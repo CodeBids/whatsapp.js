@@ -1,92 +1,244 @@
-import { LanguageCode } from "./language";
+import type { LanguageCode } from "./language"
+import type { AddressCard } from "../builders/AddressCard"
 
-import { AddressCard } from "../builders/AddressCard";
+// Message types supported by WhatsApp
+export type MessageType =
+  | "text"
+  | "template"
+  | "image"
+  | "document"
+  | "audio"
+  | "video"
+  | "sticker"
+  | "location"
+  | "contacts"
+  | "interactive"
+  | "reaction"
 
-export interface MessagePayload {
-  to: string;
-  content?: string;
-  template?: {
-    name: string;
-    language?: LanguageCode;
-  };
-  components: Component[]
-}
-
+// Components for interactive messages and templates
 export interface Component {
-  embed?: Embed;
-  button?: Button;
-  address?: AddressCard;
+  embed?: Embed
+  button?: Button
+  address?: AddressCard
+  type?: "header" | "body" | "button" | "footer"
+  parameters?: TemplateParameter[]
 }
 
-export interface Embed {
+export type Embed = {}
 
+export type Button = {}
+
+// Media file types
+export interface FileAttachment {
+  type: "audio" | "image" | "document" | "sticker" | "video"
+  url?: string
+  id?: string
+  caption?: string
+  filename?: string
 }
 
-export interface Button {
-
+// Location data
+export interface LocationData {
+  latitude: number
+  longitude: number
+  name?: string
+  address?: string
 }
 
-export interface File {
-audio?: Audio;
-image?: Image;
-document?: Document;
-contactCard?: ContactCard;
-sticker?: Sticker;
-video?: Video;
+// Contact data
+export interface ContactData {
+  name: {
+    formatted_name: string
+    first_name?: string
+    last_name?: string
+    middle_name?: string
+    suffix?: string
+    prefix?: string
+  }
+  phones?: Array<{
+    phone: string
+    type: "CELL" | "MAIN" | "IPHONE" | "HOME" | "WORK"
+    wa_id?: string
+  }>
+  emails?: Array<{
+    email: string
+    type: "HOME" | "WORK"
+  }>
+  addresses?: Array<{
+    street?: string
+    city?: string
+    state?: string
+    zip?: string
+    country?: string
+    country_code?: string
+    type: "HOME" | "WORK"
+  }>
+  urls?: Array<{
+    url: string
+    type: "HOME" | "WORK"
+  }>
+  birthday?: string
+  org?: {
+    company?: string
+    department?: string
+    title?: string
+  }
 }
 
-export interface Audio {
-
+// Template data
+export interface TemplateData {
+  name: string
+  language: LanguageCode
+  components?: Component[]
 }
 
-export interface Image {
-
+// Interactive data
+export interface InteractiveData {
+  type: "button" | "list" | "product" | "product_list"
+  header?: {
+    type: "text" | "image" | "video" | "document"
+    text?: string
+    image?: {
+      link: string
+    }
+    video?: {
+      link: string
+    }
+    document?: {
+      link: string
+    }
+  }
+  body: {
+    text: string
+  }
+  footer?: {
+    text: string
+  }
+  action: {
+    buttons?: Array<{
+      type: "reply"
+      reply: {
+        id: string
+        title: string
+      }
+    }>
+    button?: string
+    sections?: Array<{
+      title: string
+      rows: Array<{
+        id: string
+        title: string
+        description?: string
+      }>
+    }>
+    catalog_id?: string
+    product_retailer_id?: string
+  }
 }
 
-export interface Video {
-
+// Reaction data
+export interface ReactionData {
+  message_id: string
+  emoji: string
 }
 
-export interface Document {
-
+// Unified message payload that allows combining different content types
+export interface MessagePayload {
+  to: string
+  content?: string
+  template?: TemplateData
+  components?: Component[]
+  files?: FileAttachment[]
+  location?: LocationData
+  contacts?: ContactData[]
+  interactive?: InteractiveData
+  reaction?: ReactionData
 }
 
-export interface ContactCard {
-
+// Template components
+export interface TemplateParameter {
+  type: "text" | "currency" | "date_time" | "image" | "document" | "video"
+  text?: string
+  currency?: {
+    code: string
+    amount: number
+  }
+  date_time?: {
+    fallback_value: string
+  }
+  image?: {
+    link: string
+  }
+  document?: {
+    link: string
+  }
+  video?: {
+    link: string
+  }
 }
 
-export interface Sticker {
-
-}
-
-
-
+// Message body structure for the API
 export interface MessageBodyPayload {
-  messaging_product: string;
-  to: string;
-  type: 'text' | 'template' | 'interactive';
+  messaging_product: string
+  to: string
+  type: MessageType
   text?: {
-    body: string;
-  };
+    body: string
+  }
   template?: {
-    name: string;
+    name: string
     language: {
-      code: LanguageCode;
-    };
-  };
+      code: LanguageCode
+    }
+    components?: Component[]
+  }
+  image?: {
+    link?: string
+    id?: string
+    caption?: string
+  }
+  document?: {
+    link?: string
+    id?: string
+    caption?: string
+    filename?: string
+  }
+  audio?: {
+    link?: string
+    id?: string
+  }
+  video?: {
+    link?: string
+    id?: string
+    caption?: string
+  }
+  sticker?: {
+    link?: string
+    id?: string
+  }
+  location?: LocationData
+  contacts?: ContactData[]
+  interactive?: InteractiveData
+  reaction?: ReactionData
 }
 
+// API response
 export interface MessageApiResponse {
-  messaging_product: string;
-  contacts: Contact[];
-  messages: Message[];
+  messaging_product: string
+  contacts: Contact[]
+  messages: Message[]
 }
 
+// Contact structure for API response
 export interface Contact {
-  input: string;
-  wa_id: string;
+  input: string
+  wa_id: string
 }
 
+// Message structure for API response
 export interface Message {
-  id: string;
+  id: string
+  status?: "sent" | "delivered" | "read" | "failed"
+  timestamp?: string
 }
+

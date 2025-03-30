@@ -39,7 +39,7 @@ export class Client {
     this.accessToken = accessToken;
     this.version = version;
 
-    this.message = new Message(this, this.getBaseUrl(), this.accessToken);
+    this.message = new Message(this.getBaseUrl(), this.accessToken);
 
     this.initializeClientData().catch((error) => {
       console.error('Error initializing client data:', error);
