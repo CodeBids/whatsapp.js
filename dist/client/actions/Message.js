@@ -158,20 +158,7 @@ class Message {
             messageBody.type = "interactive";
             messageBody.interactive = payload.interactive;
         }
-        else if (payload.location) {
-            messageBody.type = "location";
-            messageBody.location = {
-                latitude: payload.location.latitude,
-                longitude: payload.location.longitude,
-                name: payload.location.name,
-                address: payload.location.address,
-            };
-        }
-        else if (payload.contacts && payload.contacts.length > 0) {
-            messageBody.type = "contacts";
-            messageBody.contacts = payload.contacts;
-        }
-        else if (payload.reaction) {
+        if (payload.reaction) {
             messageBody.type = "reaction";
             messageBody.reaction = payload.reaction;
         }
