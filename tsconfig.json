@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "ESNext",  // Usamos ES Modules
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",  // La salida compilada va a esta carpeta
+    "rootDir": "./src",  // El directorio de origen de tu código
+    "declaration": true,  // Genera archivos .d.ts (tipos)
+    "sourceMap": true     // Genera los mapas fuente
+  },
+  "include": ["src/**/*.ts"]
+}
