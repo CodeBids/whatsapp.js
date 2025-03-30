@@ -16,7 +16,7 @@ export class Client {
   public id: string | null = null;
   public displayPhoneNumber: string | null = null;
 
-  public message: Message; // Añadir la propiedad message
+  public message: Message;
 
   constructor({ phoneId, accessToken, version }: ClientOptions) {
     if (!phoneId || !accessToken || !version) {
@@ -39,7 +39,7 @@ export class Client {
     this.accessToken = accessToken;
     this.version = version;
 
-    this.message = new Message(this, this.getBaseUrl(), this.accessToken); // Inicializar la propiedad message
+    this.message = new Message(this, this.getBaseUrl(), this.accessToken);
 
     this.initializeClientData().catch((error) => {
       console.error('Error initializing client data:', error);

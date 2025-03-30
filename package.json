@@ -1,6 +1,6 @@
 {
     "name": "whatsapp-api-cloud-node",
-    "version": "0.0.4-Beta",
+    "version": "0.0.5-Beta",
     "description": "",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
