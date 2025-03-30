@@ -1,4 +1,4 @@
 export * from "./client";
 export * from "./message";
 export * from "./language";
-export * from "./structures/AddressCard";
+export * from "./structures/LocationCard";

@@ -1,10 +1,10 @@
 import type { LanguageCode } from "./language";
-import type { AddressCard } from "../builders/AddressCard";
+import type { LocationCard } from "../builders/LocationCard";
 export type MessageType = "text" | "template" | "image" | "document" | "audio" | "video" | "sticker" | "location" | "contacts" | "interactive" | "reaction";
 export interface Component {
     embed?: Embed;
     button?: Button;
-    address?: AddressCard;
+    location?: LocationCard;
     type?: "header" | "body" | "button" | "footer";
     parameters?: TemplateParameter[];
 }

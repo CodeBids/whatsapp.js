@@ -1,5 +1,5 @@
 import type { LanguageCode } from "./language"
-import type { AddressCard } from "../builders/AddressCard"
+import type { LocationCard } from "../builders/LocationCard"
 
 // Message types supported by WhatsApp
 export type MessageType =
@@ -19,7 +19,7 @@ export type MessageType =
 export interface Component {
   embed?: Embed
   button?: Button
-  address?: AddressCard
+  location?: LocationCard
   type?: "header" | "body" | "button" | "footer"
   parameters?: TemplateParameter[]
 }
