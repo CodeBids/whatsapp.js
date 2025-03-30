@@ -2,7 +2,11 @@
     "name": "whatsapp-api-cloud-node",
     "version": "0.0.1-Beta",
     "description": "",
-    "main": "src/client/Client.ts",
+    "main": "dist/client/Client.js",
+    "types": "dist/client/Client.d.js",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "test": "jest",
         "build": "tsc",

@@ -12,5 +12,5 @@
     "declaration": true,  // Genera archivos .d.ts (tipos)
     "sourceMap": true     // Genera los mapas fuente
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts"]
 }
