@@ -1,0 +1,71 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.WhatsAppErrorCode = void 0;
+/**
+ * Enumeration of WhatsApp API error codes.
+ * Reference: https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes
+ */
+var WhatsAppErrorCode;
+(function (WhatsAppErrorCode) {
+    // Authorization errors
+    WhatsAppErrorCode[WhatsAppErrorCode["AUTHENTICATION_FAILED"] = 0] = "AUTHENTICATION_FAILED";
+    WhatsAppErrorCode[WhatsAppErrorCode["FUNCTION_OR_PERMISSION_PROBLEM"] = 3] = "FUNCTION_OR_PERMISSION_PROBLEM";
+    WhatsAppErrorCode[WhatsAppErrorCode["PERMISSION_DENIED"] = 10] = "PERMISSION_DENIED";
+    WhatsAppErrorCode[WhatsAppErrorCode["ACCESS_TOKEN_INVALID"] = 190] = "ACCESS_TOKEN_INVALID";
+    WhatsAppErrorCode[WhatsAppErrorCode["INVALID_PARAMETER"] = 100] = "INVALID_PARAMETER";
+    //? 200 to 299 means that permissions are missing, should I implement them?
+    // Integrity errors
+    WhatsAppErrorCode[WhatsAppErrorCode["TEMPORARILY_RESTRICTED_OR_DISABLED_ACCOUNT"] = 368] = "TEMPORARILY_RESTRICTED_OR_DISABLED_ACCOUNT";
+    WhatsAppErrorCode[WhatsAppErrorCode["CAN_NOT_SEND_MESSAGE_TO_THIS_COUNTRY"] = 130497] = "CAN_NOT_SEND_MESSAGE_TO_THIS_COUNTRY";
+    WhatsAppErrorCode[WhatsAppErrorCode["RESTRICTED_OR_DISABLED_ACCOUNT"] = 131031] = "RESTRICTED_OR_DISABLED_ACCOUNT";
+    //Other errors
+    WhatsAppErrorCode[WhatsAppErrorCode["UNKNOWN_REQUEST"] = 1] = "UNKNOWN_REQUEST";
+    WhatsAppErrorCode[WhatsAppErrorCode["SERVER_DOWN_OR_OVERLOADED"] = 2] = "SERVER_DOWN_OR_OVERLOADED";
+    WhatsAppErrorCode[WhatsAppErrorCode["DELETED_PHONE_NUMBER"] = 33] = "DELETED_PHONE_NUMBER";
+    WhatsAppErrorCode[WhatsAppErrorCode["INVALID_PARAMETERS"] = 100] = "INVALID_PARAMETERS";
+    WhatsAppErrorCode[WhatsAppErrorCode["MESSAGE_SENT_AS_NO_EXPERIMENT"] = 130472] = "MESSAGE_SENT_AS_NO_EXPERIMENT";
+    WhatsAppErrorCode[WhatsAppErrorCode["COULD_NOT_SEND_MESSAGE_DUE_TO_UNKNOWN_ERROR"] = 131000] = "COULD_NOT_SEND_MESSAGE_DUE_TO_UNKNOWN_ERROR";
+    WhatsAppErrorCode[WhatsAppErrorCode["PERMISSION_NOT_GRANTED_OR_REMOVED"] = 131005] = "PERMISSION_NOT_GRANTED_OR_REMOVED";
+    WhatsAppErrorCode[WhatsAppErrorCode["MISSING_REQUIRED_PARAMETER"] = 131008] = "MISSING_REQUIRED_PARAMETER";
+    WhatsAppErrorCode[WhatsAppErrorCode["INVALID_PARAMETER_VALUES"] = 131009] = "INVALID_PARAMETER_VALUES";
+    WhatsAppErrorCode[WhatsAppErrorCode["SERVICE_UNAVAILABLE"] = 131016] = "SERVICE_UNAVAILABLE";
+    WhatsAppErrorCode[WhatsAppErrorCode["ISSUER_AND_RECIPIENTS_ARE_SAME"] = 131021] = "ISSUER_AND_RECIPIENTS_ARE_SAME";
+    WhatsAppErrorCode[WhatsAppErrorCode["UNABLE_TO_DELIVER_MESSAGE"] = 131026] = "UNABLE_TO_DELIVER_MESSAGE";
+    WhatsAppErrorCode[WhatsAppErrorCode["PHONE_NUMBER_HAS_NO_APPROVED_NAME"] = 131037] = "PHONE_NUMBER_HAS_NO_APPROVED_NAME";
+    WhatsAppErrorCode[WhatsAppErrorCode["PAYMENT_ERROR"] = 131042] = "PAYMENT_ERROR";
+    WhatsAppErrorCode[WhatsAppErrorCode["PHONE_NUMBER_REGISTRATION_ERROR"] = 131045] = "PHONE_NUMBER_REGISTRATION_ERROR";
+    WhatsAppErrorCode[WhatsAppErrorCode["WAITING_TIME_FOR_INTERACTION"] = 131047] = "WAITING_TIME_FOR_INTERACTION";
+    WhatsAppErrorCode[WhatsAppErrorCode["META_DENIED_MESSAGE_DELIVERY"] = 131049] = "META_DENIED_MESSAGE_DELIVERY";
+    WhatsAppErrorCode[WhatsAppErrorCode["NOT_COMPATIBLE_MESSAGE"] = 131051] = "NOT_COMPATIBLE_MESSAGE";
+    WhatsAppErrorCode[WhatsAppErrorCode["DOWNLOADING_MULTIMEDIA_ERROR"] = 131052] = "DOWNLOADING_MULTIMEDIA_ERROR";
+    WhatsAppErrorCode[WhatsAppErrorCode["UPLOADING_MULTIMEDIA_ERROR"] = 131053] = "UPLOADING_MULTIMEDIA_ERROR";
+    WhatsAppErrorCode[WhatsAppErrorCode["COMMERCIAL_ACCOUNT_UNDER_MAINTENANCE"] = 131057] = "COMMERCIAL_ACCOUNT_UNDER_MAINTENANCE";
+    WhatsAppErrorCode[WhatsAppErrorCode["MISSING_TEMPLATE_PARAMETERS"] = 132000] = "MISSING_TEMPLATE_PARAMETERS";
+    WhatsAppErrorCode[WhatsAppErrorCode["NON_EXISTENT_OR_NOT_APPROVED_TEMPLATE"] = 132001] = "NON_EXISTENT_OR_NOT_APPROVED_TEMPLATE";
+    WhatsAppErrorCode[WhatsAppErrorCode["VERY_LONG_TRANSLATED_TEXT"] = 132005] = "VERY_LONG_TRANSLATED_TEXT";
+    WhatsAppErrorCode[WhatsAppErrorCode["CONTENT_OF_TEMPLATE_VIOLATION_TERMS"] = 132007] = "CONTENT_OF_TEMPLATE_VIOLATION_TERMS";
+    WhatsAppErrorCode[WhatsAppErrorCode["WRONG_PARAMETER_FORMAT"] = 132012] = "WRONG_PARAMETER_FORMAT";
+    WhatsAppErrorCode[WhatsAppErrorCode["TEMPLATE_IN_PAUSE_DUE_TO_LOW_QUALITY"] = 132015] = "TEMPLATE_IN_PAUSE_DUE_TO_LOW_QUALITY";
+    WhatsAppErrorCode[WhatsAppErrorCode["TEMPLATE_PERMANENTLY_DISABLED"] = 132016] = "TEMPLATE_PERMANENTLY_DISABLED";
+    WhatsAppErrorCode[WhatsAppErrorCode["BLOCKED_PROCESS"] = 132068] = "BLOCKED_PROCESS";
+    WhatsAppErrorCode[WhatsAppErrorCode["LIMITED_PROCESS"] = 132069] = "LIMITED_PROCESS";
+    WhatsAppErrorCode[WhatsAppErrorCode["FAILURE_ATTEMPT_TO_CANCEL_REGISTRATION"] = 133000] = "FAILURE_ATTEMPT_TO_CANCEL_REGISTRATION";
+    WhatsAppErrorCode[WhatsAppErrorCode["SERVER_TEMPORARILY_UNAVAILABLE"] = 133004] = "SERVER_TEMPORARILY_UNAVAILABLE";
+    WhatsAppErrorCode[WhatsAppErrorCode["WRONG_TWO_FACTOR_AUTHENTICATION"] = 133005] = "WRONG_TWO_FACTOR_AUTHENTICATION";
+    WhatsAppErrorCode[WhatsAppErrorCode["REQUIRED_TO_VERIFY_NUMBER_AGAIN"] = 133006] = "REQUIRED_TO_VERIFY_NUMBER_AGAIN";
+    WhatsAppErrorCode[WhatsAppErrorCode["TOO_MANY_WRONG_ATTEMPTS"] = 133008] = "TOO_MANY_WRONG_ATTEMPTS";
+    WhatsAppErrorCode[WhatsAppErrorCode["PIN_ENTERED_VERY_FAST"] = 133009] = "PIN_ENTERED_VERY_FAST";
+    WhatsAppErrorCode[WhatsAppErrorCode["UNREGISTERED_NUMBER_ON_WHATSAPP_BUSINESS"] = 133010] = "UNREGISTERED_NUMBER_ON_WHATSAPP_BUSINESS";
+    WhatsAppErrorCode[WhatsAppErrorCode["RECENTLY_REMOVED_NUMBER"] = 133015] = "RECENTLY_REMOVED_NUMBER";
+    WhatsAppErrorCode[WhatsAppErrorCode["UNABLE_TO_SEND_MESSAGE_DUE_TO_PARAMETERS"] = 135000] = "UNABLE_TO_SEND_MESSAGE_DUE_TO_PARAMETERS";
+    //Synchronization errors
+    WhatsAppErrorCode[WhatsAppErrorCode["RATELIMIT_ON_SYNCHRONIZATION"] = 2593107] = "RATELIMIT_ON_SYNCHRONIZATION";
+    WhatsAppErrorCode[WhatsAppErrorCode["SYNCHRONIZATION_NOT_AVAILABLE_AFTER_24_HOURS"] = 2593108] = "SYNCHRONIZATION_NOT_AVAILABLE_AFTER_24_HOURS";
+    //Limiting errors
+    WhatsAppErrorCode[WhatsAppErrorCode["RATELIMIT"] = 4] = "RATELIMIT";
+    WhatsAppErrorCode[WhatsAppErrorCode["FREQUENCY_LIMIT_REACHED"] = 80007] = "FREQUENCY_LIMIT_REACHED";
+    WhatsAppErrorCode[WhatsAppErrorCode["PERFORMANCE_LIMIT_REACHED"] = 130429] = "PERFORMANCE_LIMIT_REACHED";
+    WhatsAppErrorCode[WhatsAppErrorCode["SPAM_FREQUENCY_LIMIT_REACHED"] = 131048] = "SPAM_FREQUENCY_LIMIT_REACHED";
+    WhatsAppErrorCode[WhatsAppErrorCode["LIMIT_SENDING_TO_SAME_NUMBER"] = 131056] = "LIMIT_SENDING_TO_SAME_NUMBER";
+    WhatsAppErrorCode[WhatsAppErrorCode["LIMIT_ON_ACCOUNT_REGISTRATION"] = 133016] = "LIMIT_ON_ACCOUNT_REGISTRATION";
+})(WhatsAppErrorCode || (exports.WhatsAppErrorCode = WhatsAppErrorCode = {}));

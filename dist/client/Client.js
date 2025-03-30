@@ -27,7 +27,7 @@ class Client {
         this.phoneId = phoneId;
         this.accessToken = accessToken;
         this.version = version;
-        this.message = new Message_1.Message(this, this.getBaseUrl(), this.accessToken); // Inicializar la propiedad message
+        this.message = new Message_1.Message(this, this.getBaseUrl(), this.accessToken);
         this.initializeClientData().catch((error) => {
             console.error('Error initializing client data:', error);
         });
