@@ -9,7 +9,7 @@ class Message {
         this.baseUrl = baseUrl;
         this.accessToken = accessToken;
     }
-    async send({ to, content, template, }) {
+    async send({ to, content, template, components }) {
         let body;
         if (content && template) {
             throw new Error("You can only send either content or template, not both.");
@@ -43,6 +43,17 @@ class Message {
                     language: {
                         code: template.language,
                     },
+                },
+            };
+        }
+        else if (components) {
+            console.log(components);
+            body = {
+                messaging_product: "whatsapp",
+                to,
+                type: 'text',
+                text: {
+                    body: 'Hola desde componentes, ' + components,
                 },
             };
         }

@@ -5,5 +5,5 @@ export declare class Message {
     private baseUrl;
     private accessToken;
     constructor(client: Client, baseUrl?: string, accessToken?: string);
-    send({ to, content, template, }: MessagePayload): Promise<MessageApiResponse>;
+    send({ to, content, template, components }: MessagePayload): Promise<MessageApiResponse>;
 }

@@ -22,6 +22,7 @@ export class Message {
     to,
     content,
     template,
+    components
   }: MessagePayload): Promise<MessageApiResponse> {
     let body: MessageBodyPayload;
 
@@ -63,6 +64,17 @@ export class Message {
           language: {
             code: template.language!,
           },
+        },
+      };
+    } else if (components) {
+      console.log(components)
+
+      body = {
+        messaging_product: "whatsapp",
+        to,
+        type: 'text',
+        text: {
+          body: 'Hola desde componentes, ' + components ,
         },
       };
     } else {

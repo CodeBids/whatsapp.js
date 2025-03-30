@@ -30,3 +30,5 @@ Object.defineProperty(exports, "WhatsAppApiException", { enumerable: true, get: 
 Object.defineProperty(exports, "getErrorMessage", { enumerable: true, get: function () { return Messages_1.getErrorMessage; } });
 var wa_api_cloud_service_1 = require("./services/wa-api-cloud.service");
 Object.defineProperty(exports, "isErrorCode", { enumerable: true, get: function () { return wa_api_cloud_service_1.isErrorCode; } });
+// Export builders
+__exportStar(require("./builders/AddressCard"), exports);
