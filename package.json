@@ -1,8 +1,8 @@
 {
     "name": "whatsapp-api-cloud-node",
-    "version": "1.0.0",
+    "version": "0.0.1-Beta",
     "description": "",
-    "main": "index.js",
+    "main": "src/client/Client.ts",
     "scripts": {
         "test": "jest",
         "build": "tsc",
@@ -11,7 +11,7 @@
         "format": "prettier --write \"src/**/*.{ts,js,json}\""
     },
     "keywords": [],
-    "author": "",
+    "author": "TheJulianJara",
     "license": "ISC",
     "packageManager": "pnpm@10.6.2",
     "devDependencies": {
