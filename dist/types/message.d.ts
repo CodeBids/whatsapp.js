@@ -10,6 +10,7 @@ export interface MessagePayload {
 export interface MessageBodyPayload {
     messaging_product: string;
     to: string;
+    type: 'text' | 'template';
     text?: {
         body: string;
     };

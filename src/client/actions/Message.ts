@@ -35,6 +35,7 @@ export class Message {
       body = {
         messaging_product: "whatsapp",
         to,
+        type: 'text',
         text: {
           body: content,
         },
@@ -56,6 +57,7 @@ export class Message {
       body = {
         messaging_product: "whatsapp",
         to,
+        type: "template",
         template: {
           name: template.name,
           language: {
