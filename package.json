@@ -2,11 +2,8 @@
     "name": "whatsapp-api-cloud-node",
     "version": "0.0.1-Beta",
     "description": "",
-    "main": "dist/client/Client.js",
-    "types": "dist/client/Client.d.js",
-    "files": [
-        "dist"
-    ],
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
         "test": "jest",
         "build": "tsc",
@@ -14,9 +11,13 @@
         "lint": "eslint src --ext .ts",
         "format": "prettier --write \"src/**/*.{ts,js,json}\""
     },
-    "keywords": [],
+    "keywords": [
+        "whatsapp",
+        "api",
+        "client"
+    ],
     "author": "TheJulianJara",
-    "license": "ISC",
+    "license": "MIT",
     "packageManager": "pnpm@10.6.2",
     "devDependencies": {
         "@eslint/js": "^9.23.0",
@@ -32,7 +33,7 @@
         "typescript": "^5.8.2",
         "typescript-eslint": "^8.28.0"
     },
-    "dependencies": {
-        "axios": "^1.8.4"
-    }
+    "files": [
+        "dist"
+    ]
 }

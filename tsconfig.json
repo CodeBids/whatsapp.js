@@ -1,16 +1,15 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "ESNext",  // Usamos ES Modules
-    "moduleResolution": "node",
-    "esModuleInterop": true,
+    "target": "ES2020",
+    "module": "CommonJS",
+    "declaration": true,
+    "outDir": "./dist",
     "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",  // La salida compilada va a esta carpeta
-    "rootDir": "./src",  // El directorio de origen de tu código
-    "declaration": true,  // Genera archivos .d.ts (tipos)
-    "sourceMap": true     // Genera los mapas fuente
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
