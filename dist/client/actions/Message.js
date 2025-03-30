@@ -65,14 +65,6 @@ class Message {
                 }
             }
         }
-        // Validate location if provided
-        //TODO: Por cada elemento que haya dentro de components verificar instanceof para poder tener el tipo correcto y hacer las verificaciones correspondientes
-        if (payload.components?.some(component => component instanceof __1.LocationCard)) {
-            const location = payload.components.find(component => component instanceof __1.LocationCard);
-            if (location.latitude === undefined || location.longitude === undefined) {
-                throw new Messages_1.WhatsAppApiException("Latitude and longitude are required for location messages", 0);
-            }
-        }
         // Validate reaction if provided
         if (payload.reaction) {
             if (!payload.reaction.message_id) {
@@ -167,6 +159,26 @@ class Message {
             messageBody.text = {
                 body: payload.content,
             };
+        }
+        else if (payload.components) {
+            payload.components.forEach((component) => {
+                if (component instanceof __1.LocationCard) {
+                    if (component.latitude === undefined ||
+                        component.longitude === undefined) {
+                        throw new Messages_1.WhatsAppApiException("Latitude and longitude are required for location components", 0);
+                    }
+                    messageBody.type = "location";
+                    messageBody.location = {
+                        latitude: component.latitude,
+                        longitude: component.longitude,
+                        name: component.name,
+                        address: component.address,
+                    };
+                }
+                else {
+                    throw new Messages_1.WhatsAppApiException("Unsupported component type in components array", 0);
+                }
+            });
         }
         else {
             // If we reach here, something went wrong with validation

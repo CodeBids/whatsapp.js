@@ -102,20 +102,6 @@ export class Message {
       }
     }
 
-    // Validate location if provided
-    //TODO: Por cada elemento que haya dentro de components verificar instanceof para poder tener el tipo correcto y hacer las verificaciones correspondientes
-    if (payload.components?.some(component => component instanceof LocationCard)) {
-      const location = payload.components.find(component => component instanceof LocationCard) as LocationCard;
-    
-      if (location.latitude === undefined || location.longitude === undefined) {
-        throw new WhatsAppApiException(
-          "Latitude and longitude are required for location messages",
-          0
-        );
-      }
-    }
-    
-
     // Validate reaction if provided
     if (payload.reaction) {
       if (!payload.reaction.message_id) {
@@ -209,7 +195,8 @@ export class Message {
     } else if (payload.interactive) {
       messageBody.type = "interactive";
       messageBody.interactive = payload.interactive;
-    }  if (payload.reaction) {
+    }
+    if (payload.reaction) {
       messageBody.type = "reaction";
       messageBody.reaction = payload.reaction;
     } else if (payload.content) {
@@ -217,6 +204,32 @@ export class Message {
       messageBody.text = {
         body: payload.content,
       };
+    } else if (payload.components) {
+      payload.components.forEach((component) => {
+        if (component instanceof LocationCard) {
+          if (
+            component.latitude === undefined ||
+            component.longitude === undefined
+          ) {
+            throw new WhatsAppApiException(
+              "Latitude and longitude are required for location components",
+              0
+            );
+          }
+          messageBody.type = "location";
+          messageBody.location = {
+            latitude: component.latitude,
+            longitude: component.longitude,
+            name: component.name,
+            address: component.address,
+          };
+        } else {
+          throw new WhatsAppApiException(
+            "Unsupported component type in components array",
+            0
+          );
+        }
+      });
     } else {
       // If we reach here, something went wrong with validation
       throw new WhatsAppApiException("Invalid message payload", 0);
