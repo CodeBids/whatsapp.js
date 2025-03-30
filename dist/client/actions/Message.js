@@ -4,6 +4,7 @@ exports.Message = void 0;
 const wa_api_cloud_service_1 = require("../../services/wa-api-cloud.service");
 const index_1 = require("../../types/index");
 const Messages_1 = require("../../errors/Messages");
+const __1 = require("../..");
 class Message {
     constructor(baseUrl = "", accessToken = "") {
         this.baseUrl = baseUrl;
@@ -35,13 +36,11 @@ class Message {
         const hasContent = Boolean(payload.content ||
             payload.template ||
             (payload.files && payload.files.length > 0) ||
-            payload.location ||
-            (payload.contacts && payload.contacts.length > 0) ||
             payload.interactive ||
             payload.reaction ||
             (payload.components && payload.components.length > 0));
         if (!hasContent) {
-            throw new Messages_1.WhatsAppApiException("At least one content type is required (text, template, files, location, contacts, interactive, reaction, or components)", 0);
+            throw new Messages_1.WhatsAppApiException("At least one content type is required (text, template, files, interactive, reaction, or components)", 0);
         }
         // Validate template if provided
         if (payload.template) {
@@ -67,8 +66,10 @@ class Message {
             }
         }
         // Validate location if provided
-        if (payload.location) {
-            if (payload.location.latitude === undefined || payload.location.longitude === undefined) {
+        //TODO: Por cada elemento que haya dentro de components verificar instanceof para poder tener el tipo correcto y hacer las verificaciones correspondientes
+        if (payload.components?.some(component => component instanceof __1.LocationCard)) {
+            const location = payload.components.find(component => component instanceof __1.LocationCard);
+            if (location.latitude === undefined || location.longitude === undefined) {
                 throw new Messages_1.WhatsAppApiException("Latitude and longitude are required for location messages", 0);
             }
         }
@@ -185,129 +186,6 @@ class Message {
             throw new Messages_1.WhatsAppApiException("Invalid message payload", 0);
         }
         return messageBody;
-    }
-    /**
-     * Convenience method to send a text message
-     * @param to Recipient's phone number
-     * @param content Message content
-     * @returns API response
-     */
-    async sendText(to, content) {
-        return this.send({ to, content });
-    }
-    /**
-     * Convenience method to send a template message
-     * @param to Recipient's phone number
-     * @param templateName Template name
-     * @param language Template language
-     * @param components Template components (optional)
-     * @returns API response
-     */
-    async sendTemplate(to, templateName, language, components) {
-        return this.send({
-            to,
-            template: {
-                name: templateName,
-                language,
-                components: components,
-            },
-        });
-    }
-    /**
-     * Convenience method to send an image
-     * @param to Recipient's phone number
-     * @param url Image URL
-     * @param caption Image caption (optional)
-     * @returns API response
-     */
-    async sendImage(to, url, caption) {
-        return this.send({
-            to,
-            files: [
-                {
-                    type: "image",
-                    url,
-                    caption,
-                },
-            ],
-        });
-    }
-    /**
-     * Convenience method to send a document
-     * @param to Recipient's phone number
-     * @param url Document URL
-     * @param filename Document filename
-     * @param caption Document caption (optional)
-     * @returns API response
-     */
-    async sendDocument(to, url, filename, caption) {
-        return this.send({
-            to,
-            files: [
-                {
-                    type: "document",
-                    url,
-                    filename,
-                    caption,
-                },
-            ],
-        });
-    }
-    /**
-     * Convenience method to send a video
-     * @param to Recipient's phone number
-     * @param url Video URL
-     * @param caption Video caption (optional)
-     * @returns API response
-     */
-    async sendVideo(to, url, caption) {
-        return this.send({
-            to,
-            files: [
-                {
-                    type: "video",
-                    url,
-                    caption,
-                },
-            ],
-        });
-    }
-    /**
-     * Convenience method to send an audio
-     * @param to Recipient's phone number
-     * @param url Audio URL
-     * @returns API response
-     */
-    async sendAudio(to, url) {
-        return this.send({
-            to,
-            files: [
-                {
-                    type: "audio",
-                    url,
-                },
-            ],
-        });
-    }
-    /**
-     * Convenience method to send a location
-     * @param to Recipient's phone number
-     * @param latitude Latitude
-     * @param longitude Longitude
-     * @param name Location name (optional)
-     * @param address Location address (optional)
-     * @returns API response
-     */
-    async sendLocation(to, latitude, longitude, name, address) {
-        return this.send({
-            to,
-            location: {
-                latitude,
-                longitude,
-                name,
-                address,
-            },
-        });
     }
 }
 exports.Message = Message;

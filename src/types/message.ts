@@ -16,13 +16,13 @@ export type MessageType =
   | "reaction"
 
 // Components for interactive messages and templates
-export interface Component {
-  embed?: Embed
-  button?: Button
-  location?: LocationCard
-  type?: "header" | "body" | "button" | "footer"
-  parameters?: TemplateParameter[]
-}
+export interface Component extends Embed, Button, LocationCard {}
+//   embed?: Embed
+//   button?: Button
+//   location?: LocationCard
+//   type?: "header" | "body" | "button" | "footer"
+//   parameters?: TemplateParameter[]
+// }
 
 export type Embed = {}
 
