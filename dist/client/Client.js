@@ -152,7 +152,7 @@ class Client extends events_1.EventEmitter {
         });
     }
     async getBusinessProfile() {
-        const url = `/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical`;
+        const url = `whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical`;
         return await this.makeApiRequest(url, "GET");
     }
 }

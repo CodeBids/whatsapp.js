@@ -31,7 +31,7 @@ export class Message {
 
     // Send the request to the API
     return await this.client.makeApiRequest(
-      `/messages`,
+      `messages`,
       "POST",
       body
     );

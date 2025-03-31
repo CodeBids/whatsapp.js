@@ -20,7 +20,7 @@ class Message {
         // Determine the message type and build the body
         const body = this.buildMessageBody(payload);
         // Send the request to the API
-        return await this.client.makeApiRequest(`/messages`, "POST", body);
+        return await this.client.makeApiRequest(`messages`, "POST", body);
     }
     /**
      * Validates the message payload
