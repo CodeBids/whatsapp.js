@@ -85,6 +85,8 @@ export class WebhookHandler extends EventEmitter {
   private async handleWebhookEvent(req: IncomingMessage, res: ServerResponse): Promise<void> {
     let body = ""
 
+    console.log(req)
+
     // Collect request body
     req.on("data", (chunk) => {
       body += chunk.toString()
