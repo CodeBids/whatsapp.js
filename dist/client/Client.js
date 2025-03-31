@@ -1,42 +1,119 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Client = void 0;
+const events_1 = require("events");
 const wa_api_cloud_service_1 = require("../services/wa-api-cloud.service");
 const Message_1 = require("./actions/Message");
+const WebhookHandler_1 = require("./webhook/handlers/WebhookHandler");
 /**
  * This is the starting point for any WhatsApp Client and the main hub for interacting with the WhatsApp API Cloud
  */
-class Client {
-    constructor({ phoneId, accessToken, version }) {
+class Client extends events_1.EventEmitter {
+    constructor(options) {
+        super();
+        this._webhook = null;
+        this._webhookServer = null;
         this.name = null;
         this.quality = null;
         this.id = null;
         this.displayPhoneNumber = null;
+        const { phoneId, accessToken, version, webhook } = options;
         if (!phoneId || !accessToken || !version) {
-            throw new Error('Phone ID, Access Token and Version are required');
+            throw new Error("Phone ID, Access Token and Version are required");
         }
         if (!/^\d+$/.test(phoneId)) {
-            throw new Error('Phone ID must be a numeric string');
+            throw new Error("Phone ID must be a numeric string");
         }
         if (!/^[A-Za-z0-9]+$/.test(accessToken)) {
-            throw new Error('Access Token must be alphanumeric');
+            throw new Error("Access Token must be alphanumeric");
         }
-        if (version !== 'v22.0') {
-            throw new Error('Version must be v22.0');
+        if (version !== "v22.0") {
+            throw new Error("Version must be v22.0");
         }
         this.phoneId = phoneId;
         this.accessToken = accessToken;
         this.version = version;
         this.message = new Message_1.Message(this.getBaseUrl(), this.accessToken);
         this.initializeClientData().catch((error) => {
-            console.error('Error initializing client data:', error);
+            console.error("Error initializing client data:", error);
         });
+        // Initialize webhook if options are provided
+        if (webhook && webhook.verifyToken) {
+            this._setupWebhook(webhook.verifyToken);
+            // Start webhook server automatically if autoStart is true or not specified
+            if (webhook.autoStart !== false && webhook.port) {
+                this._startWebhookServer(webhook.port);
+            }
+        }
+    }
+    /**
+     * Sets up a webhook handler for receiving events
+     * @param verifyToken Token used to verify webhook requests
+     * @private
+     */
+    _setupWebhook(verifyToken) {
+        this._webhook = new WebhookHandler_1.WebhookHandler(this, verifyToken);
+        // Forward all webhook events to the client
+        Object.values(WebhookHandler_1.WebhookEventType).forEach((eventType) => {
+            this._webhook.on(eventType, (data) => {
+                this.emit(eventType, data);
+            });
+        });
+    }
+    /**
+     * Starts a webhook server to listen for events
+     * @param port Port to listen on
+     * @param callback Callback function called when the server starts
+     * @returns HTTP server instance
+     * @private
+     */
+    _startWebhookServer(port, callback) {
+        if (!this._webhook) {
+            throw new Error("Webhook handler not initialized. Please provide webhook options when creating the client.");
+        }
+        this._webhookServer = this._webhook.startServer(port, callback);
+        return this._webhookServer;
+    }
+    /**
+     * Starts the webhook server if it's not already running
+     * @param port Port to listen on
+     * @param callback Callback function called when the server starts
+     * @returns HTTP server instance
+     */
+    startServer(port, callback) {
+        if (!this._webhook) {
+            throw new Error("Webhook handler not initialized. Please provide webhook options when creating the client.");
+        }
+        if (this._webhookServer) {
+            console.warn("Webhook server is already running.");
+            return this._webhookServer;
+        }
+        return this._startWebhookServer(port, callback);
+    }
+    /**
+     * Stops the webhook server if it's running
+     * @param callback Callback function called when the server stops
+     */
+    stopServer(callback) {
+        if (this._webhookServer) {
+            this._webhookServer.close(() => {
+                console.log("Webhook server stopped");
+                this._webhookServer = null;
+                if (callback)
+                    callback();
+            });
+        }
+        else {
+            console.warn("No webhook server is running.");
+            if (callback)
+                callback();
+        }
     }
     getBaseUrl() {
         return `https://graph.facebook.com/${this.version}/${this.phoneId}`;
     }
     async initializeClientData() {
-        return await (0, wa_api_cloud_service_1.apiRequest)(this.getBaseUrl(), 'GET', this.accessToken).then((data) => {
+        return await (0, wa_api_cloud_service_1.apiRequest)(this.getBaseUrl(), "GET", this.accessToken).then((data) => {
             this.name = data.verified_name;
             this.quality = data.quality_rating;
             this.id = data.id;
@@ -45,7 +122,7 @@ class Client {
     }
     async getBusinessProfile() {
         const url = `${this.getBaseUrl()}/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical`;
-        return await (0, wa_api_cloud_service_1.apiRequest)(url, 'GET', this.accessToken);
+        return await (0, wa_api_cloud_service_1.apiRequest)(url, "GET", this.accessToken);
     }
 }
 exports.Client = Client;

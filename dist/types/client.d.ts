@@ -2,6 +2,11 @@ export interface ClientOptions {
     phoneId: string;
     accessToken: string;
     version: string;
+    webhook?: {
+        verifyToken: string;
+        port?: number;
+        autoStart?: boolean;
+    };
 }
 export interface ClientInfoResponse {
     data: Datum[];

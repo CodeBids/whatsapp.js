@@ -1,9 +1,16 @@
 {
     "name": "whatsapp-api-cloud-node",
-    "version": "0.1.8-Beta",
+    "version": "0.2.0-Beta",
     "description": "",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "require": "./dist/index.js",
+            "import": "./dist/index.js"
+        }
+    },
+    "type": "commonjs",
     "scripts": {
         "test": "jest",
         "build": "tsc",
