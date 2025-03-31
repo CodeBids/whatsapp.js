@@ -25,16 +25,7 @@ export class WhatsAppApiService {
    * @returns Base API URL
    */
   getApiUrl(): string {
-    return `https://graph.facebook.com/${this.version}`
-  }
-
-  /**
-   * Gets the base URL for a specific phone number
-   * @param phoneId Phone number ID
-   * @returns Base URL for the phone number
-   */
-  getPhoneUrl(phoneId: string): string {
-    return `${this.getApiUrl()}/${phoneId}`
+    return `https://graph.facebook.com/${this.version}/${this.phoneId}`
   }
 
   /**
@@ -44,9 +35,9 @@ export class WhatsAppApiService {
    * @param data Request data (optional)
    * @returns Promise with the response
    */
-  async request<T>(url: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: unknown): Promise<T> {
+  async request<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: unknown): Promise<T> {
     try {
-      const response = await fetch(url, {
+      const response = await fetch(`${this.getApiUrl()}/${endpoint}`, {
         method,
         headers: {
           Authorization: `Bearer ${this.accessToken}`,

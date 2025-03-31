@@ -17,19 +17,13 @@ export declare class WhatsAppApiService {
      */
     getApiUrl(): string;
     /**
-     * Gets the base URL for a specific phone number
-     * @param phoneId Phone number ID
-     * @returns Base URL for the phone number
-     */
-    getPhoneUrl(phoneId: string): string;
-    /**
      * Makes a request to the WhatsApp API
      * @param url Request URL
      * @param method HTTP method
      * @param data Request data (optional)
      * @returns Promise with the response
      */
-    request<T>(url: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: unknown): Promise<T>;
+    request<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: unknown): Promise<T>;
     /**
      * Makes a request to a specific phone number
      * @param phoneId Phone number ID
