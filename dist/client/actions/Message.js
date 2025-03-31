@@ -106,6 +106,7 @@ class Message {
             messaging_product: "whatsapp",
             to: payload.to,
         };
+        console.log(payload);
         // Determine the primary message type
         // Priority order for message type determination:
         // 1. Template
