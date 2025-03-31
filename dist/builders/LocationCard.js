@@ -18,5 +18,17 @@ class LocationCard {
     setName(name) {
         this.name = name;
     }
+    setAddress(address) {
+        this.address = address;
+    }
+    setLatitude(latitude) {
+        this.latitude = latitude;
+    }
+    setLongitude(longitude) {
+        this.latitude = longitude;
+    }
+    setPhoneNumber(number) {
+        this.phone_number = number;
+    }
 }
 exports.LocationCard = LocationCard;

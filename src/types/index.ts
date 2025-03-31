@@ -5,3 +5,4 @@ export * from "./language";
 // Structures types
 
 export * from "./structures/LocationCard"
+export * from "./structures/ContactCard"

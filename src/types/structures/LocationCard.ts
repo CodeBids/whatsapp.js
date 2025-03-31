@@ -3,5 +3,5 @@ export interface Location {
   address?: string;
   latitude: number;
   longitude: number;
-  phone_number: string;
+  phone_number: number;
 }

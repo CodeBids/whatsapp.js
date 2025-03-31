@@ -5,7 +5,7 @@ export class LocationCard implements LocationInterface {
   address?: string | undefined;
   latitude!: number;
   longitude!: number;
-  phone_number!: string;
+  phone_number!: number;
 
   constructor(data: LocationInterface) {
     Object.assign(this, data); // Asigna las propiedades directamente
@@ -24,5 +24,21 @@ export class LocationCard implements LocationInterface {
 
   public setName(name: string) {
     this.name = name;
+  }
+
+  public setAddress(address: string) {
+    this.address = address
+  }
+
+  public setLatitude(latitude: number) {
+    this.latitude = latitude
+  }
+
+  public setLongitude(longitude: number) {
+    this.latitude = longitude
+  }
+
+  public setPhoneNumber(number: number) {
+    this.phone_number = number
   }
 }

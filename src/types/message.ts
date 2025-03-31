@@ -1,5 +1,7 @@
 import type { LanguageCode } from "./language"
 import type { LocationCard } from "../builders/LocationCard"
+import { ContactCard } from "../builders/ContactCard"
+import { ContactPayloadData } from ".";
 
 // Message types supported by WhatsApp
 export type MessageType =
@@ -16,7 +18,7 @@ export type MessageType =
   | "reaction"
 
 // Components for interactive messages and templates
-export interface Component extends Embed, Button, LocationCard {}
+export type Component = Embed | Button | LocationCard | ContactCard;
 //   embed?: Embed
 //   button?: Button
 //   location?: LocationCard
@@ -43,46 +45,6 @@ export interface LocationData {
   longitude: number
   name?: string
   address?: string
-}
-
-// Contact data
-export interface ContactData {
-  name: {
-    formatted_name: string
-    first_name?: string
-    last_name?: string
-    middle_name?: string
-    suffix?: string
-    prefix?: string
-  }
-  phones?: Array<{
-    phone: string
-    type: "CELL" | "MAIN" | "IPHONE" | "HOME" | "WORK"
-    wa_id?: string
-  }>
-  emails?: Array<{
-    email: string
-    type: "HOME" | "WORK"
-  }>
-  addresses?: Array<{
-    street?: string
-    city?: string
-    state?: string
-    zip?: string
-    country?: string
-    country_code?: string
-    type: "HOME" | "WORK"
-  }>
-  urls?: Array<{
-    url: string
-    type: "HOME" | "WORK"
-  }>
-  birthday?: string
-  org?: {
-    company?: string
-    department?: string
-    title?: string
-  }
 }
 
 // Template data
@@ -149,8 +111,6 @@ export interface MessagePayload {
   template?: TemplateData
   components?: Component[]
   files?: FileAttachment[]
-  location?: LocationData
-  contacts?: ContactData[]
   interactive?: InteractiveData
   reaction?: ReactionData
 }
@@ -217,7 +177,7 @@ export interface MessageBodyPayload {
     id?: string
   }
   location?: LocationData
-  contacts?: ContactData[]
+  contacts?: ContactPayloadData[]
   interactive?: InteractiveData
   reaction?: ReactionData
 }
@@ -225,12 +185,12 @@ export interface MessageBodyPayload {
 // API response
 export interface MessageApiResponse {
   messaging_product: string
-  contacts: Contact[]
+  contacts: ContactResponse[]
   messages: Message[]
 }
 
 // Contact structure for API response
-export interface Contact {
+export interface ContactResponse {
   input: string
   wa_id: string
 }

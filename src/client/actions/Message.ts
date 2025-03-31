@@ -4,10 +4,11 @@ import {
   type MessagePayload,
   type MessageBodyPayload,
   LanguageCode,
+  Component,
 } from "../../types/index";
-import type { Client } from "../Client";
 import { WhatsAppApiException } from "../../errors/Messages";
 import { LocationCard } from "../..";
+import { ContactCard } from "../../builders/ContactCard";
 
 export class Message {
   private baseUrl: string;
@@ -121,6 +122,32 @@ export class Message {
   }
 
   /**
+   * Validates the Component payload
+   * @param component Component
+   */
+  private  validateComponent(component: Component) {
+    switch (true) {
+      case component instanceof LocationCard:
+        if (component.latitude === undefined || component.longitude === undefined) {
+          throw new WhatsAppApiException(
+            "Latitude and longitude are required for location messages",
+            0
+          );
+        }
+        break;
+  
+      case component instanceof ContactCard:
+        if (!component.firstName || !component.phone.number) {
+          throw new WhatsAppApiException("Name and phone number are required", 0);
+        }
+        break;
+  
+      default:
+        throw new WhatsAppApiException("Unknown component type", 0);
+    }
+  }
+  
+  /**
    * Builds the message body based on the provided payload
    * @param payload Message payload
    * @returns Message body for the API
@@ -207,27 +234,29 @@ export class Message {
     } else if (payload.components) {
       payload.components.forEach((component) => {
         if (component instanceof LocationCard) {
-          if (
-            component.latitude === undefined ||
-            component.longitude === undefined
-          ) {
-            throw new WhatsAppApiException(
-              "Latitude and longitude are required for location components",
-              0
-            );
-          }
           messageBody.type = "location";
           messageBody.location = {
             latitude: component.latitude,
             longitude: component.longitude,
-            name: component.name,
-            address: component.address,
+            ...(component.name ? { name: component.name } : {}),
+            ...(component.address ? { address: component.address } : {}),
           };
+        } else if (component instanceof ContactCard) {
+          messageBody.type = "contacts";
+          messageBody.contacts = [
+            {
+              name: {
+                formatted_name: component.firstName,
+              },
+              phones: [
+                {
+                  phone: component.phone.number.toString(),
+                },
+              ],
+            },
+          ];
         } else {
-          throw new WhatsAppApiException(
-            "Unsupported component type in components array",
-            0
-          );
+          throw new WhatsAppApiException("Unsupported component type", 0);
         }
       });
     } else {

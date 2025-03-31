@@ -19,3 +19,4 @@ __exportStar(require("./message"), exports);
 __exportStar(require("./language"), exports);
 // Structures types
 __exportStar(require("./structures/LocationCard"), exports);
+__exportStar(require("./structures/ContactCard"), exports);

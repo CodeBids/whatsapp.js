@@ -15,6 +15,11 @@ export declare class Message {
      */
     private validatePayload;
     /**
+     * Validates the Component payload
+     * @param component Component
+     */
+    private validateComponent;
+    /**
      * Builds the message body based on the provided payload
      * @param payload Message payload
      * @returns Message body for the API
