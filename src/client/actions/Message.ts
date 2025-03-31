@@ -255,7 +255,7 @@ export class Message {
               phones: [
                 {
                   phone: component.phones[0].number.toString(),
-                  wa_id: component.phones[0].wa_id.toString(),
+                  wa_id: component.phones[0].wa_id.toString() ?? component.phones[0].number.toString(),
                 },
               ],
             },
