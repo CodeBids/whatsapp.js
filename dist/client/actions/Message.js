@@ -88,7 +88,7 @@ class Message {
                 }
                 break;
             case component instanceof ContactCard_1.ContactCard:
-                if (!component.firstName || !component.phone.number) {
+                if (!component.firstName || !component.phones[0].number) {
                     throw new Messages_1.WhatsAppApiException("Name and phone number are required", 0);
                 }
                 break;
@@ -198,10 +198,11 @@ class Message {
                         {
                             name: {
                                 formatted_name: component.firstName,
+                                first_name: component.firstName,
                             },
                             phones: [
                                 {
-                                    phone: component.phone.number.toString(),
+                                    phone: component.phones[0].number.toString(),
                                 },
                             ],
                         },

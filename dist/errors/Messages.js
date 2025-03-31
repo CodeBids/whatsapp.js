@@ -33,5 +33,5 @@ exports.ERROR_MESSAGES = {
  * @returns Descriptive message
  */
 function getErrorMessage(code) {
-    return exports.ERROR_MESSAGES[code] || `Error desconocido (código: ${code})`;
+    return exports.ERROR_MESSAGES[code] || `Unknown error (code: ${code})`;
 }

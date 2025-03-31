@@ -36,6 +36,6 @@ export const ERROR_MESSAGES: Record<number, string> = {
  * @returns Descriptive message
  */
 export function getErrorMessage(code: number): string {
-  return ERROR_MESSAGES[code] || `Error desconocido (código: ${code})`
+  return ERROR_MESSAGES[code] || `Unknown error (code: ${code})`
 }
 
