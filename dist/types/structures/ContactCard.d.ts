@@ -44,6 +44,7 @@ export interface Email {
 export interface Phone {
     number: number;
     type?: "work" | "personal";
+    wa_id: number;
 }
 export interface WebSite {
     url: string;

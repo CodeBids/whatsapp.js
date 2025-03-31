@@ -194,6 +194,7 @@ class Message {
                 }
                 else if (component instanceof ContactCard_1.ContactCard) {
                     messageBody.type = "contacts";
+                    // TODO: Agregar todos los objetos correspondientes, no usar ...[...] >:|
                     messageBody.contacts = [
                         {
                             name: {
@@ -203,6 +204,7 @@ class Message {
                             phones: [
                                 {
                                     phone: component.phones[0].number.toString(),
+                                    wa_id: component.phones[0].wa_id.toString(),
                                 },
                             ],
                         },

@@ -50,7 +50,8 @@ export interface Email {
 
 export interface Phone {
   number: number;
-  type?: "work" | "personal"
+  type?: "work" | "personal",
+  wa_id: number
 }
 
 export interface WebSite {
