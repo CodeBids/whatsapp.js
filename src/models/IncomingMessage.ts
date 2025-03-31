@@ -204,9 +204,7 @@ export class IncomingMessage {
       throw new WhatsAppApiException("Cannot mark a message as read without an ID", 0)
     }
 
-    const url = `/messages`
-
-    return this.client.makeApiRequest(url, "POST", {
+    return this.client.makeApiRequest(`messages`, "POST", {
       messaging_product: "whatsapp",
       status: "read",
       message_id: this.id,
