@@ -12,4 +12,5 @@ export { isErrorCode } from "./services/wa-api-cloud.service"
 
 // Export builders
 export * from './builders/LocationCard'
+export * from './builders/ContactCard'
 
