@@ -10,6 +10,13 @@ export declare class Message {
      */
     send(payload: MessagePayload): Promise<MessageApiResponse>;
     /**
+     * Cleans up the phone number to make it compatible with WhatsApp API.
+     * Removes the extra 9 for Argentine numbers.
+     * @param phoneNumber The phone number in international format.
+     * @returns Cleaned phone number for WhatsApp API.
+     */
+    private cleanPhoneNumber;
+    /**
      * Validates the message payload
      * @param payload Message payload
      */

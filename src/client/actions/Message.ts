@@ -14,7 +14,7 @@ export class Message {
   private client: Client;
 
   constructor(client: Client) {
-    this.client = client
+    this.client = client;
   }
 
   /**
@@ -30,11 +30,22 @@ export class Message {
     const body = this.buildMessageBody(payload);
 
     // Send the request to the API
-    return await this.client.makeApiRequest(
-      `messages`,
-      "POST",
-      body
-    );
+    return await this.client.makeApiRequest(`messages`, "POST", body);
+  }
+
+  /**
+   * Cleans up the phone number to make it compatible with WhatsApp API.
+   * Removes the extra 9 for Argentine numbers.
+   * @param phoneNumber The phone number in international format.
+   * @returns Cleaned phone number for WhatsApp API.
+   */
+  private cleanPhoneNumber(phoneNumber: string): string {
+    // Check if the number starts with +54 9 (Argentina with mobile identifier)
+    if (phoneNumber.startsWith("549")) {
+      // Remove the "9" after the country code
+      return phoneNumber.replace(/^549/, "54");
+    }
+    return phoneNumber;
   }
 
   /**
@@ -46,6 +57,9 @@ export class Message {
     if (!payload.to) {
       throw new WhatsAppApiException("Recipient phone number is required", 0);
     }
+
+    // Clean the phone number before sending
+    payload.to = this.cleanPhoneNumber(payload.to);
 
     // Check if at least one content type is provided
     const hasContent = Boolean(
@@ -229,7 +243,7 @@ export class Message {
       messageBody.type = "interactive";
       messageBody.interactive = payload.interactive;
     } else if (payload.reaction) {
-      console.log(`Payload is Reaction: `, payload.reaction)
+      console.log(`Payload is Reaction: `, payload.reaction);
       messageBody.type = "reaction";
       messageBody.reaction = payload.reaction;
     } else if (payload.content) {
@@ -238,8 +252,7 @@ export class Message {
         body: payload.content,
       };
     } else if (payload.components) {
-
-      console.log('Components? ', payload.components)
+      console.log("Components? ", payload.components);
 
       payload.components.forEach((component) => {
         if (component instanceof LocationCard) {

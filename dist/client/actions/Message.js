@@ -23,6 +23,20 @@ class Message {
         return await this.client.makeApiRequest(`messages`, "POST", body);
     }
     /**
+     * Cleans up the phone number to make it compatible with WhatsApp API.
+     * Removes the extra 9 for Argentine numbers.
+     * @param phoneNumber The phone number in international format.
+     * @returns Cleaned phone number for WhatsApp API.
+     */
+    cleanPhoneNumber(phoneNumber) {
+        // Check if the number starts with +54 9 (Argentina with mobile identifier)
+        if (phoneNumber.startsWith("549")) {
+            // Remove the "9" after the country code
+            return phoneNumber.replace(/^549/, "54");
+        }
+        return phoneNumber;
+    }
+    /**
      * Validates the message payload
      * @param payload Message payload
      */
@@ -31,6 +45,8 @@ class Message {
         if (!payload.to) {
             throw new Messages_1.WhatsAppApiException("Recipient phone number is required", 0);
         }
+        // Clean the phone number before sending
+        payload.to = this.cleanPhoneNumber(payload.to);
         // Check if at least one content type is provided
         const hasContent = Boolean(payload.content ||
             payload.template ||
@@ -184,7 +200,7 @@ class Message {
             };
         }
         else if (payload.components) {
-            console.log('Components? ', payload.components);
+            console.log("Components? ", payload.components);
             payload.components.forEach((component) => {
                 if (component instanceof __1.LocationCard) {
                     messageBody.type = "location";
