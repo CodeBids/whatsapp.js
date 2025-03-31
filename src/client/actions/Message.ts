@@ -180,6 +180,10 @@ export class Message {
       to: payload.to,
     };
 
+    if(payload.context) {
+      messageBody.context = payload.context
+    }
+
     // Determine the primary message type
     // Priority order for message type determination:
     // 1. Template

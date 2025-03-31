@@ -41,6 +41,9 @@ export class IncomingMessage {
   async reply(content: string): Promise<MessageApiResponse> {
     return this.client.message.send({
       to: this.from,
+      context: { 
+        message_id: this.id
+      },
       content,
     })
   }

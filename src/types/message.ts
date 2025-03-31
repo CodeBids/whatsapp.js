@@ -112,7 +112,8 @@ export interface MessagePayload {
   components?: Component[]
   files?: FileAttachment[]
   interactive?: InteractiveData
-  reaction?: ReactionData
+  reaction?: ReactionData,
+  context?: Context,
 }
 
 // Template components
@@ -142,6 +143,7 @@ export interface MessageBodyPayload {
   messaging_product: string
   to: string
   type: MessageType
+  context?: Context 
   text?: {
     body: string
   }
@@ -202,3 +204,6 @@ export interface Message {
   timestamp?: string
 }
 
+export interface Context { 
+  message_id: string;
+}

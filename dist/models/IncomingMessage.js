@@ -19,6 +19,9 @@ class IncomingMessage {
     async reply(content) {
         return this.client.message.send({
             to: this.from,
+            context: {
+                message_id: this.id
+            },
             content,
         });
     }

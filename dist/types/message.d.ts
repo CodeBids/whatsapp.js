@@ -77,6 +77,7 @@ export interface MessagePayload {
     files?: FileAttachment[];
     interactive?: InteractiveData;
     reaction?: ReactionData;
+    context?: Context;
 }
 export interface TemplateParameter {
     type: "text" | "currency" | "date_time" | "image" | "document" | "video";
@@ -102,6 +103,7 @@ export interface MessageBodyPayload {
     messaging_product: string;
     to: string;
     type: MessageType;
+    context?: Context;
     text?: {
         body: string;
     };
@@ -154,4 +156,7 @@ export interface Message {
     id: string;
     status?: "sent" | "delivered" | "read" | "failed";
     timestamp?: string;
+}
+export interface Context {
+    message_id: string;
 }
