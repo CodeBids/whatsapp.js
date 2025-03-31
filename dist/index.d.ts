@@ -5,3 +5,4 @@ export { WhatsAppErrorCode, type WhatsAppApiError, type WhatsAppApiErrorResponse
 export { WhatsAppApiException, getErrorMessage } from "./errors/Messages";
 export { isErrorCode } from "./services/wa-api-cloud.service";
 export * from './builders/LocationCard';
+export * from './builders/ContactCard';

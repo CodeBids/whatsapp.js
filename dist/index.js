@@ -32,3 +32,4 @@ var wa_api_cloud_service_1 = require("./services/wa-api-cloud.service");
 Object.defineProperty(exports, "isErrorCode", { enumerable: true, get: function () { return wa_api_cloud_service_1.isErrorCode; } });
 // Export builders
 __exportStar(require("./builders/LocationCard"), exports);
+__exportStar(require("./builders/ContactCard"), exports);
