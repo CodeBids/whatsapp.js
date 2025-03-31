@@ -124,7 +124,7 @@ class Message {
                 language: {
                     code: payload.template.language,
                 },
-                components: payload.template.components,
+                // components: payload.template.components,
             };
         }
         else if (payload.files && payload.files.length > 0) {
