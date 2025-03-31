@@ -137,12 +137,10 @@ export class Client extends EventEmitter {
   public stopServer(callback?: () => void): void {
     if (this._webhookServer) {
       this._webhookServer.close(() => {
-        console.log("Webhook server stopped");
         this._webhookServer = null;
         if (callback) callback();
       });
     } else {
-      console.warn("No webhook server is running.");
       if (callback) callback();
     }
   }

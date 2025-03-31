@@ -243,7 +243,6 @@ export class WebhookHandler extends EventEmitter {
     })
 
     server.listen(port, () => {
-      console.log(`WhatsApp webhook server listening on port ${port}`)
       if (callback) callback()
     })
 

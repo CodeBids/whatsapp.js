@@ -71,7 +71,6 @@ export interface ReactionData {
 }
 export interface MessagePayload {
     to: string;
-    type?: string;
     content?: string;
     template?: TemplateData;
     components?: Component[];

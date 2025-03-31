@@ -116,6 +116,10 @@ export class Message {
         );
       }
     }
+
+    if (payload.components) {
+      //TODO: Validate components
+    }
   }
 
   /**
@@ -161,8 +165,6 @@ export class Message {
       messaging_product: "whatsapp",
       to: payload.to,
     };
-
-    console.log(payload)
 
     // Determine the primary message type
     // Priority order for message type determination:
@@ -227,6 +229,7 @@ export class Message {
       messageBody.type = "interactive";
       messageBody.interactive = payload.interactive;
     } else if (payload.reaction) {
+      console.log(`Payload is Reaction: `, payload.reaction)
       messageBody.type = "reaction";
       messageBody.reaction = payload.reaction;
     } else if (payload.content) {
