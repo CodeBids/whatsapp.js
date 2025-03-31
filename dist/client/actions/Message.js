@@ -1,15 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Message = void 0;
-const wa_api_cloud_service_1 = require("../../services/wa-api-cloud.service");
 const index_1 = require("../../types/index");
 const Messages_1 = require("../../errors/Messages");
 const __1 = require("../..");
-const ContactCard_1 = require("../../builders/ContactCard");
+const ContactCard_1 = require("../../models/ContactCard");
 class Message {
-    constructor(baseUrl = "", accessToken = "") {
-        this.baseUrl = baseUrl;
-        this.accessToken = accessToken;
+    constructor(client) {
+        this.client = client;
     }
     /**
      * Sends a message through the WhatsApp API with flexible content options
@@ -22,7 +20,7 @@ class Message {
         // Determine the message type and build the body
         const body = this.buildMessageBody(payload);
         // Send the request to the API
-        return await (0, wa_api_cloud_service_1.apiRequest)(`${this.baseUrl}/messages`, "POST", this.accessToken, body);
+        return await this.client.makeApiRequest(`/messages`, "POST", body);
     }
     /**
      * Validates the message payload

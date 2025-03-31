@@ -1,4 +1,3 @@
-import { apiRequest } from "../../services/wa-api-cloud.service";
 import {
   type MessageApiResponse,
   type MessagePayload,
@@ -8,16 +7,14 @@ import {
   ContactPayloadData,
 } from "../../types/index";
 import { WhatsAppApiException } from "../../errors/Messages";
-import { LocationCard } from "../..";
-import { ContactCard } from "../../builders/ContactCard";
+import { Client, LocationCard } from "../..";
+import { ContactCard } from "../../models/ContactCard";
 
 export class Message {
-  private baseUrl: string;
-  private accessToken: string;
+  private client: Client;
 
-  constructor(baseUrl = "", accessToken = "") {
-    this.baseUrl = baseUrl;
-    this.accessToken = accessToken;
+  constructor(client: Client) {
+    this.client = client
   }
 
   /**
@@ -33,10 +30,9 @@ export class Message {
     const body = this.buildMessageBody(payload);
 
     // Send the request to the API
-    return await apiRequest(
-      `${this.baseUrl}/messages`,
+    return await this.client.makeApiRequest(
+      `/messages`,
       "POST",
-      this.accessToken,
       body
     );
   }

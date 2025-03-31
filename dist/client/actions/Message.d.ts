@@ -1,8 +1,8 @@
 import { type MessageApiResponse, type MessagePayload } from "../../types/index";
+import { Client } from "../..";
 export declare class Message {
-    private baseUrl;
-    private accessToken;
-    constructor(baseUrl?: string, accessToken?: string);
+    private client;
+    constructor(client: Client);
     /**
      * Sends a message through the WhatsApp API with flexible content options
      * @param payload Message payload with various content options

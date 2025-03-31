@@ -1,6 +1,6 @@
 import type { LanguageCode } from "./language"
-import type { LocationCard } from "../builders/LocationCard"
-import { ContactCard } from "../builders/ContactCard"
+import type { LocationCard } from "../models/LocationCard"
+import { ContactCard } from "../models/ContactCard"
 import { ContactPayloadData } from ".";
 
 // Message types supported by WhatsApp
@@ -51,7 +51,7 @@ export interface LocationData {
 export interface TemplateData {
   name: string
   language: LanguageCode
-  components?: Component[]
+  // components?: Component[] // ? I should make it compatible to send components and templates? I should... 
 }
 
 // Interactive data

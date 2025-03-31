@@ -1,6 +1,6 @@
 import type { LanguageCode } from "./language";
-import type { LocationCard } from "../builders/LocationCard";
-import { ContactCard } from "../builders/ContactCard";
+import type { LocationCard } from "../models/LocationCard";
+import { ContactCard } from "../models/ContactCard";
 import { ContactPayloadData } from ".";
 export type MessageType = "text" | "template" | "image" | "document" | "audio" | "video" | "sticker" | "location" | "contacts" | "interactive" | "reaction";
 export type Component = Embed | Button | LocationCard | ContactCard;
@@ -22,7 +22,6 @@ export interface LocationData {
 export interface TemplateData {
     name: string;
     language: LanguageCode;
-    components?: Component[];
 }
 export interface InteractiveData {
     type: "button" | "list" | "product" | "product_list";

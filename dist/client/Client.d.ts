@@ -1,13 +1,12 @@
 import { EventEmitter } from "events";
+import { WhatsAppApiService } from "../services/wa-api-cloud.service";
 import type { ClientInfoResponse, ClientOptions } from "../types";
 import { Message } from "./actions/Message";
 /**
  * This is the starting point for any WhatsApp Client and the main hub for interacting with the WhatsApp API Cloud
  */
 export declare class Client extends EventEmitter {
-    private phoneId;
-    private accessToken;
-    private version;
+    private apiService;
     private _webhook;
     private _webhookServer;
     name: string | null;
@@ -17,11 +16,17 @@ export declare class Client extends EventEmitter {
     message: Message;
     constructor(options: ClientOptions);
     /**
+     * Gets the API service
+     * @returns WhatsApp API service
+     * @internal
+     */
+    getApiService(): WhatsAppApiService;
+    /**
      * Sets up a webhook handler for receiving events
      * @param verifyToken Token used to verify webhook requests
      * @private
      */
-    private _setupWebhook;
+    _setupWebhook(verifyToken: string): void;
     /**
      * Starts a webhook server to listen for events
      * @param port Port to listen on
@@ -29,7 +34,7 @@ export declare class Client extends EventEmitter {
      * @returns HTTP server instance
      * @private
      */
-    private _startWebhookServer;
+    _startWebhookServer(port: number, callback?: () => void): any;
     /**
      * Starts the webhook server if it's not already running
      * @param port Port to listen on
@@ -42,7 +47,24 @@ export declare class Client extends EventEmitter {
      * @param callback Callback function called when the server stops
      */
     stopServer(callback?: () => void): void;
-    private getBaseUrl;
+    /**
+     * Makes a direct API request
+     * @param url API URL
+     * @param method HTTP method
+     * @param data Request data
+     * @returns API response
+     * @internal
+     */
+    makeApiRequest<T>(url: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T>;
+    /**
+     * Makes a request to the phone endpoint
+     * @param endpoint API endpoint
+     * @param method HTTP method
+     * @param data Request data
+     * @returns API response
+     * @internal
+     */
+    makePhoneRequest<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T>;
     private initializeClientData;
     getBusinessProfile(): Promise<ClientInfoResponse>;
 }

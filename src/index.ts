@@ -14,6 +14,7 @@ export { WhatsAppApiException, getErrorMessage } from "./errors/Messages"
 export { isErrorCode } from "./services/wa-api-cloud.service"
 
 // Export builders
-export * from './builders/LocationCard'
-export * from './builders/ContactCard'
+export * from './models/LocationCard'
+export * from './models/ContactCard'
+export * from './models/IncomingMessage'
 

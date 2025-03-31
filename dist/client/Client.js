@@ -30,10 +30,8 @@ class Client extends events_1.EventEmitter {
         if (version !== "v22.0") {
             throw new Error("Version must be v22.0");
         }
-        this.phoneId = phoneId;
-        this.accessToken = accessToken;
-        this.version = version;
-        this.message = new Message_1.Message(this.getBaseUrl(), this.accessToken);
+        this.apiService = new wa_api_cloud_service_1.WhatsAppApiService(accessToken, version, phoneId);
+        this.message = new Message_1.Message(this);
         this.initializeClientData().catch((error) => {
             console.error("Error initializing client data:", error);
         });
@@ -45,6 +43,14 @@ class Client extends events_1.EventEmitter {
                 this._startWebhookServer(webhook.port);
             }
         }
+    }
+    /**
+     * Gets the API service
+     * @returns WhatsApp API service
+     * @internal
+     */
+    getApiService() {
+        return this.apiService;
     }
     /**
      * Sets up a webhook handler for receiving events
@@ -109,11 +115,30 @@ class Client extends events_1.EventEmitter {
                 callback();
         }
     }
-    getBaseUrl() {
-        return `https://graph.facebook.com/${this.version}/${this.phoneId}`;
+    /**
+     * Makes a direct API request
+     * @param url API URL
+     * @param method HTTP method
+     * @param data Request data
+     * @returns API response
+     * @internal
+     */
+    async makeApiRequest(url, method, data) {
+        return this.apiService.request(url, method, data);
+    }
+    /**
+     * Makes a request to the phone endpoint
+     * @param endpoint API endpoint
+     * @param method HTTP method
+     * @param data Request data
+     * @returns API response
+     * @internal
+     */
+    async makePhoneRequest(endpoint, method, data) {
+        return this.apiService.phoneRequest(endpoint, method, data);
     }
     async initializeClientData() {
-        return await (0, wa_api_cloud_service_1.apiRequest)(this.getBaseUrl(), "GET", this.accessToken).then((data) => {
+        return await this.makePhoneRequest("", "GET").then((data) => {
             this.name = data.verified_name;
             this.quality = data.quality_rating;
             this.id = data.id;
@@ -121,8 +146,8 @@ class Client extends events_1.EventEmitter {
         });
     }
     async getBusinessProfile() {
-        const url = `${this.getBaseUrl()}/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical`;
-        return await (0, wa_api_cloud_service_1.apiRequest)(url, "GET", this.accessToken);
+        const url = `/whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical`;
+        return await this.makeApiRequest(url, "GET");
     }
 }
 exports.Client = Client;
