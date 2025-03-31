@@ -83,7 +83,8 @@ class Message {
     validateComponent(component) {
         switch (true) {
             case component instanceof __1.LocationCard:
-                if (component.latitude === undefined || component.longitude === undefined) {
+                if (component.latitude === undefined ||
+                    component.longitude === undefined) {
                     throw new Messages_1.WhatsAppApiException("Latitude and longitude are required for location messages", 0);
                 }
                 break;
@@ -194,19 +195,63 @@ class Message {
                 }
                 else if (component instanceof ContactCard_1.ContactCard) {
                     messageBody.type = "contacts";
-                    // TODO: Agregar todos los objetos correspondientes, no usar ...[...] >:|
+                    const phones = [];
+                    component.phones.forEach((phone) => {
+                        phones.push({
+                            phone: phone.number,
+                            type: phone.type ?? undefined,
+                            wa_id: phone.wa_id,
+                        });
+                    });
+                    const emails = [];
+                    component.emails?.forEach((email) => {
+                        emails.push({
+                            email: email.address,
+                            type: email.type === "work" ? "WORK" : "HOME",
+                        });
+                    });
+                    const addresses = [];
+                    component.addresses?.forEach((address) => {
+                        addresses.push({
+                            street: `${address.street.name} ${address.street.number ?? ""}`.trim(),
+                            city: address.city,
+                            state: address.country?.stateCode,
+                            zip: address.zipCode,
+                            country: address.country?.name,
+                            country_code: address.country?.code,
+                            type: address.type === "home" ? "HOME" : "WORK",
+                        });
+                    });
+                    const urls = [];
+                    component.urls?.forEach((website) => {
+                        urls.push({
+                            url: website.url,
+                            type: website.type === "work" ? "WORK" : "HOME",
+                        });
+                    });
+                    const name = {
+                        formatted_name: component.formattedName ?? component.firstName,
+                        first_name: component.firstName,
+                        ...(component.middleName
+                            ? { middle_name: component.middleName }
+                            : {}),
+                        ...(component.lastName ? { last_name: component.lastName } : {}),
+                        ...(component.namePrefix ? { prefix: component.namePrefix } : {}),
+                    };
+                    const org = {
+                        company: component.company?.name,
+                        department: component.company?.departmentName,
+                        title: component.job?.title,
+                    };
                     messageBody.contacts = [
                         {
-                            name: {
-                                formatted_name: component.firstName,
-                                first_name: component.firstName,
-                            },
-                            phones: [
-                                {
-                                    phone: component.phones[0].number.toString(),
-                                    wa_id: component.phones[0].wa_id.toString(),
-                                },
-                            ],
+                            name,
+                            phones,
+                            emails: emails.length > 0 ? emails : undefined,
+                            addresses: addresses.length > 0 ? addresses : undefined,
+                            urls: urls.length > 0 ? urls : undefined,
+                            birthday: component.birthday?.toISOString().split("T")[0],
+                            org: org.company ? org : undefined,
                         },
                     ];
                 }

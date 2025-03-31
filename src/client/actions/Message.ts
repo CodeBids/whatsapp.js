@@ -5,6 +5,7 @@ import {
   type MessageBodyPayload,
   LanguageCode,
   Component,
+  ContactPayloadData,
 } from "../../types/index";
 import { WhatsAppApiException } from "../../errors/Messages";
 import { LocationCard } from "../..";
@@ -125,28 +126,34 @@ export class Message {
    * Validates the Component payload
    * @param component Component
    */
-  private  validateComponent(component: Component) {
+  private validateComponent(component: Component) {
     switch (true) {
       case component instanceof LocationCard:
-        if (component.latitude === undefined || component.longitude === undefined) {
+        if (
+          component.latitude === undefined ||
+          component.longitude === undefined
+        ) {
           throw new WhatsAppApiException(
             "Latitude and longitude are required for location messages",
             0
           );
         }
         break;
-  
+
       case component instanceof ContactCard:
         if (!component.firstName || !component.phones[0].number) {
-          throw new WhatsAppApiException("Name and phone number are required", 0);
+          throw new WhatsAppApiException(
+            "Name and phone number are required",
+            0
+          );
         }
         break;
-  
+
       default:
         throw new WhatsAppApiException("Unknown component type", 0);
     }
   }
-  
+
   /**
    * Builds the message body based on the provided payload
    * @param payload Message payload
@@ -244,20 +251,71 @@ export class Message {
         } else if (component instanceof ContactCard) {
           messageBody.type = "contacts";
 
-          // TODO: Agregar todos los objetos correspondientes, no usar ...[...] >:|
+          const phones: ContactPayloadData["phones"] = [];
+          component.phones.forEach((phone) => {
+            phones.push({
+              phone: phone.number,
+              type: phone.type ?? undefined,
+              wa_id: phone.wa_id,
+            });
+          });
+
+          const emails: ContactPayloadData["emails"] = [];
+          component.emails?.forEach((email) => {
+            emails.push({
+              email: email.address,
+              type: email.type === "work" ? "WORK" : "HOME",
+            });
+          });
+
+          const addresses: ContactPayloadData["addresses"] = [];
+          component.addresses?.forEach((address) => {
+            addresses.push({
+              street: `${address.street.name} ${
+                address.street.number ?? ""
+              }`.trim(),
+              city: address.city,
+              state: address.country?.stateCode,
+              zip: address.zipCode,
+              country: address.country?.name,
+              country_code: address.country?.code,
+              type: address.type === "home" ? "HOME" : "WORK",
+            });
+          });
+
+          const urls: ContactPayloadData["urls"] = [];
+          component.urls?.forEach((website) => {
+            urls.push({
+              url: website.url,
+              type: website.type === "work" ? "WORK" : "HOME",
+            });
+          });
+
+          const name = {
+            formatted_name: component.formattedName ?? component.firstName,
+            first_name: component.firstName,
+            ...(component.middleName
+              ? { middle_name: component.middleName }
+              : {}),
+            ...(component.lastName ? { last_name: component.lastName } : {}),
+            ...(component.namePrefix ? { prefix: component.namePrefix } : {}),
+          };
+
+          const org = {
+            company: component.company?.name,
+            department: component.company?.departmentName,
+            title: component.job?.title,
+          };
 
           messageBody.contacts = [
             {
-              name: {
-                formatted_name: component.firstName,
-                first_name: component.firstName,
-              },
-              phones: [
-                {
-                  phone: component.phones[0].number.toString(),
-                  wa_id: component.phones[0].wa_id.toString() ?? component.phones[0].number.toString(),
-                },
-              ],
+              name,
+              phones,
+              emails: emails.length > 0 ? emails : undefined,
+              addresses: addresses.length > 0 ? addresses : undefined,
+              urls: urls.length > 0 ? urls : undefined,
+              birthday: component.birthday?.toISOString().split("T")[0],
+              org: org.company ? org : undefined,
             },
           ];
         } else {

@@ -43,7 +43,7 @@ export interface Email {
 }
 export interface Phone {
     number: number;
-    type?: "work" | "personal";
+    type?: "CELL" | "MAIN" | "IPHONE" | "HOME" | "WORK";
     wa_id: number;
 }
 export interface WebSite {
@@ -60,9 +60,9 @@ export interface ContactPayloadData {
         prefix?: string;
     };
     phones?: Array<{
-        phone: string;
+        phone: number;
         type?: "CELL" | "MAIN" | "IPHONE" | "HOME" | "WORK";
-        wa_id?: string;
+        wa_id: number;
     }>;
     emails?: Array<{
         email: string;
