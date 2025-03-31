@@ -1,7 +1,8 @@
 import { EventEmitter } from "events";
+import { Message } from "./actions/Message";
+import { IncomingMessage } from "../models/IncomingMessage"
 import { WhatsAppApiService } from "../services/wa-api-cloud.service";
 import type { ClientData, ClientInfoResponse, ClientOptions } from "../types";
-import { Message } from "./actions/Message";
 import { WebhookHandler, EventType } from "./webhook/handlers/WebhookHandler";
 
 /**
@@ -79,7 +80,13 @@ export class Client extends EventEmitter {
     // Forward all webhook events to the client
     Object.values(EventType).forEach((eventType) => {
       this._webhook!.on(eventType, (data) => {
-        this.emit(eventType, data);
+        // For message received events, convert to IncomingMessage
+        if (eventType === EventType.MESSAGE_RECEIVED) {
+          const message = new IncomingMessage(data, this)
+          this.emit(eventType, message)
+        } else {
+          this.emit(eventType, data)
+        }
       });
     });
   }
