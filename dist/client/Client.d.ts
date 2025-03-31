@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
+import { Message } from "./actions/Message";
 import { WhatsAppApiService } from "../services/wa-api-cloud.service";
 import type { ClientInfoResponse, ClientOptions } from "../types";
-import { Message } from "./actions/Message";
 /**
  * This is the starting point for any WhatsApp Client and the main hub for interacting with the WhatsApp API Cloud
  */

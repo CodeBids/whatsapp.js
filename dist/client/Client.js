@@ -2,8 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Client = void 0;
 const events_1 = require("events");
-const wa_api_cloud_service_1 = require("../services/wa-api-cloud.service");
 const Message_1 = require("./actions/Message");
+const IncomingMessage_1 = require("../models/IncomingMessage");
+const wa_api_cloud_service_1 = require("../services/wa-api-cloud.service");
 const WebhookHandler_1 = require("./webhook/handlers/WebhookHandler");
 /**
  * This is the starting point for any WhatsApp Client and the main hub for interacting with the WhatsApp API Cloud
@@ -62,7 +63,14 @@ class Client extends events_1.EventEmitter {
         // Forward all webhook events to the client
         Object.values(WebhookHandler_1.EventType).forEach((eventType) => {
             this._webhook.on(eventType, (data) => {
-                this.emit(eventType, data);
+                // For message received events, convert to IncomingMessage
+                if (eventType === WebhookHandler_1.EventType.MESSAGE_RECEIVED) {
+                    const message = new IncomingMessage_1.IncomingMessage(data, this);
+                    this.emit(eventType, message);
+                }
+                else {
+                    this.emit(eventType, data);
+                }
             });
         });
     }
