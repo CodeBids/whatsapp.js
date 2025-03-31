@@ -54,7 +54,7 @@ class Client extends events_1.EventEmitter {
     _setupWebhook(verifyToken) {
         this._webhook = new WebhookHandler_1.WebhookHandler(this, verifyToken);
         // Forward all webhook events to the client
-        Object.values(WebhookHandler_1.WebhookEventType).forEach((eventType) => {
+        Object.values(WebhookHandler_1.EventType).forEach((eventType) => {
             this._webhook.on(eventType, (data) => {
                 this.emit(eventType, data);
             });

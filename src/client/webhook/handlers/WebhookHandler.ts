@@ -5,7 +5,7 @@ import type { Client } from "../../Client"
 /**
  * Types of events that can be emitted by the webhook handler
  */
-export enum WebhookEventType {
+export enum EventType {
   MESSAGE_RECEIVED = "message.received",
   MESSAGE_DELIVERED = "message.delivered",
   MESSAGE_READ = "message.read",
@@ -17,7 +17,7 @@ export enum WebhookEventType {
  * Interface for webhook event data
  */
 export interface WebhookEvent {
-  type: WebhookEventType
+  type: EventType
   data: any
 }
 
@@ -140,7 +140,7 @@ export class WebhookHandler extends EventEmitter {
               ...this.extractMessageContent(message),
             }
 
-            this.emit(WebhookEventType.MESSAGE_RECEIVED, eventData)
+            this.emit(EventType.MESSAGE_RECEIVED, eventData)
           }
         }
 
@@ -148,19 +148,19 @@ export class WebhookHandler extends EventEmitter {
         if (value.statuses && value.statuses.length > 0) {
           for (const status of value.statuses) {
             if (status.status === "delivered") {
-              this.emit(WebhookEventType.MESSAGE_DELIVERED, {
+              this.emit(EventType.MESSAGE_DELIVERED, {
                 id: status.id,
                 recipient_id: status.recipient_id,
                 timestamp: status.timestamp,
               })
             } else if (status.status === "read") {
-              this.emit(WebhookEventType.MESSAGE_READ, {
+              this.emit(EventType.MESSAGE_READ, {
                 id: status.id,
                 recipient_id: status.recipient_id,
                 timestamp: status.timestamp,
               })
             } else {
-              this.emit(WebhookEventType.STATUS_UPDATED, status)
+              this.emit(EventType.STATUS_UPDATED, status)
             }
           }
         }
@@ -168,7 +168,7 @@ export class WebhookHandler extends EventEmitter {
         // Process reactions
         if (value.reactions && value.reactions.length > 0) {
           for (const reaction of value.reactions) {
-            this.emit(WebhookEventType.MESSAGE_REACTION, {
+            this.emit(EventType.MESSAGE_REACTION, {
               message_id: reaction.message_id,
               from: reaction.from,
               emoji: reaction.emoji,

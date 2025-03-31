@@ -1,18 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WebhookHandler = exports.WebhookEventType = void 0;
+exports.WebhookHandler = exports.EventType = void 0;
 const events_1 = require("events");
 /**
  * Types of events that can be emitted by the webhook handler
  */
-var WebhookEventType;
-(function (WebhookEventType) {
-    WebhookEventType["MESSAGE_RECEIVED"] = "message.received";
-    WebhookEventType["MESSAGE_DELIVERED"] = "message.delivered";
-    WebhookEventType["MESSAGE_READ"] = "message.read";
-    WebhookEventType["MESSAGE_REACTION"] = "message.reaction";
-    WebhookEventType["STATUS_UPDATED"] = "status.updated";
-})(WebhookEventType || (exports.WebhookEventType = WebhookEventType = {}));
+var EventType;
+(function (EventType) {
+    EventType["MESSAGE_RECEIVED"] = "message.received";
+    EventType["MESSAGE_DELIVERED"] = "message.delivered";
+    EventType["MESSAGE_READ"] = "message.read";
+    EventType["MESSAGE_REACTION"] = "message.reaction";
+    EventType["STATUS_UPDATED"] = "status.updated";
+})(EventType || (exports.EventType = EventType = {}));
 /**
  * Handler for WhatsApp webhook events
  */
@@ -119,35 +119,35 @@ class WebhookHandler extends events_1.EventEmitter {
                             context: message.context,
                             ...this.extractMessageContent(message),
                         };
-                        this.emit(WebhookEventType.MESSAGE_RECEIVED, eventData);
+                        this.emit(EventType.MESSAGE_RECEIVED, eventData);
                     }
                 }
                 // Process delivery status updates
                 if (value.statuses && value.statuses.length > 0) {
                     for (const status of value.statuses) {
                         if (status.status === "delivered") {
-                            this.emit(WebhookEventType.MESSAGE_DELIVERED, {
+                            this.emit(EventType.MESSAGE_DELIVERED, {
                                 id: status.id,
                                 recipient_id: status.recipient_id,
                                 timestamp: status.timestamp,
                             });
                         }
                         else if (status.status === "read") {
-                            this.emit(WebhookEventType.MESSAGE_READ, {
+                            this.emit(EventType.MESSAGE_READ, {
                                 id: status.id,
                                 recipient_id: status.recipient_id,
                                 timestamp: status.timestamp,
                             });
                         }
                         else {
-                            this.emit(WebhookEventType.STATUS_UPDATED, status);
+                            this.emit(EventType.STATUS_UPDATED, status);
                         }
                     }
                 }
                 // Process reactions
                 if (value.reactions && value.reactions.length > 0) {
                     for (const reaction of value.reactions) {
-                        this.emit(WebhookEventType.MESSAGE_REACTION, {
+                        this.emit(EventType.MESSAGE_REACTION, {
                             message_id: reaction.message_id,
                             from: reaction.from,
                             emoji: reaction.emoji,

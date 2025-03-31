@@ -2,7 +2,7 @@ import { EventEmitter } from "events"
 import { apiRequest } from "../services/wa-api-cloud.service"
 import type { ClientData, ClientInfoResponse, ClientOptions } from "../types"
 import { Message } from "./actions/Message"
-import { WebhookHandler, WebhookEventType } from "./webhook/handlers/WebhookHandler"
+import { WebhookHandler, EventType } from "./webhook/handlers/WebhookHandler"
 
 /**
  * This is the starting point for any WhatsApp Client and the main hub for interacting with the WhatsApp API Cloud
@@ -72,7 +72,7 @@ export class Client extends EventEmitter {
     this._webhook = new WebhookHandler(this, verifyToken)
 
     // Forward all webhook events to the client
-    Object.values(WebhookEventType).forEach((eventType) => {
+    Object.values(EventType).forEach((eventType) => {
       this._webhook!.on(eventType, (data) => {
         this.emit(eventType, data)
       })

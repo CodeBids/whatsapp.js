@@ -183,7 +183,6 @@ export class Message {
         language: {
           code: payload.template.language,
         },
-        // components: payload.template.components,
       };
     } else if (payload.files && payload.files.length > 0) {
       const file = payload.files[0];
@@ -229,8 +228,7 @@ export class Message {
     } else if (payload.interactive) {
       messageBody.type = "interactive";
       messageBody.interactive = payload.interactive;
-    }
-    if (payload.reaction) {
+    } else if (payload.reaction) {
       messageBody.type = "reaction";
       messageBody.reaction = payload.reaction;
     } else if (payload.content) {
@@ -239,6 +237,9 @@ export class Message {
         body: payload.content,
       };
     } else if (payload.components) {
+
+      console.log('Components? ', payload.components)
+
       payload.components.forEach((component) => {
         if (component instanceof LocationCard) {
           messageBody.type = "location";

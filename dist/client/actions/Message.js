@@ -124,7 +124,6 @@ class Message {
                 language: {
                     code: payload.template.language,
                 },
-                // components: payload.template.components,
             };
         }
         else if (payload.files && payload.files.length > 0) {
@@ -172,7 +171,7 @@ class Message {
             messageBody.type = "interactive";
             messageBody.interactive = payload.interactive;
         }
-        if (payload.reaction) {
+        else if (payload.reaction) {
             messageBody.type = "reaction";
             messageBody.reaction = payload.reaction;
         }
@@ -183,6 +182,7 @@ class Message {
             };
         }
         else if (payload.components) {
+            console.log('Components? ', payload.components);
             payload.components.forEach((component) => {
                 if (component instanceof __1.LocationCard) {
                     messageBody.type = "location";

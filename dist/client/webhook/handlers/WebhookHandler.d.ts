@@ -4,7 +4,7 @@ import type { Client } from "../../Client";
 /**
  * Types of events that can be emitted by the webhook handler
  */
-export declare enum WebhookEventType {
+export declare enum EventType {
     MESSAGE_RECEIVED = "message.received",
     MESSAGE_DELIVERED = "message.delivered",
     MESSAGE_READ = "message.read",
@@ -15,7 +15,7 @@ export declare enum WebhookEventType {
  * Interface for webhook event data
  */
 export interface WebhookEvent {
-    type: WebhookEventType;
+    type: EventType;
     data: any;
 }
 /**
