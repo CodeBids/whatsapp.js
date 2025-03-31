@@ -22,6 +22,8 @@ var Message_1 = require("./client/actions/Message");
 Object.defineProperty(exports, "Message", { enumerable: true, get: function () { return Message_1.Message; } });
 // Export types
 __exportStar(require("./types"), exports);
+// Export WS utilites
+__exportStar(require("./client/webhook/handlers/WebhookHandler"), exports);
 // Export error utilities
 var ErrorCodes_1 = require("./errors/ErrorCodes");
 Object.defineProperty(exports, "WhatsAppErrorCode", { enumerable: true, get: function () { return ErrorCodes_1.WhatsAppErrorCode; } });
