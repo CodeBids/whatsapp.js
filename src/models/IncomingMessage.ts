@@ -40,6 +40,7 @@ export class IncomingMessage {
    */
   async reply(payload: MessagePayload): Promise<MessageApiResponse> {
     payload.to = this.from;
+    payload.context = { message_id: this.id };
     return this.client.message.send(payload)
   }
 
