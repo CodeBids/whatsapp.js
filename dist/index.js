@@ -36,3 +36,4 @@ Object.defineProperty(exports, "isErrorCode", { enumerable: true, get: function 
 __exportStar(require("./models/Location"), exports);
 __exportStar(require("./models/Contact"), exports);
 __exportStar(require("./models/IncomingMessage"), exports);
+__exportStar(require("./models/Embed"), exports);

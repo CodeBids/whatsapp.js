@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ContactCard = void 0;
-class ContactCard {
+exports.ContactBuilder = void 0;
+class ContactBuilder {
     constructor(data) {
         Object.assign(this, data);
     }
@@ -76,4 +76,4 @@ class ContactCard {
         this.urls = urls;
     }
 }
-exports.ContactCard = ContactCard;
+exports.ContactBuilder = ContactBuilder;

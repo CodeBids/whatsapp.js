@@ -8,3 +8,4 @@ export { isErrorCode } from "./services/wa-api-cloud.service";
 export * from './models/Location';
 export * from './models/Contact';
 export * from './models/IncomingMessage';
+export * from './models/Embed';

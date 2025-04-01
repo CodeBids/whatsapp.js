@@ -1,6 +1,6 @@
 import type { LanguageCode } from "./language"
-import type { LocationCard } from "../models/Location"
-import { ContactCard } from "../models/Contact"
+import type { LocationBuilder } from "../models/Location"
+import { ContactBuilder } from "../models/Contact"
 import { ContactPayloadData, Embed } from ".";
 
 // Message types supported by WhatsApp
@@ -18,7 +18,7 @@ export type MessageType =
   | "reaction"
 
 // Components for interactive messages and templates
-export type Component = Embed | LocationCard | ContactCard;
+export type Component = Embed | LocationBuilder | ContactBuilder;
 //   embed?: Embed
 //   button?: Button
 //   location?: LocationCard

@@ -1,6 +1,6 @@
 import { Adress, Country, Company, Email, Job, Phone, ContactCardData as ContactInterface, WebSite } from "../types";
 
-export class ContactCard implements ContactInterface {
+export class ContactBuilder implements ContactInterface {
   addresses?: Adress[];
   birthday?: Date;
   country?: Country;

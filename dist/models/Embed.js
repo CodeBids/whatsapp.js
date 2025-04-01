@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Embed = void 0;
-class Embed {
+exports.EmbedBuilder = void 0;
+class EmbedBuilder {
     constructor(data) {
         Object.assign(this, data);
     }
@@ -15,4 +15,4 @@ class Embed {
         this.footer = text;
     }
 }
-exports.Embed = Embed;
+exports.EmbedBuilder = EmbedBuilder;

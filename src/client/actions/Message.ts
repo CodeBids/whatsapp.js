@@ -8,9 +8,9 @@ import {
   type InteractiveData,
 } from "../../types/index"
 import { WhatsAppApiException } from "../../errors/Messages"
-import { type Client, LocationCard } from "../.."
-import { ContactCard } from "../../models/Contact"
-import { Embed } from "../../models/Embed"
+import { type Client, LocationBuilder } from "../.."
+import { ContactBuilder } from "../../models/Contact"
+import { EmbedBuilder } from "../../models/Embed"
 
 export class Message {
   private client: Client
@@ -298,7 +298,7 @@ export class Message {
 
     components.forEach((component) => {
       switch (true) {
-        case component instanceof LocationCard:
+        case component instanceof LocationBuilder:
           if (component.latitude === undefined || component.longitude === undefined) {
             throw new WhatsAppApiException("Latitude and longitude are required for location messages", 0)
           }
@@ -314,7 +314,7 @@ export class Message {
           }
           break
 
-        case component instanceof ContactCard:
+        case component instanceof ContactBuilder:
           if (!component.firstName || !component.phones || component.phones.length === 0) {
             throw new WhatsAppApiException("First name and at least one phone number are required", 0)
           }
@@ -349,7 +349,7 @@ export class Message {
           }
           break
 
-        case component instanceof Embed:
+        case component instanceof EmbedBuilder:
           if (!component.body) {
             throw new WhatsAppApiException("Body is required in the Embed", 0)
           }
@@ -553,7 +553,7 @@ export class Message {
       // }
     } else if (payload.components) {
       payload.components.forEach((component) => {
-        if (component instanceof LocationCard) {
+        if (component instanceof LocationBuilder) {
           messageBody.type = "location"
           messageBody.location = {
             latitude: component.latitude,
@@ -561,7 +561,7 @@ export class Message {
             ...(component.name ? { name: component.name } : {}),
             ...(component.address ? { address: component.address } : {}),
           }
-        } else if (component instanceof ContactCard) {
+        } else if (component instanceof ContactBuilder) {
           messageBody.type = "contacts"
 
           const phones: ContactPayloadData["phones"] = []

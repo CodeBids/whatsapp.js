@@ -230,7 +230,7 @@ class Message {
         }
         components.forEach((component) => {
             switch (true) {
-                case component instanceof __1.LocationCard:
+                case component instanceof __1.LocationBuilder:
                     if (component.latitude === undefined || component.longitude === undefined) {
                         throw new Messages_1.WhatsAppApiException("Latitude and longitude are required for location messages", 0);
                     }
@@ -243,7 +243,7 @@ class Message {
                         throw new Messages_1.WhatsAppApiException("Longitude must be between -180 and 180 degrees", 0);
                     }
                     break;
-                case component instanceof Contact_1.ContactCard:
+                case component instanceof Contact_1.ContactBuilder:
                     if (!component.firstName || !component.phones || component.phones.length === 0) {
                         throw new Messages_1.WhatsAppApiException("First name and at least one phone number are required", 0);
                     }
@@ -273,7 +273,7 @@ class Message {
                         });
                     }
                     break;
-                case component instanceof Embed_1.Embed:
+                case component instanceof Embed_1.EmbedBuilder:
                     if (!component.body) {
                         throw new Messages_1.WhatsAppApiException("Body is required in the Embed", 0);
                     }
@@ -468,7 +468,7 @@ class Message {
         }
         else if (payload.components) {
             payload.components.forEach((component) => {
-                if (component instanceof __1.LocationCard) {
+                if (component instanceof __1.LocationBuilder) {
                     messageBody.type = "location";
                     messageBody.location = {
                         latitude: component.latitude,
@@ -477,7 +477,7 @@ class Message {
                         ...(component.address ? { address: component.address } : {}),
                     };
                 }
-                else if (component instanceof Contact_1.ContactCard) {
+                else if (component instanceof Contact_1.ContactBuilder) {
                     messageBody.type = "contacts";
                     const phones = [];
                     component.phones.forEach((phone) => {

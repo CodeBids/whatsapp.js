@@ -1,6 +1,6 @@
 import { Component, Embed as EmbedInterface } from '../types'
 
-export class Embed implements EmbedInterface {
+export class EmbedBuilder implements EmbedInterface {
   title!: string;
   body!: string;
   footer!: string;

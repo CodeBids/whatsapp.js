@@ -1,6 +1,6 @@
 import { Location as LocationInterface } from "../types";
 
-export class LocationCard implements LocationInterface {
+export class LocationBuilder implements LocationInterface {
   name!: string;
   address?: string | undefined;
   latitude!: number;

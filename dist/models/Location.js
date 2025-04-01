@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LocationCard = void 0;
-class LocationCard {
+exports.LocationBuilder = void 0;
+class LocationBuilder {
     constructor(data) {
         Object.assign(this, data); // Asigna las propiedades directamente
     }
@@ -31,4 +31,4 @@ class LocationCard {
         this.phone_number = number;
     }
 }
-exports.LocationCard = LocationCard;
+exports.LocationBuilder = LocationBuilder;
