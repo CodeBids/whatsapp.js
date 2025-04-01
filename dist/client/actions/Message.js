@@ -4,7 +4,8 @@ exports.Message = void 0;
 const index_1 = require("../../types/index");
 const Messages_1 = require("../../errors/Messages");
 const __1 = require("../..");
-const ContactCard_1 = require("../../models/ContactCard");
+const Contact_1 = require("../../models/Contact");
+const Embed_1 = require("../../models/Embed");
 class Message {
     constructor(client) {
         this.client = client;
@@ -34,7 +35,8 @@ class Message {
             // Remove the "9" after the country code
             return phoneNumber.replace(/^549/, "54");
         }
-        return phoneNumber;
+        // Remove any non-numeric characters (like +, spaces, parentheses)
+        return phoneNumber.replace(/\D/g, "");
     }
     /**
      * Validates the message payload
@@ -47,15 +49,20 @@ class Message {
         }
         // Clean the phone number before sending
         payload.to = this.cleanPhoneNumber(payload.to);
+        // Validate phone number format
+        if (!/^\d+$/.test(payload.to)) {
+            throw new Messages_1.WhatsAppApiException("Phone number must contain only digits", 0);
+        }
         // Check if at least one content type is provided
         const hasContent = Boolean(payload.content ||
             payload.template ||
             (payload.files && payload.files.length > 0) ||
             payload.interactive ||
             payload.reaction ||
-            (payload.components && payload.components.length > 0));
+            (payload.components && payload.components.length > 0) ||
+            (payload.embeds && payload.embeds.length > 0));
         if (!hasContent) {
-            throw new Messages_1.WhatsAppApiException("At least one content type is required (text, template, files, interactive, reaction, or components)", 0);
+            throw new Messages_1.WhatsAppApiException("At least one content type is required (text, template, files, interactive, reaction, components, or embeds)", 0);
         }
         // Validate template if provided
         if (payload.template) {
@@ -75,8 +82,19 @@ class Message {
                 if (!file.type) {
                     throw new Messages_1.WhatsAppApiException("File type is required", 0);
                 }
+                if (!["image", "document", "audio", "video", "sticker"].includes(file.type)) {
+                    throw new Messages_1.WhatsAppApiException(`Invalid file type: ${file.type}. Allowed types are: image, document, audio, video, sticker.`, 0);
+                }
                 if (!file.url && !file.id) {
                     throw new Messages_1.WhatsAppApiException("Either file URL or ID must be provided", 0);
+                }
+                // Validate URL format if provided
+                if (file.url && !this.isValidUrl(file.url)) {
+                    throw new Messages_1.WhatsAppApiException(`Invalid URL format: ${file.url}`, 0);
+                }
+                // Validate specific file type requirements
+                if (file.type === "document" && !file.filename) {
+                    throw new Messages_1.WhatsAppApiException("Filename is required for document files", 0);
                 }
             }
         }
@@ -89,30 +107,216 @@ class Message {
                 throw new Messages_1.WhatsAppApiException("Emoji is required for reaction messages", 0);
             }
         }
+        // Validate interactive if provided
+        if (payload.interactive) {
+            this.validateInteractive(payload.interactive);
+        }
+        // Validate embeds if provided
+        if (payload.embeds && payload.embeds.length > 0) {
+            for (const embed of payload.embeds) {
+                if (!embed.body) {
+                    throw new Messages_1.WhatsAppApiException("Body is required for embed messages", 0);
+                }
+            }
+        }
+        // Validate components if provided
         if (payload.components) {
-            //TODO: Validate components
+            this.validateComponent(payload.components);
+        }
+        // Validate context if provided
+        if (payload.context && !payload.context.message_id) {
+            throw new Messages_1.WhatsAppApiException("Message ID is required in context for reply/quote messages", 0);
+        }
+    }
+    /**
+     * Validates an interactive message
+     * @param interactive Interactive message data
+     */
+    validateInteractive(interactive) {
+        if (!interactive.type) {
+            throw new Messages_1.WhatsAppApiException("Interactive type is required", 0);
+        }
+        if (!["button", "list", "product", "product_list", "cta_url", "text"].includes(interactive.type)) {
+            throw new Messages_1.WhatsAppApiException(`Invalid interactive type: ${interactive.type}. Allowed types are: button, list, product, product_list, cta_url, text.`, 0);
+        }
+        if (!interactive.body || !interactive.body.text) {
+            throw new Messages_1.WhatsAppApiException("Body text is required for interactive messages", 0);
+        }
+        // Validate header if provided
+        if (interactive.header) {
+            if (!interactive.header.type) {
+                throw new Messages_1.WhatsAppApiException("Header type is required", 0);
+            }
+            if (!["text", "image", "video", "document"].includes(interactive.header.type)) {
+                throw new Messages_1.WhatsAppApiException(`Invalid header type: ${interactive.header.type}. Allowed types are: text, image, video, document.`, 0);
+            }
+            // Validate header content based on type
+            switch (interactive.header.type) {
+                case "text":
+                    if (!interactive.header.text) {
+                        throw new Messages_1.WhatsAppApiException("Text is required for text header", 0);
+                    }
+                    break;
+                case "image":
+                    if (!interactive.header.image || (!interactive.header.image.link && !interactive.header.image.id)) {
+                        throw new Messages_1.WhatsAppApiException("Image link or ID is required for image header", 0);
+                    }
+                    break;
+                case "video":
+                    if (!interactive.header.video || (!interactive.header.video.link && !interactive.header.video.id)) {
+                        throw new Messages_1.WhatsAppApiException("Video link or ID is required for video header", 0);
+                    }
+                    break;
+                case "document":
+                    if (!interactive.header.document || (!interactive.header.document.link && !interactive.header.document.id)) {
+                        throw new Messages_1.WhatsAppApiException("Document link or ID is required for document header", 0);
+                    }
+                    break;
+            }
+        }
+        // Validate action if provided
+        if (interactive.action) {
+            // Validate buttons if provided
+            if (interactive.action.buttons) {
+                if (interactive.action.buttons.length === 0) {
+                    throw new Messages_1.WhatsAppApiException("At least one button is required", 0);
+                }
+                if (interactive.action.buttons.length > 3) {
+                    throw new Messages_1.WhatsAppApiException("Maximum 3 buttons are allowed", 0);
+                }
+                for (const button of interactive.action.buttons) {
+                    if (!button.type) {
+                        throw new Messages_1.WhatsAppApiException("Button type is required", 0);
+                    }
+                    if (button.type === "reply" && (!button.reply || !button.reply.id || !button.reply.title)) {
+                        throw new Messages_1.WhatsAppApiException("Reply ID and title are required for reply buttons", 0);
+                    }
+                    if (button.type === "url" && (!button.url || !button.text)) {
+                        throw new Messages_1.WhatsAppApiException("URL and text are required for URL buttons", 0);
+                    }
+                    if (button.type === "url" && !this.isValidUrl(button.url)) {
+                        throw new Messages_1.WhatsAppApiException(`Invalid URL format: ${button.url}`, 0);
+                    }
+                }
+            }
+            // Validate sections if provided
+            if (interactive.action.sections) {
+                if (interactive.action.sections.length === 0) {
+                    throw new Messages_1.WhatsAppApiException("At least one section is required", 0);
+                }
+                for (const section of interactive.action.sections) {
+                    if (!section.title) {
+                        throw new Messages_1.WhatsAppApiException("Section title is required", 0);
+                    }
+                    if (!section.rows || section.rows.length === 0) {
+                        throw new Messages_1.WhatsAppApiException("At least one row is required per section", 0);
+                    }
+                    for (const row of section.rows) {
+                        if (!row.id || !row.title) {
+                            throw new Messages_1.WhatsAppApiException("Row ID and title are required", 0);
+                        }
+                    }
+                }
+            }
         }
     }
     /**
      * Validates the Component payload
      * @param component Component
      */
-    validateComponent(component) {
-        switch (true) {
-            case component instanceof __1.LocationCard:
-                if (component.latitude === undefined ||
-                    component.longitude === undefined) {
-                    throw new Messages_1.WhatsAppApiException("Latitude and longitude are required for location messages", 0);
-                }
-                break;
-            case component instanceof ContactCard_1.ContactCard:
-                if (!component.firstName || !component.phones[0].number) {
-                    throw new Messages_1.WhatsAppApiException("Name and phone number are required", 0);
-                }
-                break;
-            default:
-                throw new Messages_1.WhatsAppApiException("Unknown component type", 0);
+    validateComponent(components) {
+        if (components.length === 0) {
+            throw new Messages_1.WhatsAppApiException("At least one component is required", 0);
         }
+        components.forEach((component) => {
+            switch (true) {
+                case component instanceof __1.LocationCard:
+                    if (component.latitude === undefined || component.longitude === undefined) {
+                        throw new Messages_1.WhatsAppApiException("Latitude and longitude are required for location messages", 0);
+                    }
+                    // Validate latitude range (-90 to 90)
+                    if (component.latitude < -90 || component.latitude > 90) {
+                        throw new Messages_1.WhatsAppApiException("Latitude must be between -90 and 90 degrees", 0);
+                    }
+                    // Validate longitude range (-180 to 180)
+                    if (component.longitude < -180 || component.longitude > 180) {
+                        throw new Messages_1.WhatsAppApiException("Longitude must be between -180 and 180 degrees", 0);
+                    }
+                    break;
+                case component instanceof Contact_1.ContactCard:
+                    if (!component.firstName || !component.phones || component.phones.length === 0) {
+                        throw new Messages_1.WhatsAppApiException("First name and at least one phone number are required", 0);
+                    }
+                    // Validate phone numbers
+                    component.phones.forEach((phone) => {
+                        if (!phone.number) {
+                            throw new Messages_1.WhatsAppApiException("Phone number is required for each phone entry", 0);
+                        }
+                        if (!/^\d+$/.test(phone.number.toString().replace(/\D/g, ""))) {
+                            throw new Messages_1.WhatsAppApiException(`Invalid phone number format: ${phone.number}`, 0);
+                        }
+                    });
+                    // Validate emails if provided
+                    if (component.emails && component.emails.length > 0) {
+                        component.emails.forEach((email) => {
+                            if (!email.address || !this.isValidEmail(email.address)) {
+                                throw new Messages_1.WhatsAppApiException(`Invalid email format: ${email.address}`, 0);
+                            }
+                        });
+                    }
+                    // Validate URLs if provided
+                    if (component.urls && component.urls.length > 0) {
+                        component.urls.forEach((url) => {
+                            if (!url.url || !this.isValidUrl(url.url)) {
+                                throw new Messages_1.WhatsAppApiException(`Invalid URL format: ${url.url}`, 0);
+                            }
+                        });
+                    }
+                    break;
+                case component instanceof Embed_1.Embed:
+                    if (!component.body) {
+                        throw new Messages_1.WhatsAppApiException("Body is required in the Embed", 0);
+                    }
+                    // Validate title length if provided
+                    if (component.title && component.title.length > 60) {
+                        throw new Messages_1.WhatsAppApiException("Embed title must be 60 characters or less", 0);
+                    }
+                    // Validate body length
+                    if (component.body.length > 1000) {
+                        throw new Messages_1.WhatsAppApiException("Embed body must be 1000 characters or less", 0);
+                    }
+                    // Validate footer length if provided
+                    if (component.footer && component.footer.length > 60) {
+                        throw new Messages_1.WhatsAppApiException("Embed footer must be 60 characters or less", 0);
+                    }
+                    break;
+                default:
+                    throw new Messages_1.WhatsAppApiException("Unknown component type", 0);
+            }
+        });
+    }
+    /**
+     * Checks if a string is a valid URL
+     * @param url URL to validate
+     * @returns true if the URL is valid
+     */
+    isValidUrl(url) {
+        try {
+            new URL(url);
+            return true;
+        }
+        catch (e) {
+            return false;
+        }
+    }
+    /**
+     * Checks if a string is a valid email
+     * @param email Email to validate
+     * @returns true if the email is valid
+     */
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     }
     /**
      * Builds the message body based on the provided payload
@@ -201,8 +405,68 @@ class Message {
                 body: payload.content,
             };
         }
+        else if (payload.embeds && payload.embeds.length > 0) {
+            // Determinar el tipo de interactive basado en si hay componentes
+            const interactiveType = payload.components ? "cta_url" : "text";
+            // Inicializar el objeto interactive
+            messageBody.type = "interactive";
+            // Verificar si hay un archivo que pueda usarse como header
+            const hasValidHeaderFile = payload.files && payload.files.length > 0 && ["image", "video", "document"].includes(payload.files[0].type);
+            if (hasValidHeaderFile) {
+                // Si hay un archivo válido para el header, usarlo
+                const file = payload.files[0];
+                messageBody.interactive = {
+                    type: interactiveType,
+                    header: {
+                        type: file.type,
+                        ...(file.url ? { [file.type]: { link: file.url } } : {}),
+                        ...(file.id ? { [file.type]: { id: file.id } } : {}),
+                    },
+                    body: {
+                        text: payload.embeds[0].body || "",
+                    },
+                    ...(payload.embeds[0].footer
+                        ? {
+                            footer: {
+                                text: payload.embeds[0].footer,
+                            },
+                        }
+                        : {}),
+                };
+            }
+            else {
+                // Si no hay un archivo válido o no hay archivos, usar un header de texto
+                messageBody.interactive = {
+                    type: interactiveType,
+                    header: {
+                        type: "text",
+                        text: payload.embeds[0].title || "",
+                    },
+                    body: {
+                        text: payload.embeds[0].body || "",
+                    },
+                    ...(payload.embeds[0].footer
+                        ? {
+                            footer: {
+                                text: payload.embeds[0].footer,
+                            },
+                        }
+                        : {}),
+                };
+            }
+            // Si hay componentes, agregarlos como botones de acción
+            // TODO: Añadir compatibilidad con componentes
+            // if (payload.components && payload.components.length > 0) {
+            //   messageBody.interactive.action = {
+            //     buttons: payload.components.map((component) => ({
+            //       type: "url",
+            //       url: component.url || "",
+            //       text: component.text || "Click here",
+            //     })),
+            //   }
+            // }
+        }
         else if (payload.components) {
-            console.log("Components? ", payload.components);
             payload.components.forEach((component) => {
                 if (component instanceof __1.LocationCard) {
                     messageBody.type = "location";
@@ -213,7 +477,7 @@ class Message {
                         ...(component.address ? { address: component.address } : {}),
                     };
                 }
-                else if (component instanceof ContactCard_1.ContactCard) {
+                else if (component instanceof Contact_1.ContactCard) {
                     messageBody.type = "contacts";
                     const phones = [];
                     component.phones.forEach((phone) => {
@@ -252,9 +516,7 @@ class Message {
                     const name = {
                         formatted_name: component.formattedName ?? component.firstName,
                         first_name: component.firstName,
-                        ...(component.middleName
-                            ? { middle_name: component.middleName }
-                            : {}),
+                        ...(component.middleName ? { middle_name: component.middleName } : {}),
                         ...(component.lastName ? { last_name: component.lastName } : {}),
                         ...(component.namePrefix ? { prefix: component.namePrefix } : {}),
                     };

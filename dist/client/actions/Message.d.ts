@@ -1,5 +1,5 @@
 import { type MessageApiResponse, type MessagePayload } from "../../types/index";
-import { Client } from "../..";
+import { type Client } from "../..";
 export declare class Message {
     private client;
     constructor(client: Client);
@@ -22,10 +22,27 @@ export declare class Message {
      */
     private validatePayload;
     /**
+     * Validates an interactive message
+     * @param interactive Interactive message data
+     */
+    private validateInteractive;
+    /**
      * Validates the Component payload
      * @param component Component
      */
     private validateComponent;
+    /**
+     * Checks if a string is a valid URL
+     * @param url URL to validate
+     * @returns true if the URL is valid
+     */
+    private isValidUrl;
+    /**
+     * Checks if a string is a valid email
+     * @param email Email to validate
+     * @returns true if the email is valid
+     */
+    private isValidEmail;
     /**
      * Builds the message body based on the provided payload
      * @param payload Message payload

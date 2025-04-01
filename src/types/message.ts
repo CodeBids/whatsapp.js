@@ -1,7 +1,7 @@
 import type { LanguageCode } from "./language"
-import type { LocationCard } from "../models/LocationCard"
-import { ContactCard } from "../models/ContactCard"
-import { ContactPayloadData } from ".";
+import type { LocationCard } from "../models/Location"
+import { ContactCard } from "../models/Contact"
+import { ContactPayloadData, Embed } from ".";
 
 // Message types supported by WhatsApp
 export type MessageType =
@@ -18,17 +18,13 @@ export type MessageType =
   | "reaction"
 
 // Components for interactive messages and templates
-export type Component = Embed | Button | LocationCard | ContactCard;
+export type Component = Embed | LocationCard | ContactCard;
 //   embed?: Embed
 //   button?: Button
 //   location?: LocationCard
 //   type?: "header" | "body" | "button" | "footer"
 //   parameters?: TemplateParameter[]
 // }
-
-export type Embed = {}
-
-export type Button = {}
 
 // Media file types
 export interface FileAttachment {
@@ -56,18 +52,21 @@ export interface TemplateData {
 
 // Interactive data
 export interface InteractiveData {
-  type: "button" | "list" | "product" | "product_list"
+  type: "button" | "list" | "product" | "product_list" | "cta_url" | "text"
   header?: {
-    type: "text" | "image" | "video" | "document"
+    type: "text" | "image" | "video" | "document" | "location"
     text?: string
     image?: {
-      link: string
+      link?: string
+      id?: string
     }
     video?: {
-      link: string
+      link?: string
+      id?: string
     }
     document?: {
-      link: string
+      link?: string
+      id?: string
     }
   }
   body: {
@@ -76,13 +75,15 @@ export interface InteractiveData {
   footer?: {
     text: string
   }
-  action: {
+  action?: {
     buttons?: Array<{
-      type: "reply"
-      reply: {
+      type: "reply" | "url"
+      reply?: {
         id: string
         title: string
-      }
+      },
+      url?: string
+      text?: string
     }>
     button?: string
     sections?: Array<{
@@ -114,6 +115,7 @@ export interface MessagePayload {
   interactive?: InteractiveData
   reaction?: ReactionData,
   context?: Context,
+  embeds?: Embed[],
 }
 
 // Template components

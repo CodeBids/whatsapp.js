@@ -33,6 +33,6 @@ Object.defineProperty(exports, "getErrorMessage", { enumerable: true, get: funct
 var wa_api_cloud_service_1 = require("./services/wa-api-cloud.service");
 Object.defineProperty(exports, "isErrorCode", { enumerable: true, get: function () { return wa_api_cloud_service_1.isErrorCode; } });
 // Export builders
-__exportStar(require("./models/LocationCard"), exports);
-__exportStar(require("./models/ContactCard"), exports);
+__exportStar(require("./models/Location"), exports);
+__exportStar(require("./models/Contact"), exports);
 __exportStar(require("./models/IncomingMessage"), exports);

@@ -1,11 +1,9 @@
 import type { LanguageCode } from "./language";
-import type { LocationCard } from "../models/LocationCard";
-import { ContactCard } from "../models/ContactCard";
-import { ContactPayloadData } from ".";
+import type { LocationCard } from "../models/Location";
+import { ContactCard } from "../models/Contact";
+import { ContactPayloadData, Embed } from ".";
 export type MessageType = "text" | "template" | "image" | "document" | "audio" | "video" | "sticker" | "location" | "contacts" | "interactive" | "reaction";
-export type Component = Embed | Button | LocationCard | ContactCard;
-export type Embed = {};
-export type Button = {};
+export type Component = Embed | LocationCard | ContactCard;
 export interface FileAttachment {
     type: "audio" | "image" | "document" | "sticker" | "video";
     url?: string;
@@ -24,18 +22,21 @@ export interface TemplateData {
     language: LanguageCode;
 }
 export interface InteractiveData {
-    type: "button" | "list" | "product" | "product_list";
+    type: "button" | "list" | "product" | "product_list" | "cta_url" | "text";
     header?: {
-        type: "text" | "image" | "video" | "document";
+        type: "text" | "image" | "video" | "document" | "location";
         text?: string;
         image?: {
-            link: string;
+            link?: string;
+            id?: string;
         };
         video?: {
-            link: string;
+            link?: string;
+            id?: string;
         };
         document?: {
-            link: string;
+            link?: string;
+            id?: string;
         };
     };
     body: {
@@ -44,13 +45,15 @@ export interface InteractiveData {
     footer?: {
         text: string;
     };
-    action: {
+    action?: {
         buttons?: Array<{
-            type: "reply";
-            reply: {
+            type: "reply" | "url";
+            reply?: {
                 id: string;
                 title: string;
             };
+            url?: string;
+            text?: string;
         }>;
         button?: string;
         sections?: Array<{
@@ -78,6 +81,7 @@ export interface MessagePayload {
     interactive?: InteractiveData;
     reaction?: ReactionData;
     context?: Context;
+    embeds?: Embed[];
 }
 export interface TemplateParameter {
     type: "text" | "currency" | "date_time" | "image" | "document" | "video";

@@ -5,6 +5,6 @@ export * from './client/webhook/handlers/WebhookHandler';
 export { WhatsAppErrorCode, type WhatsAppApiError, type WhatsAppApiErrorResponse } from "./errors/ErrorCodes";
 export { WhatsAppApiException, getErrorMessage } from "./errors/Messages";
 export { isErrorCode } from "./services/wa-api-cloud.service";
-export * from './models/LocationCard';
-export * from './models/ContactCard';
+export * from './models/Location';
+export * from './models/Contact';
 export * from './models/IncomingMessage';
