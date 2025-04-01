@@ -192,7 +192,6 @@ class Message {
             messageBody.interactive = payload.interactive;
         }
         else if (payload.reaction) {
-            console.log(`Payload is Reaction: `, payload.reaction);
             messageBody.type = "reaction";
             messageBody.reaction = payload.reaction;
         }

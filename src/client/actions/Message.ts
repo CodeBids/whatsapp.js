@@ -247,7 +247,6 @@ export class Message {
       messageBody.type = "interactive";
       messageBody.interactive = payload.interactive;
     } else if (payload.reaction) {
-      console.log(`Payload is Reaction: `, payload.reaction);
       messageBody.type = "reaction";
       messageBody.reaction = payload.reaction;
     } else if (payload.content) {

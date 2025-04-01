@@ -1,5 +1,5 @@
 import type { Client } from "../client/Client"
-import type { MessageApiResponse, FileAttachment } from "../types"
+import type { MessageApiResponse, FileAttachment, MessagePayload } from "../types"
 import { WhatsAppApiException } from "../errors/Messages"
 
 /**
@@ -38,146 +38,10 @@ export class IncomingMessage {
    * @param content Text content to send
    * @returns API response
    */
-  async reply(content: string): Promise<MessageApiResponse> {
-    return this.client.message.send({
-      to: this.from,
-      context: { 
-        message_id: this.id
-      },
-      content,
-    })
+  async reply(payload: MessagePayload): Promise<MessageApiResponse> {
+    payload.to = this.from;
+    return this.client.message.send(payload)
   }
-
-  /**
-   * Replies to the message with a template
-   * @param templateName Template name
-   * @param language Template language
-   * @param components Template components (optional)
-   * @returns API response
-   */
-  // async replyWithTemplate(templateName: string, language: string, components?: any[]): Promise<MessageApiResponse> {
-  //   return this.client.message.send({
-  //     to: this.from,
-  //     template: {
-  //       name: templateName,
-  //       language: language as any,
-  //       components,
-  //     },
-  //   })
-  // }
-
-  /**
-   * Replies to the message with a file
-   * @param file File attachment
-   * @returns API response
-   */
-  // async replyWithFile(file: FileAttachment): Promise<MessageApiResponse> {
-  //   return this.client.message.send({
-  //     to: this.from,
-  //     files: [file],
-  //   })
-  // }
-
-  /**
-   * Replies to the message with an image
-   * @param url Image URL
-   * @param caption Image caption (optional)
-   * @returns API response
-   */
-  // async replyWithImage(url: string, caption?: string): Promise<MessageApiResponse> {
-  //   return this.client.message.send({
-  //     to: this.from,
-  //     files: [
-  //       {
-  //         type: "image",
-  //         url,
-  //         caption,
-  //       },
-  //     ],
-  //   })
-  // }
-
-  /**
-   * Replies to the message with a document
-   * @param url Document URL
-   * @param filename Document filename
-   * @param caption Document caption (optional)
-   * @returns API response
-   */
-  // async replyWithDocument(url: string, filename: string, caption?: string): Promise<MessageApiResponse> {
-  //   return this.client.message.send({
-  //     to: this.from,
-  //     files: [
-  //       {
-  //         type: "document",
-  //         url,
-  //         filename,
-  //         caption,
-  //       },
-  //     ],
-  //   })
-  // }
-
-  /**
-   * Replies to the message with a video
-   * @param url Video URL
-   * @param caption Video caption (optional)
-   * @returns API response
-   */
-  // async replyWithVideo(url: string, caption?: string): Promise<MessageApiResponse> {
-  //   return this.client.message.send({
-  //     to: this.from,
-  //     files: [
-  //       {
-  //         type: "video",
-  //         url,
-  //         caption,
-  //       },
-  //     ],
-  //   })
-  // }
-
-  /**
-   * Replies to the message with an audio
-   * @param url Audio URL
-   * @returns API response
-   */
-  // async replyWithAudio(url: string): Promise<MessageApiResponse> {
-  //   return this.client.message.send({
-  //     to: this.from,
-  //     files: [
-  //       {
-  //         type: "audio",
-  //         url,
-  //       },
-  //     ],
-  //   })
-  // }
-
-  /**
-   * Replies to the message with a location
-   * @param latitude Latitude
-   * @param longitude Longitude
-   * @param name Location name (optional)
-   * @param address Location address (optional)
-   * @returns API response
-   */
-  // async replyWithLocation(
-  //   latitude: number,
-  //   longitude: number,
-  //   name?: string,
-  //   address?: string,
-  // ): Promise<MessageApiResponse> {
-  //   return this.client.message.send({
-  //     to: this.from,
-  //     location: {
-  //       latitude,
-  //       longitude,
-  //       name,
-  //       address,
-  //     },
-  //   })
-  // }
 
   /**
    * Reacts to the message with an emoji
@@ -187,6 +51,10 @@ export class IncomingMessage {
   async react(emoji: string): Promise<MessageApiResponse> {
     if (!this.id) {
       throw new WhatsAppApiException("Cannot react to a message without an ID", 0)
+    }
+
+    if (emoji.length > 2) {
+      throw new WhatsAppApiException("Cannot react with more than one emoji", 0);
     }
 
     return this.client.message.send({

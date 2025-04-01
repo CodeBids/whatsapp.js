@@ -66,8 +66,7 @@ class WhatsAppApiService {
      * @returns Promise with the response
      */
     async phoneRequest(endpoint, method, data) {
-        const url = `${endpoint}`;
-        return this.request(url, method, data);
+        return this.request(endpoint, method, data);
     }
     /**
      * Handles WhatsApp API errors

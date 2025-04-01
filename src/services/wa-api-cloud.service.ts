@@ -78,8 +78,7 @@ export class WhatsAppApiService {
     method: "GET" | "POST" | "PUT" | "DELETE",
     data?: unknown,
   ): Promise<T> {
-    const url = `${endpoint}`
-    return this.request<T>(url, method, data)
+    return this.request<T>(endpoint, method, data)
   }
 
   /**

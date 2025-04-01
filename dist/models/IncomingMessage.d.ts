@@ -1,5 +1,5 @@
 import type { Client } from "../client/Client";
-import type { MessageApiResponse } from "../types";
+import type { MessageApiResponse, MessagePayload } from "../types";
 /**
  * Represents a message received from WhatsApp
  */
@@ -26,51 +26,7 @@ export declare class IncomingMessage {
      * @param content Text content to send
      * @returns API response
      */
-    reply(content: string): Promise<MessageApiResponse>;
-    /**
-     * Replies to the message with a template
-     * @param templateName Template name
-     * @param language Template language
-     * @param components Template components (optional)
-     * @returns API response
-     */
-    /**
-     * Replies to the message with a file
-     * @param file File attachment
-     * @returns API response
-     */
-    /**
-     * Replies to the message with an image
-     * @param url Image URL
-     * @param caption Image caption (optional)
-     * @returns API response
-     */
-    /**
-     * Replies to the message with a document
-     * @param url Document URL
-     * @param filename Document filename
-     * @param caption Document caption (optional)
-     * @returns API response
-     */
-    /**
-     * Replies to the message with a video
-     * @param url Video URL
-     * @param caption Video caption (optional)
-     * @returns API response
-     */
-    /**
-     * Replies to the message with an audio
-     * @param url Audio URL
-     * @returns API response
-     */
-    /**
-     * Replies to the message with a location
-     * @param latitude Latitude
-     * @param longitude Longitude
-     * @param name Location name (optional)
-     * @param address Location address (optional)
-     * @returns API response
-     */
+    reply(payload: MessagePayload): Promise<MessageApiResponse>;
     /**
      * Reacts to the message with an emoji
      * @param emoji Emoji to react with
