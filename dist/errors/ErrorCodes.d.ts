@@ -8,6 +8,7 @@ export declare enum WhatsAppErrorCode {
     PERMISSION_DENIED = 10,
     ACCESS_TOKEN_INVALID = 190,
     INVALID_PARAMETER = 100,
+    API_PERMISSION_ISSUE = 200,// Range 200-299 for API Permission issues
     TEMPORARILY_RESTRICTED_OR_DISABLED_ACCOUNT = 368,
     CAN_NOT_SEND_MESSAGE_TO_THIS_COUNTRY = 130497,
     RESTRICTED_OR_DISABLED_ACCOUNT = 131031,
@@ -60,7 +61,7 @@ export declare enum WhatsAppErrorCode {
     LIMIT_ON_ACCOUNT_REGISTRATION = 133016
 }
 /**
- * Interface for WhatsApp API bugs.
+ * Interface for WhatsApp API errors.
  */
 export interface WhatsAppApiError {
     message: string;
