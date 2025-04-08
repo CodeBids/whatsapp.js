@@ -117,6 +117,9 @@ class Message {
                 if (!embed.body) {
                     throw new Messages_1.WhatsAppApiException("Body is required for embed messages", 0);
                 }
+                if (!embed.components) {
+                    throw new Messages_1.WhatsAppApiException("Components are required for embed messages", 0);
+                }
             }
         }
         // Validate components if provided
@@ -136,7 +139,14 @@ class Message {
         if (!interactive.type) {
             throw new Messages_1.WhatsAppApiException("Interactive type is required", 0);
         }
-        if (!["button", "list", "product", "product_list", "cta_url", "text"].includes(interactive.type)) {
+        if (![
+            "button",
+            "list",
+            "product",
+            "product_list",
+            "cta_url",
+            "text",
+        ].includes(interactive.type)) {
             throw new Messages_1.WhatsAppApiException(`Invalid interactive type: ${interactive.type}. Allowed types are: button, list, product, product_list, cta_url, text.`, 0);
         }
         if (!interactive.body || !interactive.body.text) {
@@ -158,17 +168,21 @@ class Message {
                     }
                     break;
                 case "image":
-                    if (!interactive.header.image || (!interactive.header.image.link && !interactive.header.image.id)) {
+                    if (!interactive.header.image ||
+                        (!interactive.header.image.link && !interactive.header.image.id)) {
                         throw new Messages_1.WhatsAppApiException("Image link or ID is required for image header", 0);
                     }
                     break;
                 case "video":
-                    if (!interactive.header.video || (!interactive.header.video.link && !interactive.header.video.id)) {
+                    if (!interactive.header.video ||
+                        (!interactive.header.video.link && !interactive.header.video.id)) {
                         throw new Messages_1.WhatsAppApiException("Video link or ID is required for video header", 0);
                     }
                     break;
                 case "document":
-                    if (!interactive.header.document || (!interactive.header.document.link && !interactive.header.document.id)) {
+                    if (!interactive.header.document ||
+                        (!interactive.header.document.link &&
+                            !interactive.header.document.id)) {
                         throw new Messages_1.WhatsAppApiException("Document link or ID is required for document header", 0);
                     }
                     break;
@@ -188,7 +202,8 @@ class Message {
                     if (!button.type) {
                         throw new Messages_1.WhatsAppApiException("Button type is required", 0);
                     }
-                    if (button.type === "reply" && (!button.reply || !button.reply.id || !button.reply.title)) {
+                    if (button.type === "reply" &&
+                        (!button.reply || !button.reply.id || !button.reply.title)) {
                         throw new Messages_1.WhatsAppApiException("Reply ID and title are required for reply buttons", 0);
                     }
                     if (button.type === "url" && (!button.url || !button.text)) {
@@ -231,7 +246,8 @@ class Message {
         components.forEach((component) => {
             switch (true) {
                 case component instanceof __1.LocationBuilder:
-                    if (component.latitude === undefined || component.longitude === undefined) {
+                    if (component.latitude === undefined ||
+                        component.longitude === undefined) {
                         throw new Messages_1.WhatsAppApiException("Latitude and longitude are required for location messages", 0);
                     }
                     // Validate latitude range (-90 to 90)
@@ -244,7 +260,9 @@ class Message {
                     }
                     break;
                 case component instanceof Contact_1.ContactBuilder:
-                    if (!component.firstName || !component.phones || component.phones.length === 0) {
+                    if (!component.firstName ||
+                        !component.phones ||
+                        component.phones.length === 0) {
                         throw new Messages_1.WhatsAppApiException("First name and at least one phone number are required", 0);
                     }
                     // Validate phone numbers
@@ -407,11 +425,13 @@ class Message {
         }
         else if (payload.embeds && payload.embeds.length > 0) {
             // Determinar el tipo de interactive basado en si hay componentes
-            const interactiveType = payload.components ? "cta_url" : "text";
+            const interactiveType = "cta_url";
             // Inicializar el objeto interactive
             messageBody.type = "interactive";
             // Verificar si hay un archivo que pueda usarse como header
-            const hasValidHeaderFile = payload.files && payload.files.length > 0 && ["image", "video", "document"].includes(payload.files[0].type);
+            const hasValidHeaderFile = payload.files &&
+                payload.files.length > 0 &&
+                ["image", "video", "document"].includes(payload.files[0].type);
             if (hasValidHeaderFile) {
                 // Si hay un archivo válido para el header, usarlo
                 const file = payload.files[0];
@@ -456,15 +476,27 @@ class Message {
             }
             // Si hay componentes, agregarlos como botones de acción
             // TODO: Añadir compatibilidad con componentes
-            // if (payload.components && payload.components.length > 0) {
-            //   messageBody.interactive.action = {
-            //     buttons: payload.components.map((component) => ({
-            //       type: "url",
-            //       url: component.url || "",
-            //       text: component.text || "Click here",
-            //     })),
-            //   }
-            // }
+            if (payload.components && payload.components.length > 0) {
+                messageBody.interactive.action = {
+                    buttons: payload.components.map((component) => {
+                        if (component instanceof __1.ButtonBuilder && component.type) {
+                            return {
+                                type: component.type,
+                                ...(component.reply
+                                    ? {
+                                        reply: {
+                                            id: component.reply.id,
+                                            title: component.reply.title,
+                                        },
+                                    }
+                                    : {}),
+                                ...(component.url ? { url: component.url } : {}),
+                            };
+                        }
+                        throw new Messages_1.WhatsAppApiException("Unsupported component type in interactive action", 0);
+                    }),
+                };
+            }
         }
         else if (payload.components) {
             payload.components.forEach((component) => {
@@ -516,7 +548,9 @@ class Message {
                     const name = {
                         formatted_name: component.formattedName ?? component.firstName,
                         first_name: component.firstName,
-                        ...(component.middleName ? { middle_name: component.middleName } : {}),
+                        ...(component.middleName
+                            ? { middle_name: component.middleName }
+                            : {}),
                         ...(component.lastName ? { last_name: component.lastName } : {}),
                         ...(component.namePrefix ? { prefix: component.namePrefix } : {}),
                     };

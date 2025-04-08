@@ -2,8 +2,9 @@ import type { LanguageCode } from "./language";
 import type { LocationBuilder } from "../models/Location";
 import { ContactBuilder } from "../models/Contact";
 import { ContactPayloadData, Embed } from ".";
+import { ButtonBuilder } from "../models/Button";
 export type MessageType = "text" | "template" | "image" | "document" | "audio" | "video" | "sticker" | "location" | "contacts" | "interactive" | "reaction";
-export type Component = Embed | LocationBuilder | ContactBuilder;
+export type Component = Embed | LocationBuilder | ContactBuilder | ButtonBuilder;
 export interface FileAttachment {
     type: "audio" | "image" | "document" | "sticker" | "video";
     url?: string;

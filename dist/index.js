@@ -37,3 +37,4 @@ __exportStar(require("./models/Location"), exports);
 __exportStar(require("./models/Contact"), exports);
 __exportStar(require("./models/IncomingMessage"), exports);
 __exportStar(require("./models/Embed"), exports);
+__exportStar(require("./models/Button"), exports);
