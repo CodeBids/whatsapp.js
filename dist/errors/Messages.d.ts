@@ -10,7 +10,6 @@ export declare class WhatsAppApiException extends Error {
 }
 /**
  * Mapping error codes to descriptive messages
- * ! I need someone to do this for me, not for anything special, it's a lot of work, I'm going crazy.
  */
 export declare const ERROR_MESSAGES: Record<number, string>;
 /**
