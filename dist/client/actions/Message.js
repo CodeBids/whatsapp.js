@@ -117,7 +117,7 @@ class Message {
                 if (!embed.body) {
                     throw new Messages_1.WhatsAppApiException("Body is required for embed messages", 0);
                 }
-                if (!embed.components) {
+                if (!payload.components) {
                     throw new Messages_1.WhatsAppApiException("Components are required for embed messages", 0);
                 }
             }

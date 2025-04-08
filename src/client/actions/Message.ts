@@ -182,7 +182,7 @@ export class Message {
           );
         }
 
-        if (!embed.components) {
+        if (!payload.components) {
           throw new WhatsAppApiException(
             "Components are required for embed messages",
             0
