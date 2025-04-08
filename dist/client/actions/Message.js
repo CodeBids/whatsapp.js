@@ -308,6 +308,18 @@ class Message {
                         throw new Messages_1.WhatsAppApiException("Embed footer must be 60 characters or less", 0);
                     }
                     break;
+                case component instanceof __1.ButtonBuilder:
+                    if (!component.type) {
+                        throw new Messages_1.WhatsAppApiException("Button type is required", 0);
+                    }
+                    if (component.type === "reply") {
+                        if (!component.reply || !component.reply.id || !component.reply.title) {
+                            throw new Messages_1.WhatsAppApiException("Reply ID and title are required for reply buttons", 0);
+                        }
+                        if (component.text) {
+                            throw new Messages_1.WhatsAppApiException("Text is not allowed for reply buttons", 0);
+                        }
+                    }
                 default:
                     throw new Messages_1.WhatsAppApiException("Unknown component type", 0);
             }

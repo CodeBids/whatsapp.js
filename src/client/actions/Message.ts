@@ -498,6 +498,27 @@ export class Message {
           }
           break;
 
+          case component instanceof ButtonBuilder:
+          if (!component.type) {
+            throw new WhatsAppApiException("Button type is required", 0);
+          }
+          if (component.type === "reply") {
+            if (!component.reply || !component.reply.id || !component.reply.title) {
+              throw new WhatsAppApiException(
+                "Reply ID and title are required for reply buttons",
+                0
+              );
+            }
+
+            if(component.text) {
+              throw new WhatsAppApiException(
+                "Text is not allowed for reply buttons",
+                0
+              );
+            }
+          } 
+
+
         default:
           throw new WhatsAppApiException("Unknown component type", 0);
       }
