@@ -714,20 +714,21 @@ export class Message {
         if (interactiveType === "cta_url") {
           messageBody.interactive.action = {
             name: "cta_url",
-            parameters: payload.components
-              .map((component) => {
-                if (component instanceof ButtonBuilder && component.type) {
-                  return {
-                    display_text: component.text!,
-                    url: component.url!,
-                  };
-                }
-                return undefined;
-              })
-              .filter(
-                (param): param is { display_text: string; url: string } =>
-                  param !== undefined
-              ),
+            parameters:
+              payload.components
+                .map((component) => {
+                  if (component instanceof ButtonBuilder && component.type) {
+                    return {
+                      display_text: component.text!,
+                      url: component.url!,
+                    };
+                  }
+                  return undefined;
+                })
+                .filter(
+                  (param): param is { display_text: string; url: string } =>
+                    param !== undefined
+                )[0],
           };
         } else if (interactiveType === "button") {
           messageBody.interactive.action = {

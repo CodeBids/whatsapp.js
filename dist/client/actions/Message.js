@@ -515,7 +515,7 @@ class Message {
                             }
                             return undefined;
                         })
-                            .filter((param) => param !== undefined),
+                            .filter((param) => param !== undefined)[0],
                     };
                 }
                 else if (interactiveType === "button") {
