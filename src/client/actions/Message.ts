@@ -642,11 +642,20 @@ export class Message {
       };
     } else if (payload.embeds && payload.embeds.length > 0) {
       // Determinar el tipo de interactive basado en si hay componentes
-      
-      const hasComponents = payload.components && payload.components[0] instanceof ButtonBuilder;
-      const buttonType = hasComponents ? (payload.components?.[0] as ButtonBuilder).type : undefined;
 
-      const interactiveType = hasComponents ? buttonType === "reply" ? "button" : buttonType === "url" ? "cta_url" : "text" : "text";
+      const hasComponents =
+        payload.components && payload.components[0] instanceof ButtonBuilder;
+      const buttonType = hasComponents
+        ? (payload.components?.[0] as ButtonBuilder).type
+        : undefined;
+
+      const interactiveType = hasComponents
+        ? buttonType === "reply"
+          ? "button"
+          : buttonType === "url"
+          ? "cta_url"
+          : "text"
+        : "text";
 
       // Inicializar el objeto interactive
       messageBody.type = "interactive";
@@ -701,31 +710,49 @@ export class Message {
       }
 
       // Si hay componentes, agregarlos como botones de acción
-      // TODO: Añadir compatibilidad con componentes
       if (payload.components && payload.components.length > 0) {
-        messageBody.interactive.action = {
-          name: "cta_url",
-          buttons: payload.components.map((component) => {
-            if (component instanceof ButtonBuilder && component.type) {
-              return {
-                type: component.type as "reply" | "url",
-                ...(component.reply
-                  ? {
-                      reply: {
-                        id: component.reply.id,
-                        title: component.reply.title,
-                      },
-                    }
-                  : {}),
-                ...(component.url ? { url: component.url } : {}),
-              };
-            }
-            throw new WhatsAppApiException(
-              "Unsupported component type in interactive action",
-              0
-            );
-          }),
-        };
+        if (interactiveType === "cta_url") {
+          messageBody.interactive.action = {
+            name: "cta_url",
+            parameters: payload.components
+              .map((component) => {
+                if (component instanceof ButtonBuilder && component.type) {
+                  return {
+                    display_text: component.text!,
+                    url: component.url!,
+                  };
+                }
+                return undefined;
+              })
+              .filter(
+                (param): param is { display_text: string; url: string } =>
+                  param !== undefined
+              ),
+          };
+        } else if (interactiveType === "button") {
+          messageBody.interactive.action = {
+            name: "button",
+            buttons: payload.components
+              .map((component) => {
+                if (component instanceof ButtonBuilder && component.type) {
+                  return {
+                    type: component.type,
+                    ...(component.reply
+                      ? { reply: { id: component.reply.id, title: component.text! } }
+                      : {}),
+                    ...(component.url ? { url: component.url } : {}),
+                  };
+                }
+                return undefined;
+              })
+              .filter((button): button is { type: "reply" | "url"; reply?: { id: string; title: string }; url?: string } => button !== undefined),
+          };
+        }
+
+        throw new WhatsAppApiException(
+          "Unsupported component type in interactive action",
+          0
+        );
       }
     } else if (payload.components) {
       payload.components.forEach((component) => {

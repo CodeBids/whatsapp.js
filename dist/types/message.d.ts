@@ -47,6 +47,10 @@ export interface InteractiveData {
         text: string;
     };
     action?: {
+        parameters?: Array<{
+            display_text: string;
+            url: string;
+        }>;
         buttons?: Array<{
             type: "reply" | "url";
             reply?: {
