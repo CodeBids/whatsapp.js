@@ -527,7 +527,12 @@ class Message {
                                 return {
                                     type: component.type,
                                     ...(component.reply
-                                        ? { reply: { id: component.reply.id, title: component.text } }
+                                        ? {
+                                            reply: {
+                                                id: component.reply.id,
+                                                title: component.text,
+                                            },
+                                        }
                                         : {}),
                                     ...(component.url ? { url: component.url } : {}),
                                 };
@@ -537,7 +542,9 @@ class Message {
                             .filter((button) => button !== undefined),
                     };
                 }
-                throw new Messages_1.WhatsAppApiException("Unsupported component type in interactive action", 0);
+                else {
+                    throw new Messages_1.WhatsAppApiException("Unsupported component type in interactive action", 0);
+                }
             }
         }
         else if (payload.components) {

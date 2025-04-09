@@ -738,21 +738,34 @@ export class Message {
                   return {
                     type: component.type,
                     ...(component.reply
-                      ? { reply: { id: component.reply.id, title: component.text! } }
+                      ? {
+                          reply: {
+                            id: component.reply.id,
+                            title: component.text!,
+                          },
+                        }
                       : {}),
                     ...(component.url ? { url: component.url } : {}),
                   };
                 }
                 return undefined;
               })
-              .filter((button): button is { type: "reply" | "url"; reply?: { id: string; title: string }; url?: string } => button !== undefined),
+              .filter(
+                (
+                  button
+                ): button is {
+                  type: "reply" | "url";
+                  reply?: { id: string; title: string };
+                  url?: string;
+                } => button !== undefined
+              ),
           };
+        } else {
+          throw new WhatsAppApiException(
+            "Unsupported component type in interactive action",
+            0
+          );
         }
-
-        throw new WhatsAppApiException(
-          "Unsupported component type in interactive action",
-          0
-        );
       }
     } else if (payload.components) {
       payload.components.forEach((component) => {
