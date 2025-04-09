@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RowBuiler = void 0;
-class RowBuiler {
+exports.RowBuilder = void 0;
+class RowBuilder {
     constructor(id, title, description) {
         this.id = id;
         this.title = title;
@@ -20,4 +20,4 @@ class RowBuiler {
         return this;
     }
 }
-exports.RowBuiler = RowBuiler;
+exports.RowBuilder = RowBuilder;

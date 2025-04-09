@@ -321,6 +321,31 @@ class Message {
                         }
                     }
                     break;
+                case component instanceof __1.ListBuilder:
+                    if (!component.title) {
+                        throw new Messages_1.WhatsAppApiException("List title is required", 0);
+                    }
+                    if (!component.rows || component.rows.length === 0) {
+                        throw new Messages_1.WhatsAppApiException("At least one row is required for the list", 0);
+                    }
+                    if (!component.buttonText) {
+                        throw new Messages_1.WhatsAppApiException("Button text is required for the list", 0);
+                    }
+                    // Validate button text length
+                    if (component.buttonText.length > 20) {
+                        throw new Messages_1.WhatsAppApiException("Button text must be 20 characters or less", 0);
+                    }
+                    // Validate title length
+                    if (component.title.length > 24) {
+                        throw new Messages_1.WhatsAppApiException("List title must be 24 characters or less", 0);
+                    }
+                    // Validate rows
+                    component.rows.forEach((row) => {
+                        if (!row.id || !row.title) {
+                            throw new Messages_1.WhatsAppApiException("Row ID and title are required for each row", 0);
+                        }
+                    });
+                    break;
                 default:
                     throw new Messages_1.WhatsAppApiException("Unknown component type", 0);
             }

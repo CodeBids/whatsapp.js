@@ -528,6 +528,52 @@ export class Message {
           }
           break;
 
+        case component instanceof ListBuilder:
+          if (!component.title) {
+            throw new WhatsAppApiException("List title is required", 0);
+          }
+
+          if (!component.rows || component.rows.length === 0) {
+            throw new WhatsAppApiException(
+              "At least one row is required for the list",
+              0
+            );
+          }
+
+          if (!component.buttonText) {
+            throw new WhatsAppApiException(
+              "Button text is required for the list",
+              0
+            );
+          }
+
+          // Validate button text length
+          if (component.buttonText.length > 20) {
+            throw new WhatsAppApiException(
+              "Button text must be 20 characters or less",
+              0
+            );
+          }
+          
+          // Validate title length
+          if (component.title.length > 24) {
+            throw new WhatsAppApiException(
+              "List title must be 24 characters or less",
+              0
+            );
+          }
+
+          // Validate rows
+          component.rows.forEach((row) => {
+            if (!row.id || !row.title) {
+              throw new WhatsAppApiException(
+                "Row ID and title are required for each row",
+                0
+              );
+            }
+          });
+          break;
+
         default:
           throw new WhatsAppApiException("Unknown component type", 0);
       }
