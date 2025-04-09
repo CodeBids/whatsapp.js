@@ -20,12 +20,6 @@ export type MessageType =
 
 // Components for interactive messages and templates
 export type Component = Embed | LocationBuilder | ContactBuilder | ButtonBuilder;
-//   embed?: Embed
-//   button?: Button
-//   location?: LocationCard
-//   type?: "header" | "body" | "button" | "footer"
-//   parameters?: TemplateParameter[]
-// }
 
 // Media file types
 export interface FileAttachment {

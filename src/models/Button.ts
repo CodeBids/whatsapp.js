@@ -1,13 +1,13 @@
 import { Button as ButtonInterface } from '../types/structures/Button'
 
 export class ButtonBuilder implements ButtonInterface {
-  url?: string
+  type?: 'reply' | 'url'
   reply?: {
     id: string
     title: string
   }
+  url?: string
   text?: string
-  type?: 'reply' | 'url'
 
   constructor(data: ButtonInterface) {
       Object.assign(this, data);

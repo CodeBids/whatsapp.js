@@ -441,7 +441,9 @@ class Message {
         }
         else if (payload.embeds && payload.embeds.length > 0) {
             // Determinar el tipo de interactive basado en si hay componentes
-            const interactiveType = "cta_url";
+            const hasComponents = payload.components && payload.components[0] instanceof __1.ButtonBuilder;
+            const buttonType = hasComponents ? (payload.components?.[0]).type : undefined;
+            const interactiveType = hasComponents ? buttonType === "reply" ? "button" : buttonType === "url" ? "cta_url" : "text" : "text";
             // Inicializar el objeto interactive
             messageBody.type = "interactive";
             // Verificar si hay un archivo que pueda usarse como header

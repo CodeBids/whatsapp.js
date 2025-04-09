@@ -1,12 +1,12 @@
 import { Button as ButtonInterface } from '../types/structures/Button';
 export declare class ButtonBuilder implements ButtonInterface {
-    url?: string;
+    type?: 'reply' | 'url';
     reply?: {
         id: string;
         title: string;
     };
+    url?: string;
     text?: string;
-    type?: 'reply' | 'url';
     constructor(data: ButtonInterface);
     /**
      * Sets the display text for the button.
