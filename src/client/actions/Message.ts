@@ -740,7 +740,7 @@ export class Message {
                       ? {
                           reply: {
                             id: component.reply.id,
-                            title: component.text!,
+                            title: component.text ?? component.reply.title,
                           },
                         }
                       : {}),
