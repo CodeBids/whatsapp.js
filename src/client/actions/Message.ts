@@ -782,6 +782,7 @@ export class Message {
                   return undefined;
                 })
                 .filter((section): section is { title: string; rows: { id: string; title: string; description?: string }[] } => section !== undefined),
+                button: (payload.components[0] as unknown as ListBuilder).buttonText,
             }
             break;
           default:

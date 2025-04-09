@@ -556,6 +556,7 @@ class Message {
                                 return undefined;
                             })
                                 .filter((section) => section !== undefined),
+                            button: payload.components[0].buttonText,
                         };
                         break;
                     default:

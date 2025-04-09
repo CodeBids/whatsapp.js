@@ -3,6 +3,7 @@ import { Row } from "../types/structures/Row";
 export declare class ListBuilder implements ListInterface {
     title: string;
     rows: Row[];
+    buttonText: string;
     constructor(data: ListInterface);
     /**
      * Sets the title of the list.

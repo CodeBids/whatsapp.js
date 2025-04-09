@@ -4,6 +4,7 @@ import { Row } from "../types/structures/Row";
 export class ListBuilder implements ListInterface {
   title!: string;
   rows!: Row[];
+  buttonText!: string;
 
   constructor(data: ListInterface) {
     Object.assign(this, data);

@@ -39,3 +39,4 @@ __exportStar(require("./models/IncomingMessage"), exports);
 __exportStar(require("./models/Embed"), exports);
 __exportStar(require("./models/Button"), exports);
 __exportStar(require("./models/List"), exports);
+__exportStar(require("./models/Row"), exports);
