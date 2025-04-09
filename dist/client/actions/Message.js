@@ -544,6 +544,7 @@ class Message {
                 else {
                     throw new Messages_1.WhatsAppApiException("Unsupported component type in interactive action", 0);
                 }
+                console.log(messageBody);
             }
         }
         else if (payload.components) {

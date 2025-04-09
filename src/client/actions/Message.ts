@@ -765,6 +765,9 @@ export class Message {
             0
           );
         }
+        
+        console.log(messageBody)
+
       }
     } else if (payload.components) {
       payload.components.forEach((component) => {
