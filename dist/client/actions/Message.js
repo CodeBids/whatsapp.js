@@ -4,8 +4,6 @@ exports.Message = void 0;
 const index_1 = require("../../types/index");
 const Messages_1 = require("../../errors/Messages");
 const __1 = require("../..");
-const Contact_1 = require("../../models/Contact");
-const Embed_1 = require("../../models/Embed");
 class Message {
     constructor(client) {
         this.client = client;
@@ -259,7 +257,7 @@ class Message {
                         throw new Messages_1.WhatsAppApiException("Longitude must be between -180 and 180 degrees", 0);
                     }
                     break;
-                case component instanceof Contact_1.ContactBuilder:
+                case component instanceof __1.ContactBuilder:
                     if (!component.firstName ||
                         !component.phones ||
                         component.phones.length === 0) {
@@ -291,7 +289,7 @@ class Message {
                         });
                     }
                     break;
-                case component instanceof Embed_1.EmbedBuilder:
+                case component instanceof __1.EmbedBuilder:
                     if (!component.body) {
                         throw new Messages_1.WhatsAppApiException("Body is required in the Embed", 0);
                     }
@@ -441,15 +439,14 @@ class Message {
         }
         else if (payload.embeds && payload.embeds.length > 0) {
             // Determinar el tipo de interactive basado en si hay componentes
-            const hasComponents = payload.components && payload.components[0] instanceof __1.ButtonBuilder;
-            const buttonType = hasComponents
-                ? (payload.components?.[0]).type
-                : undefined;
+            const hasComponents = payload.components && payload.components.length > 0;
             const interactiveType = hasComponents
-                ? buttonType === "reply"
-                    ? "button"
-                    : buttonType === "url"
-                        ? "cta_url"
+                ? payload.components?.[0] instanceof __1.ButtonBuilder
+                    ? (payload.components?.[0]).type === "reply"
+                        ? "button"
+                        : "cta_url"
+                    : payload.components?.[0] instanceof __1.ListBuilder
+                        ? "list"
                         : "text"
                 : "text";
             // Inicializar el objeto interactive
@@ -502,49 +499,68 @@ class Message {
             }
             // Si hay componentes, agregarlos como botones de acción
             if (payload.components && payload.components.length > 0) {
-                if (interactiveType === "cta_url") {
-                    messageBody.interactive.action = {
-                        name: "cta_url",
-                        parameters: payload.components
-                            .map((component) => {
-                            if (component instanceof __1.ButtonBuilder && component.type) {
-                                return {
-                                    display_text: component.text,
-                                    url: component.url,
-                                };
-                            }
-                            return undefined;
-                        })
-                            .filter((param) => param !== undefined)[0],
-                    };
+                switch (interactiveType) {
+                    case "cta_url":
+                        messageBody.interactive.action = {
+                            name: "cta_url",
+                            parameters: payload.components
+                                .map((component) => {
+                                if (component instanceof __1.ButtonBuilder && component.type) {
+                                    return {
+                                        display_text: component.text,
+                                        url: component.url,
+                                    };
+                                }
+                                return undefined;
+                            })
+                                .filter((param) => param !== undefined)[0],
+                        };
+                        break;
+                    case "button":
+                        messageBody.interactive.action = {
+                            buttons: payload.components
+                                .map((component) => {
+                                if (component instanceof __1.ButtonBuilder && component.type) {
+                                    return {
+                                        type: component.type,
+                                        ...(component.reply
+                                            ? {
+                                                reply: {
+                                                    id: component.reply.id,
+                                                    title: component.text ?? component.reply.title,
+                                                },
+                                            }
+                                            : {}),
+                                        ...(component.url ? { url: component.url } : {}),
+                                    };
+                                }
+                                return undefined;
+                            })
+                                .filter((button) => button !== undefined),
+                        };
+                        break;
+                    case "list":
+                        messageBody.interactive.action = {
+                            sections: payload.components
+                                .map((component) => {
+                                if (component instanceof __1.ListBuilder) {
+                                    return {
+                                        title: component.title,
+                                        rows: component.rows.map((row) => ({
+                                            id: row.id,
+                                            title: row.title,
+                                            ...(row.description ? { description: row.description } : {}),
+                                        })),
+                                    };
+                                }
+                                return undefined;
+                            })
+                                .filter((section) => section !== undefined),
+                        };
+                        break;
+                    default:
+                        throw new Messages_1.WhatsAppApiException("Unsupported component type in interactive action", 0);
                 }
-                else if (interactiveType === "button") {
-                    messageBody.interactive.action = {
-                        buttons: payload.components
-                            .map((component) => {
-                            if (component instanceof __1.ButtonBuilder && component.type) {
-                                return {
-                                    type: component.type,
-                                    ...(component.reply
-                                        ? {
-                                            reply: {
-                                                id: component.reply.id,
-                                                title: component.text ?? component.reply.title,
-                                            },
-                                        }
-                                        : {}),
-                                    ...(component.url ? { url: component.url } : {}),
-                                };
-                            }
-                            return undefined;
-                        })
-                            .filter((button) => button !== undefined),
-                    };
-                }
-                else {
-                    throw new Messages_1.WhatsAppApiException("Unsupported component type in interactive action", 0);
-                }
-                console.log(messageBody);
             }
         }
         else if (payload.components) {
@@ -558,7 +574,7 @@ class Message {
                         ...(component.address ? { address: component.address } : {}),
                     };
                 }
-                else if (component instanceof Contact_1.ContactBuilder) {
+                else if (component instanceof __1.ContactBuilder) {
                     messageBody.type = "contacts";
                     const phones = [];
                     component.phones.forEach((phone) => {

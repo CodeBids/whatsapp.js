@@ -21,3 +21,5 @@ __exportStar(require("./language"), exports);
 __exportStar(require("./structures/Location"), exports);
 __exportStar(require("./structures/Contact"), exports);
 __exportStar(require("./structures/Embed"), exports);
+__exportStar(require("./structures/Button"), exports);
+__exportStar(require("./structures/List"), exports);

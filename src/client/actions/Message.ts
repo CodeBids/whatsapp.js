@@ -8,9 +8,14 @@ import {
   type InteractiveData,
 } from "../../types/index";
 import { WhatsAppApiException } from "../../errors/Messages";
-import { ButtonBuilder, type Client, LocationBuilder } from "../..";
-import { ContactBuilder } from "../../models/Contact";
-import { EmbedBuilder } from "../../models/Embed";
+import {
+  ButtonBuilder,
+  type Client,
+  ListBuilder,
+  LocationBuilder,
+  ContactBuilder,
+  EmbedBuilder,
+} from "../..";
 
 export class Message {
   private client: Client;
@@ -643,17 +648,15 @@ export class Message {
     } else if (payload.embeds && payload.embeds.length > 0) {
       // Determinar el tipo de interactive basado en si hay componentes
 
-      const hasComponents =
-        payload.components && payload.components[0] instanceof ButtonBuilder;
-      const buttonType = hasComponents
-        ? (payload.components?.[0] as ButtonBuilder).type
-        : undefined;
+      const hasComponents = payload.components && payload.components.length > 0;
 
       const interactiveType = hasComponents
-        ? buttonType === "reply"
-          ? "button"
-          : buttonType === "url"
-          ? "cta_url"
+        ? payload.components?.[0] instanceof ButtonBuilder
+          ? (payload.components?.[0] as ButtonBuilder).type === "reply"
+            ? "button"
+            : "cta_url"
+          : payload.components?.[0] instanceof ListBuilder
+          ? "list"
           : "text"
         : "text";
 
@@ -711,11 +714,11 @@ export class Message {
 
       // Si hay componentes, agregarlos como botones de acción
       if (payload.components && payload.components.length > 0) {
-        if (interactiveType === "cta_url") {
-          messageBody.interactive.action = {
-            name: "cta_url",
-            parameters:
-              payload.components
+        switch (interactiveType) {
+          case "cta_url":
+            messageBody.interactive.action = {
+              name: "cta_url",
+              parameters: payload.components
                 .map((component) => {
                   if (component instanceof ButtonBuilder && component.type) {
                     return {
@@ -729,46 +732,64 @@ export class Message {
                   (param): param is { display_text: string; url: string } =>
                     param !== undefined
                 )[0],
-          };
-        } else if (interactiveType === "button") {
-          messageBody.interactive.action = {
-            buttons: payload.components
-              .map((component) => {
-                if (component instanceof ButtonBuilder && component.type) {
-                  return {
-                    type: component.type,
-                    ...(component.reply
-                      ? {
-                          reply: {
-                            id: component.reply.id,
-                            title: component.text ?? component.reply.title,
-                          },
-                        }
-                      : {}),
-                    ...(component.url ? { url: component.url } : {}),
-                  };
-                }
-                return undefined;
-              })
-              .filter(
-                (
-                  button
-                ): button is {
-                  type: "reply" | "url";
-                  reply?: { id: string; title: string };
-                  url?: string;
-                } => button !== undefined
-              ),
-          };
-        } else {
-          throw new WhatsAppApiException(
-            "Unsupported component type in interactive action",
-            0
-          );
+            };
+            break;
+          case "button":
+            messageBody.interactive.action = {
+              buttons: payload.components
+                .map((component) => {
+                  if (component instanceof ButtonBuilder && component.type) {
+                    return {
+                      type: component.type,
+                      ...(component.reply
+                        ? {
+                            reply: {
+                              id: component.reply.id,
+                              title: component.text ?? component.reply.title,
+                            },
+                          }
+                        : {}),
+                      ...(component.url ? { url: component.url } : {}),
+                    };
+                  }
+                  return undefined;
+                })
+                .filter(
+                  (
+                    button
+                  ): button is {
+                    type: "reply" | "url";
+                    reply?: { id: string; title: string };
+                    url?: string;
+                  } => button !== undefined
+                ),
+            };
+            break;
+          case "list":
+            messageBody.interactive.action = {
+              sections: payload.components
+                .map((component) => {
+                  if (component instanceof ListBuilder) {
+                    return {
+                      title: component.title,
+                      rows: component.rows.map((row) => ({
+                        id: row.id,
+                        title: row.title,
+                        ...(row.description ? { description: row.description } : {}),
+                      })),
+                    };
+                  }
+                  return undefined;
+                })
+                .filter((section): section is { title: string; rows: { id: string; title: string; description?: string }[] } => section !== undefined),
+            }
+            break;
+          default:
+            throw new WhatsAppApiException(
+              "Unsupported component type in interactive action",
+              0
+            );
         }
-        
-        console.log(messageBody)
-
       }
     } else if (payload.components) {
       payload.components.forEach((component) => {

@@ -60,7 +60,6 @@ export interface InteractiveData {
             url?: string;
             text?: string;
         }>;
-        button?: string;
         sections?: Array<{
             title: string;
             rows: Array<{

@@ -10,3 +10,4 @@ export * from './models/Contact';
 export * from './models/IncomingMessage';
 export * from './models/Embed';
 export * from './models/Button';
+export * from './models/List';

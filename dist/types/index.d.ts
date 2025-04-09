@@ -4,3 +4,5 @@ export * from "./language";
 export * from "./structures/Location";
 export * from "./structures/Contact";
 export * from "./structures/Embed";
+export * from "./structures/Button";
+export * from "./structures/List";
