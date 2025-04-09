@@ -67,6 +67,7 @@ export interface InteractiveData {
         }>;
         catalog_id?: string;
         product_retailer_id?: string;
+        name: string;
     };
 }
 export interface ReactionData {

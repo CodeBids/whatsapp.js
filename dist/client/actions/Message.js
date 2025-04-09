@@ -365,15 +365,16 @@ class Message {
         if (payload.context) {
             messageBody.context = payload.context;
         }
-        // Determine the primary message type
-        // Priority order for message type determination:
-        // 1. Template
-        // 2. Files (first file type)
-        // 3. Interactive
-        // 4. Location
-        // 5. Contacts
-        // 6. Reaction
-        // 7. Text (default)
+        /** Determine the primary message type
+         * Priority order for message type determination:
+         * 1. Template
+         * 2. Files (first file type)
+         * 3. Interactive
+         * 4. Location
+         * 5. Contacts
+         * 6. Reaction
+         * 7. Text (default)
+         */
         if (payload.template) {
             messageBody.type = "template";
             messageBody.template = {
@@ -493,6 +494,7 @@ class Message {
             // TODO: Añadir compatibilidad con componentes
             if (payload.components && payload.components.length > 0) {
                 messageBody.interactive.action = {
+                    name: "cta_url",
                     buttons: payload.components.map((component) => {
                         if (component instanceof __1.ButtonBuilder && component.type) {
                             return {
