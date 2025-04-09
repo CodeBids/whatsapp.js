@@ -520,7 +520,6 @@ class Message {
                 }
                 else if (interactiveType === "button") {
                     messageBody.interactive.action = {
-                        name: "button",
                         buttons: payload.components
                             .map((component) => {
                             if (component instanceof __1.ButtonBuilder && component.type) {
