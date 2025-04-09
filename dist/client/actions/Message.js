@@ -325,7 +325,7 @@ class Message {
                     if (!component.title) {
                         throw new Messages_1.WhatsAppApiException("List title is required", 0);
                     }
-                    if (!component.rows || component.rows.length === 0) {
+                    if (Array.isArray(component.rows) && component.rows.length === 0) {
                         throw new Messages_1.WhatsAppApiException("At least one row is required for the list", 0);
                     }
                     if (!component.buttonText) {

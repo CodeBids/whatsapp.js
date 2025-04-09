@@ -533,7 +533,7 @@ export class Message {
             throw new WhatsAppApiException("List title is required", 0);
           }
 
-          if (!component.rows || component.rows.length === 0) {
+          if (Array.isArray(component.rows) && component.rows.length === 0) {
             throw new WhatsAppApiException(
               "At least one row is required for the list",
               0
@@ -554,7 +554,7 @@ export class Message {
               0
             );
           }
-          
+
           // Validate title length
           if (component.title.length > 24) {
             throw new WhatsAppApiException(

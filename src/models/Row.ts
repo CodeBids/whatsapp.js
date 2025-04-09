@@ -1,28 +1,14 @@
 import { Row as RowInterface } from '../types';
 
-export class RowBuilder implements RowInterface {
-  id: string;
-  title: string;
-  description?: string;
-
-  constructor(id: string, title: string, description?: string) {
-    this.id = id;
-    this.title = title;
-    this.description = description;
+export class RowBuilder {
+  rows: RowInterface[];
+  
+  constructor(rows: RowInterface[]) {
+    this.rows = rows;
   }
-
-  setId(id: string): RowBuilder {
-    this.id = id;
-    return this;
-  }
-
-  setTitle(title: string): RowBuilder {
-    this.title = title;
-    return this;
-  }
-
-  setDescription(description: string): RowBuilder {
-    this.description = description;
+  
+  addRow(row: RowInterface): RowBuilder {
+    this.rows.push(row);
     return this;
   }
 }

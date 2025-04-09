@@ -2,21 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RowBuilder = void 0;
 class RowBuilder {
-    constructor(id, title, description) {
-        this.id = id;
-        this.title = title;
-        this.description = description;
+    constructor(rows) {
+        this.rows = rows;
     }
-    setId(id) {
-        this.id = id;
-        return this;
-    }
-    setTitle(title) {
-        this.title = title;
-        return this;
-    }
-    setDescription(description) {
-        this.description = description;
+    addRow(row) {
+        this.rows.push(row);
         return this;
     }
 }
