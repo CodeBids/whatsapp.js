@@ -1,14 +1,18 @@
-import { Row as RowInterface } from '../types';
+import type { Row } from "../types"
 
 export class RowBuilder {
-  rows: RowInterface[];
-  
-  constructor(rows: RowInterface[]) {
-    this.rows = rows;
+  private rows: Row[]
+
+  constructor(rows: Row[] = []) {
+    this.rows = [...rows]
   }
-  
-  addRow(row: RowInterface): RowBuilder {
-    this.rows.push(row);
-    return this;
+
+  addRow(row: Row): RowBuilder {
+    this.rows.push(row)
+    return this
+  }
+
+  build(): Row[] {
+    return this.rows
   }
 }

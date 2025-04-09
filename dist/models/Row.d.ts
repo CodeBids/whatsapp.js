@@ -1,6 +1,7 @@
-import { Row as RowInterface } from '../types';
+import type { Row } from "../types";
 export declare class RowBuilder {
-    rows: RowInterface[];
-    constructor(rows: RowInterface[]);
-    addRow(row: RowInterface): RowBuilder;
+    private rows;
+    constructor(rows?: Row[]);
+    addRow(row: Row): RowBuilder;
+    build(): Row[];
 }
