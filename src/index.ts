@@ -7,6 +7,7 @@ export * from "./types"
 
 // Export WS utilites
 export * from './client/webhook/handlers/WebhookHandler';
+export * from './utils/MessageCollector';
 
 // Export error utilities
 export { WhatsAppErrorCode, type WhatsAppApiError, type WhatsAppApiErrorResponse } from "./errors/ErrorCodes"
