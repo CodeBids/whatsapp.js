@@ -12,6 +12,7 @@ var EventType;
     EventType["MESSAGE_READ"] = "message.read";
     EventType["MESSAGE_REACTION"] = "message.reaction";
     EventType["STATUS_UPDATED"] = "status.updated";
+    EventType["INTERACTION_CREATE"] = "interaction.create";
 })(EventType || (exports.EventType = EventType = {}));
 /**
  * Handler for WhatsApp webhook events
@@ -111,17 +112,33 @@ class WebhookHandler extends events_1.EventEmitter {
                 // Process messages
                 if (value.messages && value.messages.length > 0) {
                     for (const message of value.messages) {
-                        const eventData = {
-                            id: message.id,
-                            from: message.from,
-                            timestamp: message.timestamp,
-                            type: message.type,
-                            context: message.context,
-                            ...this.extractMessageContent(message),
-                        };
-                        this.emit(EventType.MESSAGE_RECEIVED, eventData);
+                        // Check if this is an interactive message
+                        if (message.type === "interactive") {
+                            const interactiveData = {
+                                id: message.id,
+                                from: message.from,
+                                timestamp: message.timestamp,
+                                type: message.interactive.type,
+                                interactive: message.interactive,
+                            };
+                            // Emit as INTERACTION_CREATE instead of MESSAGE_RECEIVED
+                            this.emit(EventType.INTERACTION_CREATE, interactiveData);
+                        }
+                        else {
+                            // Process regular messages as before
+                            const eventData = {
+                                id: message.id,
+                                from: message.from,
+                                timestamp: message.timestamp,
+                                type: message.type,
+                                context: message.context,
+                                ...this.extractMessageContent(message),
+                            };
+                            this.emit(EventType.MESSAGE_RECEIVED, eventData);
+                        }
                     }
                 }
+                // Rest of the code remains the same
                 // Process delivery status updates
                 if (value.statuses && value.statuses.length > 0) {
                     for (const status of value.statuses) {

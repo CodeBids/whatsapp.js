@@ -9,7 +9,8 @@ export declare enum EventType {
     MESSAGE_DELIVERED = "message.delivered",
     MESSAGE_READ = "message.read",
     MESSAGE_REACTION = "message.reaction",
-    STATUS_UPDATED = "status.updated"
+    STATUS_UPDATED = "status.updated",
+    INTERACTION_CREATE = "interaction.create"
 }
 /**
  * Interface for webhook event data

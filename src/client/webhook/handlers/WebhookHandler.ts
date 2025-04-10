@@ -11,6 +11,7 @@ export enum EventType {
   MESSAGE_READ = "message.read",
   MESSAGE_REACTION = "message.reaction",
   STATUS_UPDATED = "status.updated",
+  INTERACTION_CREATE = "interaction.create",
 }
 
 /**
@@ -131,19 +132,35 @@ export class WebhookHandler extends EventEmitter {
         // Process messages
         if (value.messages && value.messages.length > 0) {
           for (const message of value.messages) {
-            const eventData = {
-              id: message.id,
-              from: message.from,
-              timestamp: message.timestamp,
-              type: message.type,
-              context: message.context,
-              ...this.extractMessageContent(message),
-            }
+            // Check if this is an interactive message
+            if (message.type === "interactive") {
+              const interactiveData = {
+                id: message.id,
+                from: message.from,
+                timestamp: message.timestamp,
+                type: message.interactive.type,
+                interactive: message.interactive,
+              }
 
-            this.emit(EventType.MESSAGE_RECEIVED, eventData)
+              // Emit as INTERACTION_CREATE instead of MESSAGE_RECEIVED
+              this.emit(EventType.INTERACTION_CREATE, interactiveData)
+            } else {
+              // Process regular messages as before
+              const eventData = {
+                id: message.id,
+                from: message.from,
+                timestamp: message.timestamp,
+                type: message.type,
+                context: message.context,
+                ...this.extractMessageContent(message),
+              }
+
+              this.emit(EventType.MESSAGE_RECEIVED, eventData)
+            }
           }
         }
 
+        // Rest of the code remains the same
         // Process delivery status updates
         if (value.statuses && value.statuses.length > 0) {
           for (const status of value.statuses) {
@@ -249,4 +266,3 @@ export class WebhookHandler extends EventEmitter {
     return server
   }
 }
-
