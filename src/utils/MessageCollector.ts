@@ -1,4 +1,5 @@
 import { EventEmitter } from "events"
+import type { Client } from "../client/Client"
 import type { WebhookHandler } from "../client/webhook/handlers/WebhookHandler"
 import { EventType } from "../client/webhook/handlers/WebhookHandler"
 
@@ -27,18 +28,22 @@ export class MessageCollector extends EventEmitter {
 
   /**
    * Creates a new message collector
-   * @param handler The webhook handler to collect messages from
+   * @param client The client instance to collect messages from
    * @param options Collector options
    * @param eventTypes Event types to listen for (defaults to MESSAGE_RECEIVED and INTERACTION_CREATE)
    */
   constructor(
-    handler: WebhookHandler,
+    client: Client,
     options: CollectorOptions = {},
     eventTypes: EventType[] = [EventType.MESSAGE_RECEIVED, EventType.INTERACTION_CREATE],
   ) {
     super()
 
-    this.handler = handler
+    if (!client.getWebhookHandler()) {
+      throw new Error("Webhook handler is not initialized. Please provide webhook options when creating the client.")
+    }
+
+    this.handler = client.getWebhookHandler()!
     this.collected = new Map()
     this.filter = options.filter || (() => true)
     this.max = options.max || Number.POSITIVE_INFINITY
@@ -113,18 +118,19 @@ export class MessageCollector extends EventEmitter {
 
   /**
    * Returns the first message that passes the filter
+   * @param client The client instance
    * @param filter Filter function
    * @param time Time to wait in ms
    * @returns A promise that resolves with the first message
    */
   public static async awaitMessage(
-    handler: WebhookHandler,
+    client: Client,
     filter: (message: any) => boolean = () => true,
     time = 60000,
     eventTypes: EventType[] = [EventType.MESSAGE_RECEIVED, EventType.INTERACTION_CREATE],
   ): Promise<any> {
     return new Promise((resolve, reject) => {
-      const collector = new MessageCollector(handler, { filter, time, max: 1 }, eventTypes)
+      const collector = new MessageCollector(client, { filter, time, max: 1 }, eventTypes)
 
       collector.on("end", (collected) => {
         const first = collected.values().next().value

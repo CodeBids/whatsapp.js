@@ -73,11 +73,7 @@ export class WhatsAppApiService {
    * @param data Request data (optional)
    * @returns Promise with the response
    */
-  async phoneRequest<T>(
-    endpoint: string,
-    method: "GET" | "POST" | "PUT" | "DELETE",
-    data?: unknown,
-  ): Promise<T> {
+  async phoneRequest<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: unknown): Promise<T> {
     return this.request<T>(endpoint, method, data)
   }
 
@@ -122,4 +118,3 @@ export class WhatsAppApiService {
 export function isErrorCode(error: unknown, code: number): boolean {
   return error instanceof WhatsAppApiException && error.code === code
 }
-

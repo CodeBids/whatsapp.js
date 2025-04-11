@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import type { WebhookHandler } from "../client/webhook/handlers/WebhookHandler";
+import type { Client } from "../client/Client";
 import { EventType } from "../client/webhook/handlers/WebhookHandler";
 export interface CollectorOptions {
     time?: number;
@@ -23,11 +23,11 @@ export declare class MessageCollector extends EventEmitter {
     private eventTypes;
     /**
      * Creates a new message collector
-     * @param handler The webhook handler to collect messages from
+     * @param client The client instance to collect messages from
      * @param options Collector options
      * @param eventTypes Event types to listen for (defaults to MESSAGE_RECEIVED and INTERACTION_CREATE)
      */
-    constructor(handler: WebhookHandler, options?: CollectorOptions, eventTypes?: EventType[]);
+    constructor(client: Client, options?: CollectorOptions, eventTypes?: EventType[]);
     /**
      * Handles collecting a message
      * @param message The message to collect
@@ -44,9 +44,10 @@ export declare class MessageCollector extends EventEmitter {
     awaitMessages(): Promise<Map<string, any>>;
     /**
      * Returns the first message that passes the filter
+     * @param client The client instance
      * @param filter Filter function
      * @param time Time to wait in ms
      * @returns A promise that resolves with the first message
      */
-    static awaitMessage(handler: WebhookHandler, filter?: (message: any) => boolean, time?: number, eventTypes?: EventType[]): Promise<any>;
+    static awaitMessage(client: Client, filter?: (message: any) => boolean, time?: number, eventTypes?: EventType[]): Promise<any>;
 }

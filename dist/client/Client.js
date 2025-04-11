@@ -151,6 +151,14 @@ class Client extends events_1.EventEmitter {
             this.displayPhoneNumber = data.display_phone_number;
         });
     }
+    /**
+   * Gets the webhook handler
+   * @returns The webhook handler or null if not initialized
+   * @internal
+   */
+    getWebhookHandler() {
+        return this._webhook;
+    }
     async getBusinessProfile() {
         const url = `whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical`;
         return await this.makeApiRequest(url, "GET");

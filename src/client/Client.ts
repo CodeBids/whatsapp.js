@@ -178,6 +178,15 @@ export class Client extends EventEmitter {
     })
   }
 
+    /**
+   * Gets the webhook handler
+   * @returns The webhook handler or null if not initialized
+   * @internal
+   */
+    getWebhookHandler(): WebhookHandler | null {
+      return this._webhook
+    }
+
   public async getBusinessProfile(): Promise<ClientInfoResponse> {
     const url = `whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical`;
     return await this.makeApiRequest<ClientInfoResponse>(url, "GET");

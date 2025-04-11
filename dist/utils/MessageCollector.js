@@ -9,13 +9,16 @@ const WebhookHandler_1 = require("../client/webhook/handlers/WebhookHandler");
 class MessageCollector extends events_1.EventEmitter {
     /**
      * Creates a new message collector
-     * @param handler The webhook handler to collect messages from
+     * @param client The client instance to collect messages from
      * @param options Collector options
      * @param eventTypes Event types to listen for (defaults to MESSAGE_RECEIVED and INTERACTION_CREATE)
      */
-    constructor(handler, options = {}, eventTypes = [WebhookHandler_1.EventType.MESSAGE_RECEIVED, WebhookHandler_1.EventType.INTERACTION_CREATE]) {
+    constructor(client, options = {}, eventTypes = [WebhookHandler_1.EventType.MESSAGE_RECEIVED, WebhookHandler_1.EventType.INTERACTION_CREATE]) {
         super();
-        this.handler = handler;
+        if (!client.getWebhookHandler()) {
+            throw new Error("Webhook handler is not initialized. Please provide webhook options when creating the client.");
+        }
+        this.handler = client.getWebhookHandler();
         this.collected = new Map();
         this.filter = options.filter || (() => true);
         this.max = options.max || Number.POSITIVE_INFINITY;
@@ -79,13 +82,14 @@ class MessageCollector extends events_1.EventEmitter {
     }
     /**
      * Returns the first message that passes the filter
+     * @param client The client instance
      * @param filter Filter function
      * @param time Time to wait in ms
      * @returns A promise that resolves with the first message
      */
-    static async awaitMessage(handler, filter = () => true, time = 60000, eventTypes = [WebhookHandler_1.EventType.MESSAGE_RECEIVED, WebhookHandler_1.EventType.INTERACTION_CREATE]) {
+    static async awaitMessage(client, filter = () => true, time = 60000, eventTypes = [WebhookHandler_1.EventType.MESSAGE_RECEIVED, WebhookHandler_1.EventType.INTERACTION_CREATE]) {
         return new Promise((resolve, reject) => {
-            const collector = new MessageCollector(handler, { filter, time, max: 1 }, eventTypes);
+            const collector = new MessageCollector(client, { filter, time, max: 1 }, eventTypes);
             collector.on("end", (collected) => {
                 const first = collected.values().next().value;
                 if (first) {
