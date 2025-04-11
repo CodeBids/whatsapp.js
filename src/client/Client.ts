@@ -178,14 +178,44 @@ export class Client extends EventEmitter {
     })
   }
 
-    /**
+  /**
    * Gets the webhook handler
    * @returns The webhook handler or null if not initialized
    * @internal
    */
-    getWebhookHandler(): WebhookHandler | null {
-      return this._webhook
-    }
+  getWebhookHandler(): WebhookHandler | null {
+    return this._webhook
+  }
+
+  /**
+   * Creates a message collector
+   * @param options Collector options
+   * @param eventTypes Event types to listen for
+   * @returns A new message collector
+   */
+  createMessageCollector(
+    options: import("../utils/MessageCollector").CollectorOptions = {},
+    eventTypes: EventType[] = [EventType.MESSAGE_RECEIVED, EventType.INTERACTION_CREATE],
+  ): import("../utils/MessageCollector").MessageCollector {
+    const { MessageCollector } = require("../utils/MessageCollector")
+    return new MessageCollector(this, options, eventTypes)
+  }
+
+  /**
+   * Waits for a single message that passes the filter
+   * @param filter Filter function
+   * @param time Time to wait in ms
+   * @param eventTypes Event types to listen for
+   * @returns A promise that resolves with the first message
+   */
+  awaitMessage(
+    filter: (message: any) => boolean = () => true,
+    time = 60000,
+    eventTypes: EventType[] = [EventType.MESSAGE_RECEIVED, EventType.INTERACTION_CREATE],
+  ): Promise<any> {
+    const { MessageCollector } = require("../utils/MessageCollector")
+    return MessageCollector.awaitMessage(this, filter, time, eventTypes)
+  }
 
   public async getBusinessProfile(): Promise<ClientInfoResponse> {
     const url = `whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical`;
