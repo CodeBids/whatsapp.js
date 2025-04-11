@@ -115,9 +115,13 @@ class Message {
                 if (!embed.body) {
                     throw new Messages_1.WhatsAppApiException("Body is required for embed messages", 0);
                 }
-                if (!payload.components) {
-                    throw new Messages_1.WhatsAppApiException("Components are required for embed messages", 0);
-                }
+                //! wtf, I don't remember posting this here, but it's fake.... I think
+                // if (!payload.components) {
+                //   throw new WhatsAppApiException(
+                //     "Components are required for embed messages",
+                //     0
+                //   );
+                // }
             }
         }
         // Validate components if provided

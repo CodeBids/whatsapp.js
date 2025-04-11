@@ -187,12 +187,14 @@ export class Message {
           );
         }
 
-        if (!payload.components) {
-          throw new WhatsAppApiException(
-            "Components are required for embed messages",
-            0
-          );
-        }
+
+        //! wtf, I don't remember posting this here, but it's fake.... I think
+        // if (!payload.components) {
+        //   throw new WhatsAppApiException(
+        //     "Components are required for embed messages",
+        //     0
+        //   );
+        // }
       }
     }
 
