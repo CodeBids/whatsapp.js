@@ -28,11 +28,28 @@ export interface WebhookEvent {
 export class WebhookHandler extends EventEmitter {
   private client: Client
   private verifyToken: string
+  private activeCollectors: Set<any> = new Set()
 
   constructor(client: Client, verifyToken: string) {
     super()
     this.client = client
     this.verifyToken = verifyToken
+  }
+
+  /**
+   * Registers an active collector
+   * @param collector The collector to register
+   */
+  public registerCollector(collector: any): void {
+    this.activeCollectors.add(collector)
+  }
+
+  /**
+   * Unregisters an active collector
+   * @param collector The collector to unregister
+   */
+  public unregisterCollector(collector: any): void {
+    this.activeCollectors.delete(collector)
   }
 
   /**
@@ -132,21 +149,23 @@ export class WebhookHandler extends EventEmitter {
         // Process messages
         if (value.messages && value.messages.length > 0) {
           for (const message of value.messages) {
+            // Prepare event data
+            let eventData
+            let eventType
+
             // Check if this is an interactive message
             if (message.type === "interactive") {
-              const interactiveData = {
+              eventData = {
                 id: message.id,
                 from: message.from,
                 timestamp: message.timestamp,
                 type: message.interactive.type,
                 interactive: message.interactive,
               }
-
-              // Emit as INTERACTION_CREATE instead of MESSAGE_RECEIVED
-              this.emit(EventType.INTERACTION_CREATE, interactiveData)
+              eventType = EventType.INTERACTION_CREATE
             } else {
-              // Process regular messages as before
-              const eventData = {
+              // Process regular messages
+              eventData = {
                 id: message.id,
                 from: message.from,
                 timestamp: message.timestamp,
@@ -154,8 +173,21 @@ export class WebhookHandler extends EventEmitter {
                 context: message.context,
                 ...this.extractMessageContent(message),
               }
+              eventType = EventType.MESSAGE_RECEIVED
+            }
 
-              this.emit(EventType.MESSAGE_RECEIVED, eventData)
+            // Check if any collector should handle this message exclusively
+            let shouldPreventDefault = false
+            for (const collector of this.activeCollectors) {
+              if (collector.eventTypes.includes(eventType) && collector.handleCollect(eventData)) {
+                shouldPreventDefault = true
+                break
+              }
+            }
+
+            // Only emit the event if no collector prevented the default behavior
+            if (!shouldPreventDefault) {
+              this.emit(eventType, eventData)
             }
           }
         }

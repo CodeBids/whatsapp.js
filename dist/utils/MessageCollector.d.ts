@@ -21,6 +21,8 @@ export declare class MessageCollector extends EventEmitter {
     private max;
     private ended;
     private eventTypes;
+    private time;
+    private client;
     /**
      * Creates a new message collector
      * @param client The client instance to collect messages from
@@ -31,12 +33,18 @@ export declare class MessageCollector extends EventEmitter {
     /**
      * Handles collecting a message
      * @param message The message to collect
+     * @returns true if the message was collected (passed the filter), false otherwise
      */
     private handleCollect;
     /**
      * Stops the collector
      */
     stop(): void;
+    /**
+     * Resets the collector's timer
+     * @returns true if the timer was reset, false if there was no timer
+     */
+    resetTimer(): boolean;
     /**
      * Returns a promise that resolves when the collector ends
      * @returns A promise that resolves with the collected messages

@@ -18,29 +18,34 @@ class MessageCollector extends events_1.EventEmitter {
         if (!client.getWebhookHandler()) {
             throw new Error("Webhook handler is not initialized. Please provide webhook options when creating the client.");
         }
+        this.client = client;
         this.handler = client.getWebhookHandler();
         this.collected = new Map();
         this.filter = options.filter || (() => true);
         this.max = options.max || Number.POSITIVE_INFINITY;
         this.ended = false;
         this.eventTypes = eventTypes;
+        this.time = options.time || 0;
+        // Register this collector with the webhook handler
+        this.handler.registerCollector(this);
         // Set up event listeners
         this.eventTypes.forEach((eventType) => {
             this.handler.on(eventType, this.handleCollect.bind(this));
         });
         // Set up timeout if provided
-        this.timeout = options.time ? setTimeout(() => this.stop(), options.time) : null;
+        this.timeout = this.time ? setTimeout(() => this.stop(), this.time) : null;
     }
     /**
      * Handles collecting a message
      * @param message The message to collect
+     * @returns true if the message was collected (passed the filter), false otherwise
      */
     handleCollect(message) {
         if (this.ended)
-            return;
+            return false;
         // Apply filter
         if (!this.filter(message))
-            return;
+            return false;
         // Store the message
         this.collected.set(message.id, message);
         // Emit collect event
@@ -49,6 +54,7 @@ class MessageCollector extends events_1.EventEmitter {
         if (this.collected.size >= this.max) {
             this.stop();
         }
+        return true;
     }
     /**
      * Stops the collector
@@ -62,12 +68,29 @@ class MessageCollector extends events_1.EventEmitter {
             clearTimeout(this.timeout);
             this.timeout = null;
         }
+        // Unregister this collector from the webhook handler
+        this.handler.unregisterCollector(this);
         // Remove event listeners
         this.eventTypes.forEach((eventType) => {
             this.handler.removeListener(eventType, this.handleCollect.bind(this));
         });
         // Emit end event
         this.emit("end", this.collected);
+    }
+    /**
+     * Resets the collector's timer
+     * @returns true if the timer was reset, false if there was no timer
+     */
+    resetTimer() {
+        if (!this.time)
+            return false;
+        // Clear existing timeout if it exists
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+        }
+        // Set a new timeout
+        this.timeout = setTimeout(() => this.stop(), this.time);
+        return true;
     }
     /**
      * Returns a promise that resolves when the collector ends

@@ -20,8 +20,23 @@ var EventType;
 class WebhookHandler extends events_1.EventEmitter {
     constructor(client, verifyToken) {
         super();
+        this.activeCollectors = new Set();
         this.client = client;
         this.verifyToken = verifyToken;
+    }
+    /**
+     * Registers an active collector
+     * @param collector The collector to register
+     */
+    registerCollector(collector) {
+        this.activeCollectors.add(collector);
+    }
+    /**
+     * Unregisters an active collector
+     * @param collector The collector to unregister
+     */
+    unregisterCollector(collector) {
+        this.activeCollectors.delete(collector);
     }
     /**
      * Handles incoming webhook requests
@@ -112,21 +127,23 @@ class WebhookHandler extends events_1.EventEmitter {
                 // Process messages
                 if (value.messages && value.messages.length > 0) {
                     for (const message of value.messages) {
+                        // Prepare event data
+                        let eventData;
+                        let eventType;
                         // Check if this is an interactive message
                         if (message.type === "interactive") {
-                            const interactiveData = {
+                            eventData = {
                                 id: message.id,
                                 from: message.from,
                                 timestamp: message.timestamp,
                                 type: message.interactive.type,
                                 interactive: message.interactive,
                             };
-                            // Emit as INTERACTION_CREATE instead of MESSAGE_RECEIVED
-                            this.emit(EventType.INTERACTION_CREATE, interactiveData);
+                            eventType = EventType.INTERACTION_CREATE;
                         }
                         else {
-                            // Process regular messages as before
-                            const eventData = {
+                            // Process regular messages
+                            eventData = {
                                 id: message.id,
                                 from: message.from,
                                 timestamp: message.timestamp,
@@ -134,7 +151,19 @@ class WebhookHandler extends events_1.EventEmitter {
                                 context: message.context,
                                 ...this.extractMessageContent(message),
                             };
-                            this.emit(EventType.MESSAGE_RECEIVED, eventData);
+                            eventType = EventType.MESSAGE_RECEIVED;
+                        }
+                        // Check if any collector should handle this message exclusively
+                        let shouldPreventDefault = false;
+                        for (const collector of this.activeCollectors) {
+                            if (collector.eventTypes.includes(eventType) && collector.handleCollect(eventData)) {
+                                shouldPreventDefault = true;
+                                break;
+                            }
+                        }
+                        // Only emit the event if no collector prevented the default behavior
+                        if (!shouldPreventDefault) {
+                            this.emit(eventType, eventData);
                         }
                     }
                 }

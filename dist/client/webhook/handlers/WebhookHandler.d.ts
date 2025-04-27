@@ -25,7 +25,18 @@ export interface WebhookEvent {
 export declare class WebhookHandler extends EventEmitter {
     private client;
     private verifyToken;
+    private activeCollectors;
     constructor(client: Client, verifyToken: string);
+    /**
+     * Registers an active collector
+     * @param collector The collector to register
+     */
+    registerCollector(collector: any): void;
+    /**
+     * Unregisters an active collector
+     * @param collector The collector to unregister
+     */
+    unregisterCollector(collector: any): void;
     /**
      * Handles incoming webhook requests
      * @param req Incoming HTTP request

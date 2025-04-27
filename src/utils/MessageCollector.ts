@@ -25,6 +25,8 @@ export class MessageCollector extends EventEmitter {
   private max: number
   private ended: boolean
   private eventTypes: EventType[]
+  private time: number
+  private client: Client
 
   /**
    * Creates a new message collector
@@ -43,12 +45,17 @@ export class MessageCollector extends EventEmitter {
       throw new Error("Webhook handler is not initialized. Please provide webhook options when creating the client.")
     }
 
+    this.client = client
     this.handler = client.getWebhookHandler()!
     this.collected = new Map()
     this.filter = options.filter || (() => true)
     this.max = options.max || Number.POSITIVE_INFINITY
     this.ended = false
     this.eventTypes = eventTypes
+    this.time = options.time || 0
+
+    // Register this collector with the webhook handler
+    this.handler.registerCollector(this)
 
     // Set up event listeners
     this.eventTypes.forEach((eventType) => {
@@ -56,18 +63,19 @@ export class MessageCollector extends EventEmitter {
     })
 
     // Set up timeout if provided
-    this.timeout = options.time ? setTimeout(() => this.stop(), options.time) : null
+    this.timeout = this.time ? setTimeout(() => this.stop(), this.time) : null
   }
 
   /**
    * Handles collecting a message
    * @param message The message to collect
+   * @returns true if the message was collected (passed the filter), false otherwise
    */
-  private handleCollect(message: any): void {
-    if (this.ended) return
+  private handleCollect(message: any): boolean {
+    if (this.ended) return false
 
     // Apply filter
-    if (!this.filter(message)) return
+    if (!this.filter(message)) return false
 
     // Store the message
     this.collected.set(message.id, message)
@@ -79,6 +87,8 @@ export class MessageCollector extends EventEmitter {
     if (this.collected.size >= this.max) {
       this.stop()
     }
+
+    return true
   }
 
   /**
@@ -95,6 +105,9 @@ export class MessageCollector extends EventEmitter {
       this.timeout = null
     }
 
+    // Unregister this collector from the webhook handler
+    this.handler.unregisterCollector(this)
+
     // Remove event listeners
     this.eventTypes.forEach((eventType) => {
       this.handler.removeListener(eventType, this.handleCollect.bind(this))
@@ -102,6 +115,23 @@ export class MessageCollector extends EventEmitter {
 
     // Emit end event
     this.emit("end", this.collected)
+  }
+
+  /**
+   * Resets the collector's timer
+   * @returns true if the timer was reset, false if there was no timer
+   */
+  public resetTimer(): boolean {
+    if (!this.time) return false
+
+    // Clear existing timeout if it exists
+    if (this.timeout) {
+      clearTimeout(this.timeout)
+    }
+
+    // Set a new timeout
+    this.timeout = setTimeout(() => this.stop(), this.time)
+    return true
   }
 
   /**

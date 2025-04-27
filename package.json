@@ -1,5 +1,5 @@
 {
-    "name": "whatsapp-api-cloud-node",
+    "name": "wanode",
     "version": "0.6.4-Beta",
     "description": "",
     "main": "dist/index.js",
