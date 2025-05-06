@@ -1,7 +1,6 @@
 export interface ClientOptions {
   phoneId: string;
   accessToken: string;
-  version: string;
   webhook?: {
     verifyToken: string
     port?: number

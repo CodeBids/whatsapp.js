@@ -1,6 +1,6 @@
 {
-    "name": "wanode",
-    "version": "0.6.4-Beta",
+    "name": "whatsapp.js",
+    "version": "0.6.6-Beta",
     "description": "",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",

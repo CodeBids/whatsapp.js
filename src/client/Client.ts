@@ -23,10 +23,10 @@ export class Client extends EventEmitter {
   constructor(options: ClientOptions) {
     super();
 
-    const { phoneId, accessToken, version, webhook } = options;
+    const { phoneId, accessToken, webhook } = options;
 
-    if (!phoneId || !accessToken || !version) {
-      throw new Error("Phone ID, Access Token and Version are required");
+    if (!phoneId || !accessToken) {
+      throw new Error("Phone ID and Access Token are required");
     }
 
     if (!/^\d+$/.test(phoneId)) {
@@ -37,11 +37,7 @@ export class Client extends EventEmitter {
       throw new Error("Access Token must be alphanumeric");
     }
 
-    if (version !== "v22.0") {
-      throw new Error("Version must be v22.0");
-    }
-
-    this.apiService = new WhatsAppApiService(accessToken, version, phoneId);
+    this.apiService = new WhatsAppApiService(accessToken, "v22.0", phoneId);
 
     this.message = new Message(this);
 
