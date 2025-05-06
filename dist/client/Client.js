@@ -18,9 +18,9 @@ class Client extends events_1.EventEmitter {
         this.quality = null;
         this.id = null;
         this.displayPhoneNumber = null;
-        const { phoneId, accessToken, version, webhook } = options;
-        if (!phoneId || !accessToken || !version) {
-            throw new Error("Phone ID, Access Token and Version are required");
+        const { phoneId, accessToken, webhook } = options;
+        if (!phoneId || !accessToken) {
+            throw new Error("Phone ID and Access Token are required");
         }
         if (!/^\d+$/.test(phoneId)) {
             throw new Error("Phone ID must be a numeric string");
@@ -28,10 +28,7 @@ class Client extends events_1.EventEmitter {
         if (!/^[A-Za-z0-9]+$/.test(accessToken)) {
             throw new Error("Access Token must be alphanumeric");
         }
-        if (version !== "v22.0") {
-            throw new Error("Version must be v22.0");
-        }
-        this.apiService = new wa_api_cloud_service_1.WhatsAppApiService(accessToken, version, phoneId);
+        this.apiService = new wa_api_cloud_service_1.WhatsAppApiService(accessToken, "v22.0", phoneId);
         this.message = new Message_1.Message(this);
         this.initializeClientData().catch((error) => {
             console.error("Error initializing client data:", error);
