@@ -1,6 +1,6 @@
 {
     "name": "whatsapp.js",
-    "version": "0.6.6-Beta",
+    "version": "0.6.9-Beta",
     "description": "",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
