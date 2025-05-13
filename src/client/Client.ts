@@ -1,57 +1,65 @@
-import { EventEmitter } from "events";
-import { Message } from "./actions/Message";
+import { EventEmitter } from "events"
+import { Message } from "./actions/Message"
 import { IncomingMessage } from "../models/IncomingMessage"
-import { WhatsAppApiService } from "../services/wa-api-cloud.service";
-import type { ClientData, ClientInfoResponse, ClientOptions } from "../types";
-import { WebhookHandler, EventType } from "./webhook/handlers/WebhookHandler";
+import { WhatsAppApiService } from "../services/wa-api-cloud.service"
+import type { ClientData, ClientInfoResponse, ClientOptions } from "../types"
+import { WebhookHandler, EventType } from "./webhook/handlers/WebhookHandler"
 
 /**
  * This is the starting point for any WhatsApp Client and the main hub for interacting with the WhatsApp API Cloud
  */
 export class Client extends EventEmitter {
-  private apiService: WhatsAppApiService;
-  private _webhook: WebhookHandler | null = null;
-  private _webhookServer: any = null;
+  private apiService: WhatsAppApiService
+  private _webhook: WebhookHandler | null = null
+  private _webhookServer: any = null
 
-  public name: string | null = null;
-  public quality: string | null = null;
-  public id: string | null = null;
-  public displayPhoneNumber: string | null = null;
+  public name: string | null = null
+  public quality: string | null = null
+  public id: string | null = null
+  public displayPhoneNumber: string | null = null
 
-  public message: Message;
+  public message: Message
 
   constructor(options: ClientOptions) {
-    super();
+    super()
 
-    const { phoneId, accessToken, webhook } = options;
+    const { phoneId, accessToken, webhook } = options
+
+    console.log("Initializing WhatsApp client with options:", {
+      phoneId: phoneId ? `${phoneId.substring(0, 4)}...` : undefined, // Solo mostrar los primeros 4 caracteres por seguridad
+      accessTokenProvided: !!accessToken,
+      webhookProvided: !!webhook,
+    })
 
     if (!phoneId || !accessToken) {
-      throw new Error("Phone ID and Access Token are required");
+      throw new Error("Phone ID and Access Token are required")
     }
 
     if (!/^\d+$/.test(phoneId)) {
-      throw new Error("Phone ID must be a numeric string");
+      console.error("Invalid Phone ID format:", phoneId)
+      throw new Error("Phone ID must be a numeric string")
     }
 
     if (!/^[A-Za-z0-9]+$/.test(accessToken)) {
-      throw new Error("Access Token must be alphanumeric");
+      console.error("Invalid Access Token format")
+      throw new Error("Access Token must be alphanumeric")
     }
 
-    this.apiService = new WhatsAppApiService(accessToken, "v22.0", phoneId);
+    this.apiService = new WhatsAppApiService(accessToken, "v22.0", phoneId)
 
-    this.message = new Message(this);
+    this.message = new Message(this)
 
     this.initializeClientData().catch((error) => {
-      console.error("Error initializing client data:", error);
-    });
+      console.error("Error initializing client data:", error)
+    })
 
     // Initialize webhook if options are provided
     if (webhook && webhook.verifyToken) {
-      this._setupWebhook(webhook.verifyToken);
+      this._setupWebhook(webhook.verifyToken)
 
       // Start webhook server automatically if autoStart is true or not specified
       if (webhook.autoStart !== false && webhook.port) {
-        this._startWebhookServer(webhook.port);
+        this._startWebhookServer(webhook.port)
       }
     }
   }
@@ -62,7 +70,7 @@ export class Client extends EventEmitter {
    * @internal
    */
   getApiService(): WhatsAppApiService {
-    return this.apiService;
+    return this.apiService
   }
 
   /**
@@ -71,7 +79,7 @@ export class Client extends EventEmitter {
    * @private
    */
   _setupWebhook(verifyToken: string): void {
-    this._webhook = new WebhookHandler(this, verifyToken);
+    this._webhook = new WebhookHandler(this, verifyToken)
 
     // Forward all webhook events to the client
     Object.values(EventType).forEach((eventType) => {
@@ -83,8 +91,8 @@ export class Client extends EventEmitter {
         } else {
           this.emit(eventType, data)
         }
-      });
-    });
+      })
+    })
   }
 
   /**
@@ -96,13 +104,11 @@ export class Client extends EventEmitter {
    */
   _startWebhookServer(port: number, callback?: () => void): any {
     if (!this._webhook) {
-      throw new Error(
-        "Webhook handler not initialized. Please provide webhook options when creating the client."
-      );
+      throw new Error("Webhook handler not initialized. Please provide webhook options when creating the client.")
     }
 
-    this._webhookServer = this._webhook.startServer(port, callback);
-    return this._webhookServer;
+    this._webhookServer = this._webhook.startServer(port, callback)
+    return this._webhookServer
   }
 
   /**
@@ -113,17 +119,15 @@ export class Client extends EventEmitter {
    */
   public startServer(port: number, callback?: () => void): any {
     if (!this._webhook) {
-      throw new Error(
-        "Webhook handler not initialized. Please provide webhook options when creating the client."
-      );
+      throw new Error("Webhook handler not initialized. Please provide webhook options when creating the client.")
     }
 
     if (this._webhookServer) {
-      console.warn("Webhook server is already running.");
-      return this._webhookServer;
+      console.warn("Webhook server is already running.")
+      return this._webhookServer
     }
 
-    return this._startWebhookServer(port, callback);
+    return this._startWebhookServer(port, callback)
   }
 
   /**
@@ -133,11 +137,11 @@ export class Client extends EventEmitter {
   public stopServer(callback?: () => void): void {
     if (this._webhookServer) {
       this._webhookServer.close(() => {
-        this._webhookServer = null;
-        if (callback) callback();
-      });
+        this._webhookServer = null
+        if (callback) callback()
+      })
     } else {
-      if (callback) callback();
+      if (callback) callback()
     }
   }
 
@@ -150,7 +154,15 @@ export class Client extends EventEmitter {
    * @internal
    */
   async makeApiRequest<T>(url: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T> {
-    return this.apiService.request<T>(url, method, data)
+    console.log(`Making API request: ${method} ${url}`, data ? { dataProvided: true } : { dataProvided: false })
+    try {
+      const response = await this.apiService.request<T>(url, method, data)
+      console.log(`API request successful: ${method} ${url}`, { responseReceived: true })
+      return response
+    } catch (error) {
+      console.error(`API request failed: ${method} ${url}`, error)
+      throw error
+    }
   }
 
   /**
@@ -162,16 +174,39 @@ export class Client extends EventEmitter {
    * @internal
    */
   async makePhoneRequest<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T> {
-    return this.apiService.phoneRequest<T>(endpoint, method, data)
+    console.log(
+      `Making phone request: ${method} ${endpoint || "[root]"}`,
+      data ? { dataProvided: true } : { dataProvided: false },
+    )
+    try {
+      const response = await this.apiService.phoneRequest<T>(endpoint, method, data)
+      console.log(`Phone request successful: ${method} ${endpoint || "[root]"}`, { responseReceived: true })
+      return response
+    } catch (error) {
+      console.error(`Phone request failed: ${method} ${endpoint || "[root]"}`, error)
+      throw error
+    }
   }
 
   private async initializeClientData(): Promise<void> {
-    return await this.makePhoneRequest<ClientData>("", "GET").then((data) => {
+    console.log("Starting client data initialization...")
+    try {
+      const data = await this.makePhoneRequest<ClientData>("", "GET")
+      console.log("Client data received:", data)
       this.name = data.verified_name
       this.quality = data.quality_rating
       this.id = data.id
       this.displayPhoneNumber = data.display_phone_number
-    })
+      console.log("Client data initialized successfully:", {
+        name: this.name,
+        quality: this.quality,
+        id: this.id,
+        displayPhoneNumber: this.displayPhoneNumber,
+      })
+    } catch (error) {
+      console.error("Failed to initialize client data:", error)
+      throw error
+    }
   }
 
   /**
@@ -214,7 +249,7 @@ export class Client extends EventEmitter {
   }
 
   public async getBusinessProfile(): Promise<ClientInfoResponse> {
-    const url = `whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical`;
-    return await this.makeApiRequest<ClientInfoResponse>(url, "GET");
+    const url = `whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical`
+    return await this.makeApiRequest<ClientInfoResponse>(url, "GET")
   }
 }

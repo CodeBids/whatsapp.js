@@ -19,13 +19,20 @@ class Client extends events_1.EventEmitter {
         this.id = null;
         this.displayPhoneNumber = null;
         const { phoneId, accessToken, webhook } = options;
+        console.log("Initializing WhatsApp client with options:", {
+            phoneId: phoneId ? `${phoneId.substring(0, 4)}...` : undefined, // Solo mostrar los primeros 4 caracteres por seguridad
+            accessTokenProvided: !!accessToken,
+            webhookProvided: !!webhook,
+        });
         if (!phoneId || !accessToken) {
             throw new Error("Phone ID and Access Token are required");
         }
         if (!/^\d+$/.test(phoneId)) {
+            console.error("Invalid Phone ID format:", phoneId);
             throw new Error("Phone ID must be a numeric string");
         }
         if (!/^[A-Za-z0-9]+$/.test(accessToken)) {
+            console.error("Invalid Access Token format");
             throw new Error("Access Token must be alphanumeric");
         }
         this.apiService = new wa_api_cloud_service_1.WhatsAppApiService(accessToken, "v22.0", phoneId);
@@ -127,7 +134,16 @@ class Client extends events_1.EventEmitter {
      * @internal
      */
     async makeApiRequest(url, method, data) {
-        return this.apiService.request(url, method, data);
+        console.log(`Making API request: ${method} ${url}`, data ? { dataProvided: true } : { dataProvided: false });
+        try {
+            const response = await this.apiService.request(url, method, data);
+            console.log(`API request successful: ${method} ${url}`, { responseReceived: true });
+            return response;
+        }
+        catch (error) {
+            console.error(`API request failed: ${method} ${url}`, error);
+            throw error;
+        }
     }
     /**
      * Makes a request to the phone endpoint
@@ -138,15 +154,37 @@ class Client extends events_1.EventEmitter {
      * @internal
      */
     async makePhoneRequest(endpoint, method, data) {
-        return this.apiService.phoneRequest(endpoint, method, data);
+        console.log(`Making phone request: ${method} ${endpoint || "[root]"}`, data ? { dataProvided: true } : { dataProvided: false });
+        try {
+            const response = await this.apiService.phoneRequest(endpoint, method, data);
+            console.log(`Phone request successful: ${method} ${endpoint || "[root]"}`, { responseReceived: true });
+            return response;
+        }
+        catch (error) {
+            console.error(`Phone request failed: ${method} ${endpoint || "[root]"}`, error);
+            throw error;
+        }
     }
     async initializeClientData() {
-        return await this.makePhoneRequest("", "GET").then((data) => {
+        console.log("Starting client data initialization...");
+        try {
+            const data = await this.makePhoneRequest("", "GET");
+            console.log("Client data received:", data);
             this.name = data.verified_name;
             this.quality = data.quality_rating;
             this.id = data.id;
             this.displayPhoneNumber = data.display_phone_number;
-        });
+            console.log("Client data initialized successfully:", {
+                name: this.name,
+                quality: this.quality,
+                id: this.id,
+                displayPhoneNumber: this.displayPhoneNumber,
+            });
+        }
+        catch (error) {
+            console.error("Failed to initialize client data:", error);
+            throw error;
+        }
     }
     /**
      * Gets the webhook handler

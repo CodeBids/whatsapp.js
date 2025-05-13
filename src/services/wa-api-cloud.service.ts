@@ -25,7 +25,9 @@ export class WhatsAppApiService {
    * @returns Base API URL
    */
   getApiUrl(): string {
-    return `https://graph.facebook.com/${this.version}/${this.phoneId}`
+    const url = `https://graph.facebook.com/${this.version}/${this.phoneId}`
+    console.log("API URL constructed:", url)
+    return url
   }
 
   /**
@@ -37,7 +39,20 @@ export class WhatsAppApiService {
    */
   async request<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: unknown): Promise<T> {
     try {
-      const response = await fetch(`${this.getApiUrl()}/${endpoint}`, {
+      const url = `${this.getApiUrl()}/${endpoint}`
+      console.log(`Making request to: ${method} ${url}`)
+
+      const headers = {
+        Authorization: `Bearer ${this.accessToken.substring(0, 4)}...`, // Solo mostrar los primeros 4 caracteres por seguridad
+        "Content-Type": "application/json",
+      }
+      console.log("Request headers:", headers)
+
+      if (data) {
+        console.log("Request body:", JSON.stringify(data, null, 2))
+      }
+
+      const response = await fetch(url, {
         method,
         headers: {
           Authorization: `Bearer ${this.accessToken}`,
@@ -46,10 +61,14 @@ export class WhatsAppApiService {
         body: data ? JSON.stringify(data) : undefined,
       })
 
+      console.log(`Response status: ${response.status} ${response.statusText}`)
+
       const responseData = await response.json()
+      console.log("Response data:", JSON.stringify(responseData, null, 2))
 
       if (!response.ok) {
         // If the response is not successful, process the error
+        console.error("Error response received:", responseData)
         this.handleApiError(responseData)
       }
 
@@ -57,10 +76,18 @@ export class WhatsAppApiService {
     } catch (error) {
       // If it's already a WhatsAppApiException, propagate it
       if (error instanceof WhatsAppApiException) {
+        console.error("WhatsApp API Exception:", {
+          message: error.message,
+          code: error.code,
+          subcode: error.subcode,
+          details: error.details,
+          traceId: error.traceId,
+        })
         throw error
       }
 
       // If it's another type of error, convert it to WhatsAppApiException
+      console.error("Unknown error during API request:", error)
       throw new WhatsAppApiException(error instanceof Error ? error.message : "Unknown error", 0)
     }
   }
@@ -74,7 +101,15 @@ export class WhatsAppApiService {
    * @returns Promise with the response
    */
   async phoneRequest<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: unknown): Promise<T> {
-    return this.request<T>(endpoint, method, data)
+    console.log(`Phone request: ${method} ${endpoint || "[root]"}`)
+    try {
+      const result = await this.request<T>(endpoint, method, data)
+      console.log("Phone request successful")
+      return result
+    } catch (error) {
+      console.error("Phone request failed:", error)
+      throw error
+    }
   }
 
   /**
@@ -82,12 +117,23 @@ export class WhatsAppApiService {
    * @param errorResponse Error response
    */
   private handleApiError(errorResponse: any): never {
+    console.error("Handling API error:", errorResponse)
+
     // Check if the response has the expected format
     if (errorResponse && errorResponse.error) {
       const apiError = errorResponse.error as WhatsAppApiError
+      console.error("API error details:", {
+        message: apiError.message,
+        type: apiError.type,
+        code: apiError.code,
+        error_data: apiError.error_data,
+        error_subcode: apiError.error_subcode,
+        fbtrace_id: apiError.fbtrace_id,
+      })
 
       // Get the descriptive message for the error code
       const message = getErrorMessage(apiError.code)
+      console.error("Error message from code:", message)
 
       // Throw a custom exception with the error details
       throw new WhatsAppApiException(
@@ -100,6 +146,7 @@ export class WhatsAppApiService {
     }
 
     // If the response doesn't have the expected format, throw a generic exception
+    console.error("Unknown error format:", errorResponse)
     throw new WhatsAppApiException("Unknown error in the WhatsApp API", 0)
   }
 
