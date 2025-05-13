@@ -22,6 +22,11 @@ export declare class Message {
      */
     private validatePayload;
     /**
+     * Validates template components and parameters
+     * @param components Template components to validate
+     */
+    private validateTemplateComponents;
+    /**
      * Validates an interactive message
      * @param interactive Interactive message data
      */

@@ -21,6 +21,48 @@ export interface LocationData {
 export interface TemplateData {
     name: string;
     language: LanguageCode;
+    components?: TemplateComponent[];
+}
+export interface TemplateComponent {
+    type: "header" | "body" | "button" | "footer";
+    sub_type?: "quick_reply" | "url" | "CATALOG";
+    index?: string | number;
+    parameters: TemplateParameter[];
+}
+export interface TemplateParameter {
+    type: "text" | "currency" | "date_time" | "image" | "document" | "video" | "payload" | "action";
+    text?: string;
+    currency?: {
+        fallback_value: string;
+        code: string;
+        amount_1000: number;
+    };
+    date_time?: {
+        fallback_value: string;
+        day_of_week?: number;
+        year?: number;
+        month?: number;
+        day_of_month?: number;
+        hour?: number;
+        minute?: number;
+        calendar?: "GREGORIAN";
+    };
+    image?: {
+        link: string;
+    };
+    document?: {
+        link: string;
+    };
+    video?: {
+        link: string;
+    };
+    payload?: string;
+    action?: {
+        thumbnail_product_retailer_id?: string;
+        catalog_id?: string;
+        product_retailer_id?: string;
+        link?: string;
+    };
 }
 export interface InteractiveData {
     type: "button" | "list" | "product" | "product_list" | "cta_url" | "text";
@@ -89,28 +131,9 @@ export interface MessagePayload {
     context?: Context;
     embeds?: Embed[];
 }
-export interface TemplateParameter {
-    type: "text" | "currency" | "date_time" | "image" | "document" | "video";
-    text?: string;
-    currency?: {
-        code: string;
-        amount: number;
-    };
-    date_time?: {
-        fallback_value: string;
-    };
-    image?: {
-        link: string;
-    };
-    document?: {
-        link: string;
-    };
-    video?: {
-        link: string;
-    };
-}
 export interface MessageBodyPayload {
     messaging_product: string;
+    recipient_type?: string;
     to: string;
     type: MessageType;
     context?: Context;
@@ -122,7 +145,7 @@ export interface MessageBodyPayload {
         language: {
             code: LanguageCode;
         };
-        components?: Component[];
+        components?: TemplateComponent[];
     };
     image?: {
         link?: string;

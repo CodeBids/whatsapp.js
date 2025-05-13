@@ -73,6 +73,10 @@ class Message {
             if (!Object.values(index_1.LanguageCode).includes(payload.template.language)) {
                 throw new Messages_1.WhatsAppApiException(`Invalid template language: ${payload.template.language}. Allowed languages are: ${Object.values(index_1.LanguageCode).join(", ")}.`, 0);
             }
+            // Validate template components if provided
+            if (payload.template.components) {
+                this.validateTemplateComponents(payload.template.components);
+            }
         }
         // Validate files if provided
         if (payload.files && payload.files.length > 0) {
@@ -115,13 +119,6 @@ class Message {
                 if (!embed.body) {
                     throw new Messages_1.WhatsAppApiException("Body is required for embed messages", 0);
                 }
-                //! wtf, I don't remember posting this here, but it's fake.... I think
-                // if (!payload.components) {
-                //   throw new WhatsAppApiException(
-                //     "Components are required for embed messages",
-                //     0
-                //   );
-                // }
             }
         }
         // Validate components if provided
@@ -134,6 +131,95 @@ class Message {
         }
     }
     /**
+     * Validates template components and parameters
+     * @param components Template components to validate
+     */
+    validateTemplateComponents(components) {
+        for (const component of components) {
+            // Validate component type
+            if (!["header", "body", "button", "footer"].includes(component.type)) {
+                throw new Messages_1.WhatsAppApiException(`Invalid component type: ${component.type}`, 0);
+            }
+            // Validate button sub_type if it's a button
+            if (component.type === "button" && component.sub_type) {
+                if (!["quick_reply", "url", "CATALOG"].includes(component.sub_type)) {
+                    throw new Messages_1.WhatsAppApiException(`Invalid button sub_type: ${component.sub_type}`, 0);
+                }
+            }
+            // Validate parameters
+            if (!component.parameters || !Array.isArray(component.parameters) || component.parameters.length === 0) {
+                throw new Messages_1.WhatsAppApiException(`Parameters are required for ${component.type} component`, 0);
+            }
+            // Validate each parameter
+            for (const param of component.parameters) {
+                if (!param.type) {
+                    throw new Messages_1.WhatsAppApiException("Parameter type is required", 0);
+                }
+                // Validate parameter based on its type
+                switch (param.type) {
+                    case "text":
+                        if (!param.text) {
+                            throw new Messages_1.WhatsAppApiException("Text value is required for text parameter", 0);
+                        }
+                        break;
+                    case "currency":
+                        if (!param.currency) {
+                            throw new Messages_1.WhatsAppApiException("Currency object is required for currency parameter", 0);
+                        }
+                        if (!param.currency.fallback_value || !param.currency.code || param.currency.amount_1000 === undefined) {
+                            throw new Messages_1.WhatsAppApiException("Currency parameter must include fallback_value, code, and amount_1000", 0);
+                        }
+                        break;
+                    case "date_time":
+                        if (!param.date_time || !param.date_time.fallback_value) {
+                            throw new Messages_1.WhatsAppApiException("Date time parameter must include fallback_value", 0);
+                        }
+                        break;
+                    case "image":
+                        if (!param.image || !param.image.link) {
+                            throw new Messages_1.WhatsAppApiException("Image parameter must include a link", 0);
+                        }
+                        if (!this.isValidUrl(param.image.link)) {
+                            throw new Messages_1.WhatsAppApiException(`Invalid URL format for image: ${param.image.link}`, 0);
+                        }
+                        break;
+                    case "document":
+                        if (!param.document || !param.document.link) {
+                            throw new Messages_1.WhatsAppApiException("Document parameter must include a link", 0);
+                        }
+                        if (!this.isValidUrl(param.document.link)) {
+                            throw new Messages_1.WhatsAppApiException(`Invalid URL format for document: ${param.document.link}`, 0);
+                        }
+                        break;
+                    case "video":
+                        if (!param.video || !param.video.link) {
+                            throw new Messages_1.WhatsAppApiException("Video parameter must include a link", 0);
+                        }
+                        if (!this.isValidUrl(param.video.link)) {
+                            throw new Messages_1.WhatsAppApiException(`Invalid URL format for video: ${param.video.link}`, 0);
+                        }
+                        break;
+                    case "payload":
+                        if (!param.payload) {
+                            throw new Messages_1.WhatsAppApiException("Payload value is required for payload parameter", 0);
+                        }
+                        break;
+                    case "action":
+                        if (!param.action) {
+                            throw new Messages_1.WhatsAppApiException("Action object is required for action parameter", 0);
+                        }
+                        // For catalog actions, validate required fields
+                        if (component.sub_type === "CATALOG" && !param.action.thumbnail_product_retailer_id) {
+                            throw new Messages_1.WhatsAppApiException("thumbnail_product_retailer_id is required for CATALOG button", 0);
+                        }
+                        break;
+                    default:
+                        throw new Messages_1.WhatsAppApiException(`Unsupported parameter type: ${param.type}`, 0);
+                }
+            }
+        }
+    }
+    /**
      * Validates an interactive message
      * @param interactive Interactive message data
      */
@@ -141,14 +227,7 @@ class Message {
         if (!interactive.type) {
             throw new Messages_1.WhatsAppApiException("Interactive type is required", 0);
         }
-        if (![
-            "button",
-            "list",
-            "product",
-            "product_list",
-            "cta_url",
-            "text",
-        ].includes(interactive.type)) {
+        if (!["button", "list", "product", "product_list", "cta_url", "text"].includes(interactive.type)) {
             throw new Messages_1.WhatsAppApiException(`Invalid interactive type: ${interactive.type}. Allowed types are: button, list, product, product_list, cta_url, text.`, 0);
         }
         if (!interactive.body || !interactive.body.text) {
@@ -170,21 +249,17 @@ class Message {
                     }
                     break;
                 case "image":
-                    if (!interactive.header.image ||
-                        (!interactive.header.image.link && !interactive.header.image.id)) {
+                    if (!interactive.header.image || (!interactive.header.image.link && !interactive.header.image.id)) {
                         throw new Messages_1.WhatsAppApiException("Image link or ID is required for image header", 0);
                     }
                     break;
                 case "video":
-                    if (!interactive.header.video ||
-                        (!interactive.header.video.link && !interactive.header.video.id)) {
+                    if (!interactive.header.video || (!interactive.header.video.link && !interactive.header.video.id)) {
                         throw new Messages_1.WhatsAppApiException("Video link or ID is required for video header", 0);
                     }
                     break;
                 case "document":
-                    if (!interactive.header.document ||
-                        (!interactive.header.document.link &&
-                            !interactive.header.document.id)) {
+                    if (!interactive.header.document || (!interactive.header.document.link && !interactive.header.document.id)) {
                         throw new Messages_1.WhatsAppApiException("Document link or ID is required for document header", 0);
                     }
                     break;
@@ -204,8 +279,7 @@ class Message {
                     if (!button.type) {
                         throw new Messages_1.WhatsAppApiException("Button type is required", 0);
                     }
-                    if (button.type === "reply" &&
-                        (!button.reply || !button.reply.id || !button.reply.title)) {
+                    if (button.type === "reply" && (!button.reply || !button.reply.id || !button.reply.title)) {
                         throw new Messages_1.WhatsAppApiException("Reply ID and title are required for reply buttons", 0);
                     }
                     if (button.type === "url" && (!button.url || !button.text)) {
@@ -248,8 +322,7 @@ class Message {
         components.forEach((component) => {
             switch (true) {
                 case component instanceof __1.LocationBuilder:
-                    if (component.latitude === undefined ||
-                        component.longitude === undefined) {
+                    if (component.latitude === undefined || component.longitude === undefined) {
                         throw new Messages_1.WhatsAppApiException("Latitude and longitude are required for location messages", 0);
                     }
                     // Validate latitude range (-90 to 90)
@@ -262,9 +335,7 @@ class Message {
                     }
                     break;
                 case component instanceof __1.ContactBuilder:
-                    if (!component.firstName ||
-                        !component.phones ||
-                        component.phones.length === 0) {
+                    if (!component.firstName || !component.phones || component.phones.length === 0) {
                         throw new Messages_1.WhatsAppApiException("First name and at least one phone number are required", 0);
                     }
                     // Validate phone numbers
@@ -315,9 +386,7 @@ class Message {
                         throw new Messages_1.WhatsAppApiException("Button type is required", 0);
                     }
                     if (component.type === "reply") {
-                        if (!component.reply ||
-                            !component.reply.id ||
-                            !component.reply.title) {
+                        if (!component.reply || !component.reply.id || !component.reply.title) {
                             throw new Messages_1.WhatsAppApiException("Reply ID and title are required for reply buttons", 0);
                         }
                         if (component.text) {
@@ -387,6 +456,7 @@ class Message {
         // Initialize the message body with common properties
         const messageBody = {
             messaging_product: "whatsapp",
+            recipient_type: "individual",
             to: payload.to,
         };
         if (payload.context) {
@@ -410,6 +480,10 @@ class Message {
                     code: payload.template.language,
                 },
             };
+            // Include template components if provided
+            if (payload.template.components && payload.template.components.length > 0) {
+                messageBody.template.components = payload.template.components;
+            }
         }
         else if (payload.files && payload.files.length > 0) {
             const file = payload.files[0];
@@ -481,9 +555,7 @@ class Message {
             // Inicializar el objeto interactive
             messageBody.type = "interactive";
             // Verificar si hay un archivo que pueda usarse como header
-            const hasValidHeaderFile = payload.files &&
-                payload.files.length > 0 &&
-                ["image", "video", "document"].includes(payload.files[0].type);
+            const hasValidHeaderFile = payload.files && payload.files.length > 0 && ["image", "video", "document"].includes(payload.files[0].type);
             if (hasValidHeaderFile) {
                 // Si hay un archivo válido para el header, usarlo
                 const file = payload.files[0];
@@ -643,9 +715,7 @@ class Message {
                     const name = {
                         formatted_name: component.formattedName ?? component.firstName,
                         first_name: component.firstName,
-                        ...(component.middleName
-                            ? { middle_name: component.middleName }
-                            : {}),
+                        ...(component.middleName ? { middle_name: component.middleName } : {}),
                         ...(component.lastName ? { last_name: component.lastName } : {}),
                         ...(component.namePrefix ? { prefix: component.namePrefix } : {}),
                     };
