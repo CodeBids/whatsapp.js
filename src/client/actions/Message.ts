@@ -6,22 +6,16 @@ import {
   type Component,
   type ContactPayloadData,
   type InteractiveData,
-} from "../../types/index";
-import { WhatsAppApiException } from "../../errors/Messages";
-import {
-  ButtonBuilder,
-  type Client,
-  ListBuilder,
-  LocationBuilder,
-  ContactBuilder,
-  EmbedBuilder,
-} from "../..";
+  type TemplateComponent,
+} from "../../types/index"
+import { WhatsAppApiException } from "../../errors/Messages"
+import { ButtonBuilder, type Client, ListBuilder, LocationBuilder, ContactBuilder, EmbedBuilder } from "../.."
 
 export class Message {
-  private client: Client;
+  private client: Client
 
   constructor(client: Client) {
-    this.client = client;
+    this.client = client
   }
 
   /**
@@ -31,13 +25,13 @@ export class Message {
    */
   async send(payload: MessagePayload): Promise<MessageApiResponse> {
     // Validate the payload
-    this.validatePayload(payload);
+    this.validatePayload(payload)
 
     // Determine the message type and build the body
-    const body = this.buildMessageBody(payload);
+    const body = this.buildMessageBody(payload)
 
     // Send the request to the API
-    return await this.client.makeApiRequest(`messages`, "POST", body);
+    return await this.client.makeApiRequest(`messages`, "POST", body)
   }
 
   /**
@@ -50,10 +44,10 @@ export class Message {
     // Check if the number starts with +54 9 (Argentina with mobile identifier)
     if (phoneNumber.startsWith("549")) {
       // Remove the "9" after the country code
-      return phoneNumber.replace(/^549/, "54");
+      return phoneNumber.replace(/^549/, "54")
     }
     // Remove any non-numeric characters (like +, spaces, parentheses)
-    return phoneNumber.replace(/\D/g, "");
+    return phoneNumber.replace(/\D/g, "")
   }
 
   /**
@@ -63,18 +57,15 @@ export class Message {
   private validatePayload(payload: MessagePayload): void {
     // Check if recipient is provided
     if (!payload.to) {
-      throw new WhatsAppApiException("Recipient phone number is required", 0);
+      throw new WhatsAppApiException("Recipient phone number is required", 0)
     }
 
     // Clean the phone number before sending
-    payload.to = this.cleanPhoneNumber(payload.to);
+    payload.to = this.cleanPhoneNumber(payload.to)
 
     // Validate phone number format
     if (!/^\d+$/.test(payload.to)) {
-      throw new WhatsAppApiException(
-        "Phone number must contain only digits",
-        0
-      );
+      throw new WhatsAppApiException("Phone number must contain only digits", 0)
     }
 
     // Check if at least one content type is provided
@@ -85,24 +76,24 @@ export class Message {
         payload.interactive ||
         payload.reaction ||
         (payload.components && payload.components.length > 0) ||
-        (payload.embeds && payload.embeds.length > 0)
-    );
+        (payload.embeds && payload.embeds.length > 0),
+    )
 
     if (!hasContent) {
       throw new WhatsAppApiException(
         "At least one content type is required (text, template, files, interactive, reaction, components, or embeds)",
-        0
-      );
+        0,
+      )
     }
 
     // Validate template if provided
     if (payload.template) {
       if (!payload.template.name) {
-        throw new WhatsAppApiException("Template name is required", 0);
+        throw new WhatsAppApiException("Template name is required", 0)
       }
 
       if (!payload.template.language) {
-        throw new WhatsAppApiException("Template language is required", 0);
+        throw new WhatsAppApiException("Template language is required", 0)
       }
 
       if (!Object.values(LanguageCode).includes(payload.template.language)) {
@@ -110,8 +101,13 @@ export class Message {
           `Invalid template language: ${
             payload.template.language
           }. Allowed languages are: ${Object.values(LanguageCode).join(", ")}.`,
-          0
-        );
+          0,
+        )
+      }
+
+      // Validate template components if provided
+      if (payload.template.components) {
+        this.validateTemplateComponents(payload.template.components)
       }
     }
 
@@ -119,38 +115,28 @@ export class Message {
     if (payload.files && payload.files.length > 0) {
       for (const file of payload.files) {
         if (!file.type) {
-          throw new WhatsAppApiException("File type is required", 0);
+          throw new WhatsAppApiException("File type is required", 0)
         }
 
-        if (
-          !["image", "document", "audio", "video", "sticker"].includes(
-            file.type
-          )
-        ) {
+        if (!["image", "document", "audio", "video", "sticker"].includes(file.type)) {
           throw new WhatsAppApiException(
             `Invalid file type: ${file.type}. Allowed types are: image, document, audio, video, sticker.`,
-            0
-          );
+            0,
+          )
         }
 
         if (!file.url && !file.id) {
-          throw new WhatsAppApiException(
-            "Either file URL or ID must be provided",
-            0
-          );
+          throw new WhatsAppApiException("Either file URL or ID must be provided", 0)
         }
 
         // Validate URL format if provided
         if (file.url && !this.isValidUrl(file.url)) {
-          throw new WhatsAppApiException(`Invalid URL format: ${file.url}`, 0);
+          throw new WhatsAppApiException(`Invalid URL format: ${file.url}`, 0)
         }
 
         // Validate specific file type requirements
         if (file.type === "document" && !file.filename) {
-          throw new WhatsAppApiException(
-            "Filename is required for document files",
-            0
-          );
+          throw new WhatsAppApiException("Filename is required for document files", 0)
         }
       }
     }
@@ -158,57 +144,130 @@ export class Message {
     // Validate reaction if provided
     if (payload.reaction) {
       if (!payload.reaction.message_id) {
-        throw new WhatsAppApiException(
-          "Message ID is required for reaction messages",
-          0
-        );
+        throw new WhatsAppApiException("Message ID is required for reaction messages", 0)
       }
 
       if (!payload.reaction.emoji) {
-        throw new WhatsAppApiException(
-          "Emoji is required for reaction messages",
-          0
-        );
+        throw new WhatsAppApiException("Emoji is required for reaction messages", 0)
       }
     }
 
     // Validate interactive if provided
     if (payload.interactive) {
-      this.validateInteractive(payload.interactive);
+      this.validateInteractive(payload.interactive)
     }
 
     // Validate embeds if provided
     if (payload.embeds && payload.embeds.length > 0) {
       for (const embed of payload.embeds) {
         if (!embed.body) {
-          throw new WhatsAppApiException(
-            "Body is required for embed messages",
-            0
-          );
+          throw new WhatsAppApiException("Body is required for embed messages", 0)
         }
-
-
-        //! wtf, I don't remember posting this here, but it's fake.... I think
-        // if (!payload.components) {
-        //   throw new WhatsAppApiException(
-        //     "Components are required for embed messages",
-        //     0
-        //   );
-        // }
       }
     }
 
     // Validate components if provided
     if (payload.components) {
-      this.validateComponent(payload.components);
+      this.validateComponent(payload.components)
     }
 
     // Validate context if provided
     if (payload.context && !payload.context.message_id) {
-      throw new WhatsAppApiException(
-        "Message ID is required in context for reply/quote messages",
-        0
-      );
+      throw new WhatsAppApiException("Message ID is required in context for reply/quote messages", 0)
+    }
+  }
+
+  /**
+   * Validates template components and parameters
+   * @param components Template components to validate
+   */
+  private validateTemplateComponents(components: TemplateComponent[]): void {
+    for (const component of components) {
+      // Validate component type
+      if (!["header", "body", "button", "footer"].includes(component.type)) {
+        throw new WhatsAppApiException(`Invalid component type: ${component.type}`, 0)
+      }
+
+      // Validate button sub_type if it's a button
+      if (component.type === "button" && component.sub_type) {
+        if (!["quick_reply", "url", "CATALOG"].includes(component.sub_type)) {
+          throw new WhatsAppApiException(`Invalid button sub_type: ${component.sub_type}`, 0)
+        }
+      }
+
+      // Validate parameters
+      if (!component.parameters || !Array.isArray(component.parameters) || component.parameters.length === 0) {
+        throw new WhatsAppApiException(`Parameters are required for ${component.type} component`, 0)
+      }
+
+      // Validate each parameter
+      for (const param of component.parameters) {
+        if (!param.type) {
+          throw new WhatsAppApiException("Parameter type is required", 0)
+        }
+
+        // Validate parameter based on its type
+        switch (param.type) {
+          case "text":
+            if (!param.text) {
+              throw new WhatsAppApiException("Text value is required for text parameter", 0)
+            }
+            break
+          case "currency":
+            if (!param.currency) {
+              throw new WhatsAppApiException("Currency object is required for currency parameter", 0)
+            }
+            if (!param.currency.fallback_value || !param.currency.code || param.currency.amount_1000 === undefined) {
+              throw new WhatsAppApiException("Currency parameter must include fallback_value, code, and amount_1000", 0)
+            }
+            break
+          case "date_time":
+            if (!param.date_time || !param.date_time.fallback_value) {
+              throw new WhatsAppApiException("Date time parameter must include fallback_value", 0)
+            }
+            break
+          case "image":
+            if (!param.image || !param.image.link) {
+              throw new WhatsAppApiException("Image parameter must include a link", 0)
+            }
+            if (!this.isValidUrl(param.image.link)) {
+              throw new WhatsAppApiException(`Invalid URL format for image: ${param.image.link}`, 0)
+            }
+            break
+          case "document":
+            if (!param.document || !param.document.link) {
+              throw new WhatsAppApiException("Document parameter must include a link", 0)
+            }
+            if (!this.isValidUrl(param.document.link)) {
+              throw new WhatsAppApiException(`Invalid URL format for document: ${param.document.link}`, 0)
+            }
+            break
+          case "video":
+            if (!param.video || !param.video.link) {
+              throw new WhatsAppApiException("Video parameter must include a link", 0)
+            }
+            if (!this.isValidUrl(param.video.link)) {
+              throw new WhatsAppApiException(`Invalid URL format for video: ${param.video.link}`, 0)
+            }
+            break
+          case "payload":
+            if (!param.payload) {
+              throw new WhatsAppApiException("Payload value is required for payload parameter", 0)
+            }
+            break
+          case "action":
+            if (!param.action) {
+              throw new WhatsAppApiException("Action object is required for action parameter", 0)
+            }
+            // For catalog actions, validate required fields
+            if (component.sub_type === "CATALOG" && !param.action.thumbnail_product_retailer_id) {
+              throw new WhatsAppApiException("thumbnail_product_retailer_id is required for CATALOG button", 0)
+            }
+            break
+          default:
+            throw new WhatsAppApiException(`Unsupported parameter type: ${param.type}`, 0)
+        }
+      }
     }
   }
 
@@ -218,93 +277,55 @@ export class Message {
    */
   private validateInteractive(interactive: InteractiveData): void {
     if (!interactive.type) {
-      throw new WhatsAppApiException("Interactive type is required", 0);
+      throw new WhatsAppApiException("Interactive type is required", 0)
     }
 
-    if (
-      ![
-        "button",
-        "list",
-        "product",
-        "product_list",
-        "cta_url",
-        "text",
-      ].includes(interactive.type)
-    ) {
+    if (!["button", "list", "product", "product_list", "cta_url", "text"].includes(interactive.type)) {
       throw new WhatsAppApiException(
         `Invalid interactive type: ${interactive.type}. Allowed types are: button, list, product, product_list, cta_url, text.`,
-        0
-      );
+        0,
+      )
     }
 
     if (!interactive.body || !interactive.body.text) {
-      throw new WhatsAppApiException(
-        "Body text is required for interactive messages",
-        0
-      );
+      throw new WhatsAppApiException("Body text is required for interactive messages", 0)
     }
 
     // Validate header if provided
     if (interactive.header) {
       if (!interactive.header.type) {
-        throw new WhatsAppApiException("Header type is required", 0);
+        throw new WhatsAppApiException("Header type is required", 0)
       }
 
-      if (
-        !["text", "image", "video", "document"].includes(
-          interactive.header.type
-        )
-      ) {
+      if (!["text", "image", "video", "document"].includes(interactive.header.type)) {
         throw new WhatsAppApiException(
           `Invalid header type: ${interactive.header.type}. Allowed types are: text, image, video, document.`,
-          0
-        );
+          0,
+        )
       }
 
       // Validate header content based on type
       switch (interactive.header.type) {
         case "text":
           if (!interactive.header.text) {
-            throw new WhatsAppApiException(
-              "Text is required for text header",
-              0
-            );
+            throw new WhatsAppApiException("Text is required for text header", 0)
           }
-          break;
+          break
         case "image":
-          if (
-            !interactive.header.image ||
-            (!interactive.header.image.link && !interactive.header.image.id)
-          ) {
-            throw new WhatsAppApiException(
-              "Image link or ID is required for image header",
-              0
-            );
+          if (!interactive.header.image || (!interactive.header.image.link && !interactive.header.image.id)) {
+            throw new WhatsAppApiException("Image link or ID is required for image header", 0)
           }
-          break;
+          break
         case "video":
-          if (
-            !interactive.header.video ||
-            (!interactive.header.video.link && !interactive.header.video.id)
-          ) {
-            throw new WhatsAppApiException(
-              "Video link or ID is required for video header",
-              0
-            );
+          if (!interactive.header.video || (!interactive.header.video.link && !interactive.header.video.id)) {
+            throw new WhatsAppApiException("Video link or ID is required for video header", 0)
           }
-          break;
+          break
         case "document":
-          if (
-            !interactive.header.document ||
-            (!interactive.header.document.link &&
-              !interactive.header.document.id)
-          ) {
-            throw new WhatsAppApiException(
-              "Document link or ID is required for document header",
-              0
-            );
+          if (!interactive.header.document || (!interactive.header.document.link && !interactive.header.document.id)) {
+            throw new WhatsAppApiException("Document link or ID is required for document header", 0)
           }
-          break;
+          break
       }
     }
 
@@ -313,40 +334,28 @@ export class Message {
       // Validate buttons if provided
       if (interactive.action.buttons) {
         if (interactive.action.buttons.length === 0) {
-          throw new WhatsAppApiException("At least one button is required", 0);
+          throw new WhatsAppApiException("At least one button is required", 0)
         }
 
         if (interactive.action.buttons.length > 3) {
-          throw new WhatsAppApiException("Maximum 3 buttons are allowed", 0);
+          throw new WhatsAppApiException("Maximum 3 buttons are allowed", 0)
         }
 
         for (const button of interactive.action.buttons) {
           if (!button.type) {
-            throw new WhatsAppApiException("Button type is required", 0);
+            throw new WhatsAppApiException("Button type is required", 0)
           }
 
-          if (
-            button.type === "reply" &&
-            (!button.reply || !button.reply.id || !button.reply.title)
-          ) {
-            throw new WhatsAppApiException(
-              "Reply ID and title are required for reply buttons",
-              0
-            );
+          if (button.type === "reply" && (!button.reply || !button.reply.id || !button.reply.title)) {
+            throw new WhatsAppApiException("Reply ID and title are required for reply buttons", 0)
           }
 
           if (button.type === "url" && (!button.url || !button.text)) {
-            throw new WhatsAppApiException(
-              "URL and text are required for URL buttons",
-              0
-            );
+            throw new WhatsAppApiException("URL and text are required for URL buttons", 0)
           }
 
           if (button.type === "url" && !this.isValidUrl(button.url!)) {
-            throw new WhatsAppApiException(
-              `Invalid URL format: ${button.url}`,
-              0
-            );
+            throw new WhatsAppApiException(`Invalid URL format: ${button.url}`, 0)
           }
         }
       }
@@ -354,27 +363,21 @@ export class Message {
       // Validate sections if provided
       if (interactive.action.sections) {
         if (interactive.action.sections.length === 0) {
-          throw new WhatsAppApiException("At least one section is required", 0);
+          throw new WhatsAppApiException("At least one section is required", 0)
         }
 
         for (const section of interactive.action.sections) {
           if (!section.title) {
-            throw new WhatsAppApiException("Section title is required", 0);
+            throw new WhatsAppApiException("Section title is required", 0)
           }
 
           if (!section.rows || section.rows.length === 0) {
-            throw new WhatsAppApiException(
-              "At least one row is required per section",
-              0
-            );
+            throw new WhatsAppApiException("At least one row is required per section", 0)
           }
 
           for (const row of section.rows) {
             if (!row.id || !row.title) {
-              throw new WhatsAppApiException(
-                "Row ID and title are required",
-                0
-              );
+              throw new WhatsAppApiException("Row ID and title are required", 0)
             }
           }
         }
@@ -388,198 +391,133 @@ export class Message {
    */
   private validateComponent(components: Component[]) {
     if (components.length === 0) {
-      throw new WhatsAppApiException("At least one component is required", 0);
+      throw new WhatsAppApiException("At least one component is required", 0)
     }
 
     components.forEach((component) => {
       switch (true) {
         case component instanceof LocationBuilder:
-          if (
-            component.latitude === undefined ||
-            component.longitude === undefined
-          ) {
-            throw new WhatsAppApiException(
-              "Latitude and longitude are required for location messages",
-              0
-            );
+          if (component.latitude === undefined || component.longitude === undefined) {
+            throw new WhatsAppApiException("Latitude and longitude are required for location messages", 0)
           }
 
           // Validate latitude range (-90 to 90)
           if (component.latitude < -90 || component.latitude > 90) {
-            throw new WhatsAppApiException(
-              "Latitude must be between -90 and 90 degrees",
-              0
-            );
+            throw new WhatsAppApiException("Latitude must be between -90 and 90 degrees", 0)
           }
 
           // Validate longitude range (-180 to 180)
           if (component.longitude < -180 || component.longitude > 180) {
-            throw new WhatsAppApiException(
-              "Longitude must be between -180 and 180 degrees",
-              0
-            );
+            throw new WhatsAppApiException("Longitude must be between -180 and 180 degrees", 0)
           }
-          break;
+          break
 
         case component instanceof ContactBuilder:
-          if (
-            !component.firstName ||
-            !component.phones ||
-            component.phones.length === 0
-          ) {
-            throw new WhatsAppApiException(
-              "First name and at least one phone number are required",
-              0
-            );
+          if (!component.firstName || !component.phones || component.phones.length === 0) {
+            throw new WhatsAppApiException("First name and at least one phone number are required", 0)
           }
 
           // Validate phone numbers
           component.phones.forEach((phone) => {
             if (!phone.number) {
-              throw new WhatsAppApiException(
-                "Phone number is required for each phone entry",
-                0
-              );
+              throw new WhatsAppApiException("Phone number is required for each phone entry", 0)
             }
 
             if (!/^\d+$/.test(phone.number.toString().replace(/\D/g, ""))) {
-              throw new WhatsAppApiException(
-                `Invalid phone number format: ${phone.number}`,
-                0
-              );
+              throw new WhatsAppApiException(`Invalid phone number format: ${phone.number}`, 0)
             }
-          });
+          })
 
           // Validate emails if provided
           if (component.emails && component.emails.length > 0) {
             component.emails.forEach((email) => {
               if (!email.address || !this.isValidEmail(email.address)) {
-                throw new WhatsAppApiException(
-                  `Invalid email format: ${email.address}`,
-                  0
-                );
+                throw new WhatsAppApiException(`Invalid email format: ${email.address}`, 0)
               }
-            });
+            })
           }
 
           // Validate URLs if provided
           if (component.urls && component.urls.length > 0) {
             component.urls.forEach((url) => {
               if (!url.url || !this.isValidUrl(url.url)) {
-                throw new WhatsAppApiException(
-                  `Invalid URL format: ${url.url}`,
-                  0
-                );
+                throw new WhatsAppApiException(`Invalid URL format: ${url.url}`, 0)
               }
-            });
+            })
           }
-          break;
+          break
 
         case component instanceof EmbedBuilder:
           if (!component.body) {
-            throw new WhatsAppApiException("Body is required in the Embed", 0);
+            throw new WhatsAppApiException("Body is required in the Embed", 0)
           }
 
           // Validate title length if provided
           if (component.title && component.title.length > 60) {
-            throw new WhatsAppApiException(
-              "Embed title must be 60 characters or less",
-              0
-            );
+            throw new WhatsAppApiException("Embed title must be 60 characters or less", 0)
           }
 
           // Validate body length
           if (component.body.length > 1000) {
-            throw new WhatsAppApiException(
-              "Embed body must be 1000 characters or less",
-              0
-            );
+            throw new WhatsAppApiException("Embed body must be 1000 characters or less", 0)
           }
 
           // Validate footer length if provided
           if (component.footer && component.footer.length > 60) {
-            throw new WhatsAppApiException(
-              "Embed footer must be 60 characters or less",
-              0
-            );
+            throw new WhatsAppApiException("Embed footer must be 60 characters or less", 0)
           }
-          break;
+          break
 
         case component instanceof ButtonBuilder:
           if (!component.type) {
-            throw new WhatsAppApiException("Button type is required", 0);
+            throw new WhatsAppApiException("Button type is required", 0)
           }
           if (component.type === "reply") {
-            if (
-              !component.reply ||
-              !component.reply.id ||
-              !component.reply.title
-            ) {
-              throw new WhatsAppApiException(
-                "Reply ID and title are required for reply buttons",
-                0
-              );
+            if (!component.reply || !component.reply.id || !component.reply.title) {
+              throw new WhatsAppApiException("Reply ID and title are required for reply buttons", 0)
             }
 
             if (component.text) {
-              throw new WhatsAppApiException(
-                "Text is not allowed for reply buttons",
-                0
-              );
+              throw new WhatsAppApiException("Text is not allowed for reply buttons", 0)
             }
           }
-          break;
+          break
 
         case component instanceof ListBuilder:
           if (!component.title) {
-            throw new WhatsAppApiException("List title is required", 0);
+            throw new WhatsAppApiException("List title is required", 0)
           }
 
           if (Array.isArray(component.rows) && component.rows.length === 0) {
-            throw new WhatsAppApiException(
-              "At least one row is required for the list",
-              0
-            );
+            throw new WhatsAppApiException("At least one row is required for the list", 0)
           }
 
           if (!component.buttonText) {
-            throw new WhatsAppApiException(
-              "Button text is required for the list",
-              0
-            );
+            throw new WhatsAppApiException("Button text is required for the list", 0)
           }
 
           // Validate button text length
           if (component.buttonText.length > 20) {
-            throw new WhatsAppApiException(
-              "Button text must be 20 characters or less",
-              0
-            );
+            throw new WhatsAppApiException("Button text must be 20 characters or less", 0)
           }
 
           // Validate title length
           if (component.title.length > 24) {
-            throw new WhatsAppApiException(
-              "List title must be 24 characters or less",
-              0
-            );
+            throw new WhatsAppApiException("List title must be 24 characters or less", 0)
           }
 
           // Validate rows
           component.rows.forEach((row) => {
             if (!row.id || !row.title) {
-              throw new WhatsAppApiException(
-                "Row ID and title are required for each row",
-                0
-              );
+              throw new WhatsAppApiException("Row ID and title are required for each row", 0)
             }
-          });
-          break;
+          })
+          break
 
         default:
-          throw new WhatsAppApiException("Unknown component type", 0);
+          throw new WhatsAppApiException("Unknown component type", 0)
       }
-    });
+    })
   }
 
   /**
@@ -589,10 +527,10 @@ export class Message {
    */
   private isValidUrl(url: string): boolean {
     try {
-      new URL(url);
-      return true;
+      new URL(url)
+      return true
     } catch (e) {
-      return false;
+      return false
     }
   }
 
@@ -602,8 +540,8 @@ export class Message {
    * @returns true if the email is valid
    */
   private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
   }
 
   /**
@@ -615,11 +553,12 @@ export class Message {
     // Initialize the message body with common properties
     const messageBody: Partial<MessageBodyPayload> = {
       messaging_product: "whatsapp",
+      recipient_type: "individual",
       to: payload.to,
-    };
+    }
 
     if (payload.context) {
-      messageBody.context = payload.context;
+      messageBody.context = payload.context
     }
 
     /** Determine the primary message type
@@ -634,16 +573,21 @@ export class Message {
      */
 
     if (payload.template) {
-      messageBody.type = "template";
+      messageBody.type = "template"
       messageBody.template = {
         name: payload.template.name,
         language: {
           code: payload.template.language,
         },
-      };
+      }
+
+      // Include template components if provided
+      if (payload.template.components && payload.template.components.length > 0) {
+        messageBody.template.components = payload.template.components
+      }
     } else if (payload.files && payload.files.length > 0) {
-      const file = payload.files[0];
-      messageBody.type = file.type;
+      const file = payload.files[0]
+      messageBody.type = file.type
 
       // Handle different file types
       switch (file.type) {
@@ -652,51 +596,51 @@ export class Message {
             ...(file.id ? { id: file.id } : {}),
             ...(file.url ? { link: file.url } : {}),
             ...(file.caption ? { caption: file.caption } : {}),
-          };
-          break;
+          }
+          break
         case "document":
           messageBody.document = {
             ...(file.id ? { id: file.id } : {}),
             ...(file.url ? { link: file.url } : {}),
             ...(file.caption ? { caption: file.caption } : {}),
             ...(file.filename ? { filename: file.filename } : {}),
-          };
-          break;
+          }
+          break
         case "audio":
           messageBody.audio = {
             ...(file.id ? { id: file.id } : {}),
             ...(file.url ? { link: file.url } : {}),
-          };
-          break;
+          }
+          break
         case "video":
           messageBody.video = {
             ...(file.id ? { id: file.id } : {}),
             ...(file.url ? { link: file.url } : {}),
             ...(file.caption ? { caption: file.caption } : {}),
-          };
-          break;
+          }
+          break
         case "sticker":
           messageBody.sticker = {
             ...(file.id ? { id: file.id } : {}),
             ...(file.url ? { link: file.url } : {}),
-          };
-          break;
+          }
+          break
       }
     } else if (payload.interactive) {
-      messageBody.type = "interactive";
-      messageBody.interactive = payload.interactive;
+      messageBody.type = "interactive"
+      messageBody.interactive = payload.interactive
     } else if (payload.reaction) {
-      messageBody.type = "reaction";
-      messageBody.reaction = payload.reaction;
+      messageBody.type = "reaction"
+      messageBody.reaction = payload.reaction
     } else if (payload.content) {
-      messageBody.type = "text";
+      messageBody.type = "text"
       messageBody.text = {
         body: payload.content,
-      };
+      }
     } else if (payload.embeds && payload.embeds.length > 0) {
       // Determinar el tipo de interactive basado en si hay componentes
 
-      const hasComponents = payload.components && payload.components.length > 0;
+      const hasComponents = payload.components && payload.components.length > 0
 
       const interactiveType = hasComponents
         ? payload.components?.[0] instanceof ButtonBuilder
@@ -704,22 +648,20 @@ export class Message {
             ? "button"
             : "cta_url"
           : payload.components?.[0] instanceof ListBuilder
-          ? "list"
-          : "text"
-        : "text";
+            ? "list"
+            : "text"
+        : "text"
 
       // Inicializar el objeto interactive
-      messageBody.type = "interactive";
+      messageBody.type = "interactive"
 
       // Verificar si hay un archivo que pueda usarse como header
       const hasValidHeaderFile =
-        payload.files &&
-        payload.files.length > 0 &&
-        ["image", "video", "document"].includes(payload.files[0].type);
+        payload.files && payload.files.length > 0 && ["image", "video", "document"].includes(payload.files[0].type)
 
       if (hasValidHeaderFile) {
         // Si hay un archivo válido para el header, usarlo
-        const file = payload.files![0];
+        const file = payload.files![0]
 
         messageBody.interactive = {
           type: interactiveType,
@@ -738,7 +680,7 @@ export class Message {
                 },
               }
             : {}),
-        };
+        }
       } else {
         // Si no hay un archivo válido o no hay archivos, usar un header de texto
         messageBody.interactive = {
@@ -757,7 +699,7 @@ export class Message {
                 },
               }
             : {}),
-        };
+        }
       }
 
       // Si hay componentes, agregarlos como botones de acción
@@ -772,16 +714,13 @@ export class Message {
                     return {
                       display_text: component.text!,
                       url: component.url!,
-                    };
+                    }
                   }
-                  return undefined;
+                  return undefined
                 })
-                .filter(
-                  (param): param is { display_text: string; url: string } =>
-                    param !== undefined
-                )[0],
-            };
-            break;
+                .filter((param): param is { display_text: string; url: string } => param !== undefined)[0],
+            }
+            break
           case "button":
             messageBody.interactive.action = {
               buttons: payload.components
@@ -798,21 +737,21 @@ export class Message {
                           }
                         : {}),
                       ...(component.url ? { url: component.url } : {}),
-                    };
+                    }
                   }
-                  return undefined;
+                  return undefined
                 })
                 .filter(
                   (
-                    button
+                    button,
                   ): button is {
-                    type: "reply" | "url";
-                    reply?: { id: string; title: string };
-                    url?: string;
-                  } => button !== undefined
+                    type: "reply" | "url"
+                    reply?: { id: string; title: string }
+                    url?: string
+                  } => button !== undefined,
                 ),
-            };
-            break;
+            }
+            break
           case "list":
             messageBody.interactive.action = {
               sections: payload.components
@@ -825,89 +764,87 @@ export class Message {
                         title: row.title,
                         ...(row.description ? { description: row.description } : {}),
                       })),
-                    };
+                    }
                   }
-                  return undefined;
+                  return undefined
                 })
-                .filter((section): section is { title: string; rows: { id: string; title: string; description?: string }[] } => section !== undefined),
-                button: (payload.components[0] as unknown as ListBuilder).buttonText,
+                .filter(
+                  (
+                    section,
+                  ): section is { title: string; rows: { id: string; title: string; description?: string }[] } =>
+                    section !== undefined,
+                ),
+              button: (payload.components[0] as unknown as ListBuilder).buttonText,
             }
-            break;
+            break
           default:
-            throw new WhatsAppApiException(
-              "Unsupported component type in interactive action",
-              0
-            );
+            throw new WhatsAppApiException("Unsupported component type in interactive action", 0)
         }
       }
     } else if (payload.components) {
       payload.components.forEach((component) => {
         if (component instanceof LocationBuilder) {
-          messageBody.type = "location";
+          messageBody.type = "location"
           messageBody.location = {
             latitude: component.latitude,
             longitude: component.longitude,
             ...(component.name ? { name: component.name } : {}),
             ...(component.address ? { address: component.address } : {}),
-          };
+          }
         } else if (component instanceof ContactBuilder) {
-          messageBody.type = "contacts";
+          messageBody.type = "contacts"
 
-          const phones: ContactPayloadData["phones"] = [];
+          const phones: ContactPayloadData["phones"] = []
           component.phones.forEach((phone) => {
             phones.push({
               phone: phone.number,
               type: phone.type ?? undefined,
               wa_id: phone.wa_id,
-            });
-          });
+            })
+          })
 
-          const emails: ContactPayloadData["emails"] = [];
+          const emails: ContactPayloadData["emails"] = []
           component.emails?.forEach((email) => {
             emails.push({
               email: email.address,
               type: email.type === "work" ? "WORK" : "HOME",
-            });
-          });
+            })
+          })
 
-          const addresses: ContactPayloadData["addresses"] = [];
+          const addresses: ContactPayloadData["addresses"] = []
           component.addresses?.forEach((address) => {
             addresses.push({
-              street: `${address.street.name} ${
-                address.street.number ?? ""
-              }`.trim(),
+              street: `${address.street.name} ${address.street.number ?? ""}`.trim(),
               city: address.city,
               state: address.country?.stateCode,
               zip: address.zipCode,
               country: address.country?.name,
               country_code: address.country?.code,
               type: address.type === "home" ? "HOME" : "WORK",
-            });
-          });
+            })
+          })
 
-          const urls: ContactPayloadData["urls"] = [];
+          const urls: ContactPayloadData["urls"] = []
           component.urls?.forEach((website) => {
             urls.push({
               url: website.url,
               type: website.type === "work" ? "WORK" : "HOME",
-            });
-          });
+            })
+          })
 
           const name = {
             formatted_name: component.formattedName ?? component.firstName,
             first_name: component.firstName,
-            ...(component.middleName
-              ? { middle_name: component.middleName }
-              : {}),
+            ...(component.middleName ? { middle_name: component.middleName } : {}),
             ...(component.lastName ? { last_name: component.lastName } : {}),
             ...(component.namePrefix ? { prefix: component.namePrefix } : {}),
-          };
+          }
 
           const org = {
             company: component.company?.name,
             department: component.company?.departmentName,
             title: component.job?.title,
-          };
+          }
 
           messageBody.contacts = [
             {
@@ -919,16 +856,16 @@ export class Message {
               birthday: component.birthday?.toISOString().split("T")[0],
               org: org.company ? org : undefined,
             },
-          ];
+          ]
         } else {
-          throw new WhatsAppApiException("Unsupported component type", 0);
+          throw new WhatsAppApiException("Unsupported component type", 0)
         }
-      });
+      })
     } else {
       // If we reach here, something went wrong with validation
-      throw new WhatsAppApiException("Invalid message payload", 0);
+      throw new WhatsAppApiException("Invalid message payload", 0)
     }
 
-    return messageBody as MessageBodyPayload;
+    return messageBody as MessageBodyPayload
   }
 }

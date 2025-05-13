@@ -42,8 +42,54 @@ export interface LocationData {
 export interface TemplateData {
   name: string
   language: LanguageCode
-  // components?: Component[] // ? I should make it compatible to send components and templates? I should... 
+  components?: TemplateComponent[]
 }
+
+// Add new interfaces for template components and parameters
+export interface TemplateComponent {
+  type: "header" | "body" | "button" | "footer"
+  sub_type?: "quick_reply" | "url" | "CATALOG"
+  index?: string | number
+  parameters: TemplateParameter[]
+}
+
+// Update the TemplateParameter interface to include all parameter types
+export interface TemplateParameter {
+  type: "text" | "currency" | "date_time" | "image" | "document" | "video" | "payload" | "action"
+  text?: string
+  currency?: {
+    fallback_value: string
+    code: string
+    amount_1000: number
+  }
+  date_time?: {
+    fallback_value: string
+    day_of_week?: number
+    year?: number
+    month?: number
+    day_of_month?: number
+    hour?: number
+    minute?: number
+    calendar?: "GREGORIAN"
+  }
+  image?: {
+    link: string
+  }
+  document?: {
+    link: string
+  }
+  video?: {
+    link: string
+  }
+  payload?: string
+  action?: {
+    thumbnail_product_retailer_id?: string
+    catalog_id?: string
+    product_retailer_id?: string
+    link?: string
+  }
+}
+
 
 // Interactive data
 export interface InteractiveData {
@@ -118,34 +164,13 @@ export interface MessagePayload {
   embeds?: Embed[],
 }
 
-// Template components
-export interface TemplateParameter {
-  type: "text" | "currency" | "date_time" | "image" | "document" | "video"
-  text?: string
-  currency?: {
-    code: string
-    amount: number
-  }
-  date_time?: {
-    fallback_value: string
-  }
-  image?: {
-    link: string
-  }
-  document?: {
-    link: string
-  }
-  video?: {
-    link: string
-  }
-}
-
 // Message body structure for the API
 export interface MessageBodyPayload {
   messaging_product: string
+  recipient_type?: string
   to: string
   type: MessageType
-  context?: Context 
+  context?: Context
   text?: {
     body: string
   }
@@ -154,7 +179,7 @@ export interface MessageBodyPayload {
     language: {
       code: LanguageCode
     }
-    components?: Component[]
+    components?: TemplateComponent[]
   }
   image?: {
     link?: string
