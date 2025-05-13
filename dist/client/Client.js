@@ -134,16 +134,7 @@ class Client extends events_1.EventEmitter {
      * @internal
      */
     async makeApiRequest(url, method, data) {
-        console.log(`Making API request: ${method} ${url}`, data ? { dataProvided: true } : { dataProvided: false });
-        try {
-            const response = await this.apiService.request(url, method, data);
-            console.log(`API request successful: ${method} ${url}`, { responseReceived: true });
-            return response;
-        }
-        catch (error) {
-            console.error(`API request failed: ${method} ${url}`, error);
-            throw error;
-        }
+        return this.apiService.request(url, method, data);
     }
     /**
      * Makes a request to the phone endpoint
@@ -154,35 +145,19 @@ class Client extends events_1.EventEmitter {
      * @internal
      */
     async makePhoneRequest(endpoint, method, data) {
-        console.log(`Making phone request: ${method} ${endpoint || "[root]"}`, data ? { dataProvided: true } : { dataProvided: false });
-        try {
-            const response = await this.apiService.phoneRequest(endpoint, method, data);
-            console.log(`Phone request successful: ${method} ${endpoint || "[root]"}`, { responseReceived: true });
-            return response;
-        }
-        catch (error) {
-            console.error(`Phone request failed: ${method} ${endpoint || "[root]"}`, error);
-            throw error;
-        }
+        return this.apiService.phoneRequest(endpoint, method, data);
     }
     async initializeClientData() {
-        console.log("Starting client data initialization...");
         try {
-            const data = await this.makePhoneRequest("", "GET");
-            console.log("Client data received:", data);
+            // Usar el endpoint correcto "whatsapp_business_profile" en lugar de un string vacío
+            const data = await this.makePhoneRequest("whatsapp_business_profile", "GET");
             this.name = data.verified_name;
             this.quality = data.quality_rating;
             this.id = data.id;
             this.displayPhoneNumber = data.display_phone_number;
-            console.log("Client data initialized successfully:", {
-                name: this.name,
-                quality: this.quality,
-                id: this.id,
-                displayPhoneNumber: this.displayPhoneNumber,
-            });
         }
         catch (error) {
-            console.error("Failed to initialize client data:", error);
+            console.error("Error initializing client data:", error);
             throw error;
         }
     }

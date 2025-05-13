@@ -22,9 +22,7 @@ class WhatsAppApiService {
      * @returns Base API URL
      */
     getApiUrl() {
-        const url = `https://graph.facebook.com/${this.version}/${this.phoneId}`;
-        console.log("API URL constructed:", url);
-        return url;
+        return `https://graph.facebook.com/${this.version}/${this.phoneId}`;
     }
     /**
      * Makes a request to the WhatsApp API
@@ -35,17 +33,7 @@ class WhatsAppApiService {
      */
     async request(endpoint, method, data) {
         try {
-            const url = `${this.getApiUrl()}/${endpoint}`;
-            console.log(`Making request to: ${method} ${url}`);
-            const headers = {
-                Authorization: `Bearer ${this.accessToken.substring(0, 4)}...`, // Solo mostrar los primeros 4 caracteres por seguridad
-                "Content-Type": "application/json",
-            };
-            console.log("Request headers:", headers);
-            if (data) {
-                console.log("Request body:", JSON.stringify(data, null, 2));
-            }
-            const response = await fetch(url, {
+            const response = await fetch(`${this.getApiUrl()}/${endpoint}`, {
                 method,
                 headers: {
                     Authorization: `Bearer ${this.accessToken}`,
@@ -53,12 +41,9 @@ class WhatsAppApiService {
                 },
                 body: data ? JSON.stringify(data) : undefined,
             });
-            console.log(`Response status: ${response.status} ${response.statusText}`);
             const responseData = await response.json();
-            console.log("Response data:", JSON.stringify(responseData, null, 2));
             if (!response.ok) {
                 // If the response is not successful, process the error
-                console.error("Error response received:", responseData);
                 this.handleApiError(responseData);
             }
             return responseData;
@@ -66,17 +51,9 @@ class WhatsAppApiService {
         catch (error) {
             // If it's already a WhatsAppApiException, propagate it
             if (error instanceof Messages_1.WhatsAppApiException) {
-                console.error("WhatsApp API Exception:", {
-                    message: error.message,
-                    code: error.code,
-                    subcode: error.subcode,
-                    details: error.details,
-                    traceId: error.traceId,
-                });
                 throw error;
             }
             // If it's another type of error, convert it to WhatsAppApiException
-            console.error("Unknown error during API request:", error);
             throw new Messages_1.WhatsAppApiException(error instanceof Error ? error.message : "Unknown error", 0);
         }
     }
@@ -105,26 +82,17 @@ class WhatsAppApiService {
      * @param errorResponse Error response
      */
     handleApiError(errorResponse) {
-        console.error("Handling API error:", errorResponse);
         // Check if the response has the expected format
         if (errorResponse && errorResponse.error) {
             const apiError = errorResponse.error;
-            console.error("API error details:", {
-                message: apiError.message,
-                type: apiError.type,
-                code: apiError.code,
-                error_data: apiError.error_data,
-                error_subcode: apiError.error_subcode,
-                fbtrace_id: apiError.fbtrace_id,
-            });
             // Get the descriptive message for the error code
-            const message = (0, Messages_1.getErrorMessage)(apiError.code);
-            console.error("Error message from code:", message);
+            const codeMessage = (0, Messages_1.getErrorMessage)(apiError.code);
+            // Combine the API's original error message with our descriptive message
+            const fullMessage = `${apiError.message} - ${codeMessage}`;
             // Throw a custom exception with the error details
-            throw new Messages_1.WhatsAppApiException(message, apiError.code, apiError.error_subcode, apiError.error_data?.details, apiError.fbtrace_id);
+            throw new Messages_1.WhatsAppApiException(fullMessage, apiError.code, apiError.error_subcode, apiError.error_data?.details, apiError.fbtrace_id);
         }
         // If the response doesn't have the expected format, throw a generic exception
-        console.error("Unknown error format:", errorResponse);
         throw new Messages_1.WhatsAppApiException("Unknown error in the WhatsApp API", 0);
     }
     /**
