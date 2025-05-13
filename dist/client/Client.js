@@ -19,11 +19,6 @@ class Client extends events_1.EventEmitter {
         this.id = null;
         this.displayPhoneNumber = null;
         const { phoneId, accessToken, webhook } = options;
-        console.log("Initializing WhatsApp client with options:", {
-            phoneId: phoneId ? `${phoneId.substring(0, 4)}...` : undefined, // Solo mostrar los primeros 4 caracteres por seguridad
-            accessTokenProvided: !!accessToken,
-            webhookProvided: !!webhook,
-        });
         if (!phoneId || !accessToken) {
             throw new Error("Phone ID and Access Token are required");
         }
