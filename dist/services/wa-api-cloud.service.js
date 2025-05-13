@@ -66,10 +66,8 @@ class WhatsAppApiService {
      * @returns Promise with the response
      */
     async phoneRequest(endpoint, method, data) {
-        console.log(`Phone request: ${method} ${endpoint || "[root]"}`);
         try {
             const result = await this.request(endpoint, method, data);
-            console.log("Phone request successful");
             return result;
         }
         catch (error) {
