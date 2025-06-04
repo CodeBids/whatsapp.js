@@ -25,7 +25,7 @@ class LocationBuilder {
         this.latitude = latitude;
     }
     setLongitude(longitude) {
-        this.latitude = longitude;
+        this.longitude = longitude;
     }
     setPhoneNumber(number) {
         this.phone_number = number;
