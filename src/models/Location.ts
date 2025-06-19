@@ -35,7 +35,7 @@ export class LocationBuilder implements LocationInterface {
   }
 
   public setLongitude(longitude: number) {
-    this.latitude = longitude
+    this.longitude = longitude
   }
 
   public setPhoneNumber(number: number) {
