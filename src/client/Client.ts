@@ -56,6 +56,11 @@ export class Client extends EventEmitter {
         this._startWebhookServer(webhook.port)
       }
     }
+
+    // When all promises are resolved, emit the 'ready' event
+    Promise.all([this.initializeClientData()]).then(() => {
+      this.emit("ready")
+    })
   }
 
   /**
