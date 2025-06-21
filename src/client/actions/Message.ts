@@ -664,19 +664,11 @@ export class Message {
           }
           if (component.type === "reply") {
             if (
-              !component.reply ||
-              !component.reply.id ||
-              !component.reply.title
+              !component.id ||
+              !component.text
             ) {
               throw new WhatsAppApiException(
-                "Reply ID and title are required for reply buttons",
-                0
-              );
-            }
-
-            if (component.text) {
-              throw new WhatsAppApiException(
-                "Text is not allowed for reply buttons",
+                "ID and text are required for reply buttons",
                 0
               );
             }
@@ -955,11 +947,11 @@ export class Message {
                   if (component instanceof ButtonBuilder && component.type) {
                     return {
                       type: component.type,
-                      ...(component.reply
+                      ...(component.id && component.text
                         ? {
                             reply: {
-                              id: component.reply.id,
-                              title: component.text ?? component.reply.title,
+                              id: component.id,
+                              title: component.text,
                             },
                           }
                         : {}),
@@ -973,7 +965,8 @@ export class Message {
                     button
                   ): button is {
                     type: "reply" | "url";
-                    reply?: { id: string; title: string };
+                    id?: string;
+                    text?: string;
                     url?: string;
                   } => button !== undefined
                 ),

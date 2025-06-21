@@ -406,13 +406,9 @@ class Message {
                         throw new Messages_1.WhatsAppApiException("Button type is required", 0);
                     }
                     if (component.type === "reply") {
-                        if (!component.reply ||
-                            !component.reply.id ||
-                            !component.reply.title) {
-                            throw new Messages_1.WhatsAppApiException("Reply ID and title are required for reply buttons", 0);
-                        }
-                        if (component.text) {
-                            throw new Messages_1.WhatsAppApiException("Text is not allowed for reply buttons", 0);
+                        if (!component.id ||
+                            !component.text) {
+                            throw new Messages_1.WhatsAppApiException("ID and text are required for reply buttons", 0);
                         }
                     }
                     break;
@@ -652,11 +648,11 @@ class Message {
                                 if (component instanceof __1.ButtonBuilder && component.type) {
                                     return {
                                         type: component.type,
-                                        ...(component.reply
+                                        ...(component.id && component.text
                                             ? {
                                                 reply: {
-                                                    id: component.reply.id,
-                                                    title: component.text ?? component.reply.title,
+                                                    id: component.id,
+                                                    title: component.text,
                                                 },
                                             }
                                             : {}),

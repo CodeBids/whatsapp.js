@@ -1,10 +1,7 @@
 import { Button as ButtonInterface } from '../types/structures/Button';
 export declare class ButtonBuilder implements ButtonInterface {
     type?: 'reply' | 'url';
-    reply?: {
-        id: string;
-        title: string;
-    };
+    id?: string;
     url?: string;
     text?: string;
     constructor(data: ButtonInterface);
@@ -18,4 +15,14 @@ export declare class ButtonBuilder implements ButtonInterface {
      * @param url The URL to be opened when the button is clicked.
      * */
     setUrl(url: string): void;
+    /**
+     * Sets the ID for the button.
+     * @param id The unique identifier for the button.
+     * */
+    setId(id: string): void;
+    /**
+     * Sets the type of the button.
+     * @param type The type of the button, either 'reply' or 'url'.
+     * */
+    setType(type: 'reply' | 'url'): void;
 }

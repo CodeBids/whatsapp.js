@@ -1,9 +1,6 @@
 export interface Button {
   url?: string;
-  reply?: {
-    id: string;
-    title: string;
-  };
+  id?: string;
   text?: string;
   type?: "reply" | "url";
 }

@@ -2,10 +2,7 @@ import { Button as ButtonInterface } from '../types/structures/Button'
 
 export class ButtonBuilder implements ButtonInterface {
   type?: 'reply' | 'url'
-  reply?: {
-    id: string
-    title: string
-  }
+  id?: string
   url?: string
   text?: string
 
@@ -27,5 +24,21 @@ export class ButtonBuilder implements ButtonInterface {
    * */
   public setUrl(url: string): void {
     this.url = url;
+  }
+
+  /**
+   * Sets the ID for the button.
+   * @param id The unique identifier for the button.
+   * */
+  public setId(id: string): void {
+    this.id = id;
+  }
+
+  /**
+   * Sets the type of the button.
+   * @param type The type of the button, either 'reply' or 'url'.
+   * */
+  public setType(type: 'reply' | 'url'): void {
+    this.type = type;
   }
 }

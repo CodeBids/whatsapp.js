@@ -59,7 +59,13 @@ export class Client extends EventEmitter {
 
     // When all promises are resolved, emit the 'ready' event
     Promise.all([this.initializeClientData()]).then(() => {
-      this.emit("ready")
+      // Get the client data and emit 'ready' event with client info
+      this.emit("ready", {
+        name: this.name,
+        quality: this.quality,
+        id: this.id,
+        displayPhoneNumber: this.displayPhoneNumber,
+      })
     })
   }
 

@@ -19,5 +19,19 @@ class ButtonBuilder {
     setUrl(url) {
         this.url = url;
     }
+    /**
+     * Sets the ID for the button.
+     * @param id The unique identifier for the button.
+     * */
+    setId(id) {
+        this.id = id;
+    }
+    /**
+     * Sets the type of the button.
+     * @param type The type of the button, either 'reply' or 'url'.
+     * */
+    setType(type) {
+        this.type = type;
+    }
 }
 exports.ButtonBuilder = ButtonBuilder;
