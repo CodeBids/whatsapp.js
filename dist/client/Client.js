@@ -30,7 +30,7 @@ class Client extends events_1.EventEmitter {
             console.error("Invalid Access Token format");
             throw new Error("Access Token must be alphanumeric");
         }
-        this.apiService = new wa_api_cloud_service_1.WhatsAppApiService(accessToken, "v22.0", phoneId);
+        this.apiService = new wa_api_cloud_service_1.WhatsAppApiService(accessToken, "v23.0", phoneId);
         this.message = new Message_1.Message(this);
         this.initializeClientData().catch((error) => {
             console.error("Error initializing client data:", error);
