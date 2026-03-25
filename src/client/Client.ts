@@ -39,7 +39,7 @@ export class Client extends EventEmitter {
       throw new Error("Access Token must be alphanumeric")
     }
 
-    this.apiService = new WhatsAppApiService(accessToken, "v23.0", phoneId)
+    this.apiService = new WhatsAppApiService(accessToken, "v25.0", phoneId)
 
     this.message = new Message(this)
 
