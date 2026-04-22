@@ -2,7 +2,7 @@ import { EventEmitter } from "events"
 import { Message } from "./actions/Message"
 import { IncomingMessage } from "../models/IncomingMessage"
 import { WhatsAppApiService } from "../services/wa-api-cloud.service"
-import type { ClientData, ClientInfoResponse, ClientOptions } from "../types"
+import type { ClientData, ClientInfoResponse, ClientOptions, BusinessProfileUpdate, MediaUploadResponse, MediaUrlResponse, MediaDeleteResponse } from "../types"
 import { WebhookHandler, EventType } from "./webhook/handlers/WebhookHandler"
 
 /**
@@ -230,5 +230,79 @@ export class Client extends EventEmitter {
   public async getBusinessProfile(): Promise<ClientInfoResponse> {
     const url = `whatsapp_business_profile?fields=about,address,description,email,profile_picture_url,websites,vertical`
     return await this.makeApiRequest<ClientInfoResponse>(url, "GET")
+  }
+
+  /**
+   * Updates the business profile
+   * @param profile Business profile fields to update
+   * @returns API response
+   */
+  public async updateBusinessProfile(profile: BusinessProfileUpdate): Promise<any> {
+    return await this.makeApiRequest("whatsapp_business_profile", "POST", {
+      messaging_product: "whatsapp",
+      ...profile,
+    })
+  }
+
+  /**
+   * Sends a typing indicator to the user
+   * @param to Recipient's phone number
+   * @returns API response
+   */
+  public async sendTypingIndicator(to: string): Promise<any> {
+    return await this.makeApiRequest("messages", "POST", {
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to,
+      typing: "typing",
+    })
+  }
+
+  /**
+   * Uploads media to WhatsApp servers
+   * @param fileBuffer File content as Buffer
+   * @param mimeType MIME type of the file (e.g., "image/jpeg", "video/mp4")
+   * @param filename Filename for the upload
+   * @returns Promise with the media ID
+   */
+  public async uploadMedia(fileBuffer: Buffer, mimeType: string, filename: string): Promise<MediaUploadResponse> {
+    return this.apiService.uploadMedia(fileBuffer, mimeType, filename)
+  }
+
+  /**
+   * Gets the URL of an uploaded media file
+   * @param mediaId Media ID
+   * @returns Promise with the media URL information
+   */
+  public async getMediaUrl(mediaId: string): Promise<MediaUrlResponse> {
+    return this.apiService.getMediaUrl(mediaId)
+  }
+
+  /**
+   * Deletes an uploaded media file
+   * @param mediaId Media ID
+   * @returns Promise with the deletion result
+   */
+  public async deleteMedia(mediaId: string): Promise<MediaDeleteResponse> {
+    return this.apiService.deleteMedia(mediaId)
+  }
+
+  /**
+   * Downloads media from WhatsApp servers
+   * @param mediaUrl The media URL obtained from getMediaUrl
+   * @returns Promise with the media as ArrayBuffer
+   */
+  public async downloadMedia(mediaUrl: string): Promise<ArrayBuffer> {
+    return this.apiService.downloadMedia(mediaUrl)
+  }
+
+  /**
+   * Downloads media by its ID (convenience method)
+   * @param mediaId Media ID
+   * @returns Promise with the media as ArrayBuffer
+   */
+  public async downloadMediaById(mediaId: string): Promise<ArrayBuffer> {
+    const mediaInfo = await this.getMediaUrl(mediaId)
+    return this.downloadMedia(mediaInfo.url)
   }
 }

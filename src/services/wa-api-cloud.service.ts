@@ -1,4 +1,5 @@
 import type { WhatsAppApiError } from "../errors/ErrorCodes"
+import type { MediaUrlResponse, MediaDeleteResponse, MediaUploadResponse } from "../types/message"
 import { WhatsAppApiException, getErrorMessage } from "../errors/Messages"
 
 /**
@@ -80,6 +81,128 @@ export class WhatsAppApiService {
     } catch (error) {
       console.error("Phone request failed:", error)
       throw error
+    }
+  }
+
+  /**
+   * Uploads media to WhatsApp servers
+   * @param filePath Path to the file
+   * @param mimeType MIME type of the file
+   * @param fileBuffer File content as Buffer
+   * @returns Promise with the media ID
+   */
+  async uploadMedia(fileBuffer: Buffer, mimeType: string, filename: string): Promise<MediaUploadResponse> {
+    try {
+      const formData = new FormData()
+      formData.append("messaging_product", "whatsapp")
+      formData.append("file", new Blob([fileBuffer], { type: mimeType }), filename)
+      formData.append("type", mimeType)
+
+      const response = await fetch(`${this.getApiUrl()}/media`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+        },
+        body: formData,
+      })
+
+      const responseData = await response.json()
+
+      if (!response.ok) {
+        this.handleApiError(responseData)
+      }
+
+      return responseData as MediaUploadResponse
+    } catch (error) {
+      if (error instanceof WhatsAppApiException) {
+        throw error
+      }
+      throw new WhatsAppApiException(error instanceof Error ? error.message : "Unknown error uploading media", 0)
+    }
+  }
+
+  /**
+   * Gets the URL of an uploaded media file
+   * @param mediaId Media ID
+   * @returns Promise with the media URL info
+   */
+  async getMediaUrl(mediaId: string): Promise<MediaUrlResponse> {
+    try {
+      const response = await fetch(`https://graph.facebook.com/${this.version}/${mediaId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+        },
+      })
+
+      const responseData = await response.json()
+
+      if (!response.ok) {
+        this.handleApiError(responseData)
+      }
+
+      return responseData as MediaUrlResponse
+    } catch (error) {
+      if (error instanceof WhatsAppApiException) {
+        throw error
+      }
+      throw new WhatsAppApiException(error instanceof Error ? error.message : "Unknown error getting media URL", 0)
+    }
+  }
+
+  /**
+   * Deletes an uploaded media file
+   * @param mediaId Media ID
+   * @returns Promise with the deletion result
+   */
+  async deleteMedia(mediaId: string): Promise<MediaDeleteResponse> {
+    try {
+      const response = await fetch(`https://graph.facebook.com/${this.version}/${mediaId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+        },
+      })
+
+      const responseData = await response.json()
+
+      if (!response.ok) {
+        this.handleApiError(responseData)
+      }
+
+      return responseData as MediaDeleteResponse
+    } catch (error) {
+      if (error instanceof WhatsAppApiException) {
+        throw error
+      }
+      throw new WhatsAppApiException(error instanceof Error ? error.message : "Unknown error deleting media", 0)
+    }
+  }
+
+  /**
+   * Downloads media from WhatsApp servers
+   * @param mediaUrl The media URL obtained from getMediaUrl
+   * @returns Promise with the media as ArrayBuffer
+   */
+  async downloadMedia(mediaUrl: string): Promise<ArrayBuffer> {
+    try {
+      const response = await fetch(mediaUrl, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new WhatsAppApiException(`Failed to download media: ${response.status}`, response.status)
+      }
+
+      return await response.arrayBuffer()
+    } catch (error) {
+      if (error instanceof WhatsAppApiException) {
+        throw error
+      }
+      throw new WhatsAppApiException(error instanceof Error ? error.message : "Unknown error downloading media", 0)
     }
   }
 

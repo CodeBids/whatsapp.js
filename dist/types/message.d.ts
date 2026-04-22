@@ -3,7 +3,7 @@ import type { LocationBuilder } from "../models/Location";
 import { ContactBuilder } from "../models/Contact";
 import { ContactPayloadData, Embed } from ".";
 import { ButtonBuilder } from "../models/Button";
-export type MessageType = "text" | "template" | "image" | "document" | "audio" | "video" | "sticker" | "location" | "contacts" | "interactive" | "reaction";
+export type MessageType = "text" | "template" | "image" | "document" | "audio" | "video" | "sticker" | "location" | "contacts" | "interactive" | "reaction" | "address_message";
 export type Component = Embed | LocationBuilder | ContactBuilder | ButtonBuilder;
 export interface FileAttachment {
     type: "audio" | "image" | "document" | "sticker" | "video";
@@ -66,7 +66,7 @@ export interface TemplateParameter {
     };
 }
 export interface InteractiveData {
-    type: "button" | "list" | "product" | "product_list" | "cta_url" | "text";
+    type: "button" | "list" | "product" | "product_list" | "cta_url" | "text" | "location_request_message" | "flow" | "address_message";
     header?: {
         type: "text" | "image" | "video" | "document" | "location";
         text?: string;
@@ -115,6 +115,21 @@ export interface InteractiveData {
         catalog_id?: string;
         product_retailer_id?: string;
         name?: string;
+        flow_message_version?: string;
+        flow_token?: string;
+        flow_id?: string;
+        flow_cta?: string;
+        flow_action?: "navigate" | "data_exchange";
+        flow_action_payload?: {
+            screen?: string;
+            data?: Record<string, any>;
+        };
+        sections_product_list?: Array<{
+            title: string;
+            product_items: Array<{
+                product_retailer_id: string;
+            }>;
+        }>;
     };
 }
 export interface ReactionData {
@@ -131,6 +146,63 @@ export interface MessagePayload {
     reaction?: ReactionData;
     context?: Context;
     embeds?: Embed[];
+    locationRequest?: {
+        body: string;
+    };
+    flow?: FlowData;
+    addressMessage?: AddressMessageData;
+    product?: ProductData;
+    productList?: {
+        catalog_id: string;
+        header?: string;
+        body: string;
+        footer?: string;
+        sections: ProductListSection[];
+    };
+}
+export interface FlowData {
+    header?: string;
+    body: string;
+    footer?: string;
+    flow_id: string;
+    flow_cta: string;
+    flow_token?: string;
+    flow_message_version?: string;
+    flow_action?: "navigate" | "data_exchange";
+    flow_action_payload?: {
+        screen?: string;
+        data?: Record<string, any>;
+    };
+}
+export interface AddressMessageData {
+    country: string;
+    values?: {
+        name?: string;
+        phone_number?: string;
+        in_pin_code?: string;
+        floor_number?: string;
+        tower_number?: string;
+        building_name?: string;
+        address?: string;
+        landmark_area?: string;
+        city?: string;
+        state?: string;
+    };
+    saved_addresses?: Array<{
+        id: string;
+        value: {
+            name?: string;
+            phone_number?: string;
+            in_pin_code?: string;
+            floor_number?: string;
+            tower_number?: string;
+            building_name?: string;
+            address?: string;
+            landmark_area?: string;
+            city?: string;
+            state?: string;
+        };
+    }>;
 }
 export interface MessageBodyPayload {
     messaging_product: string;
@@ -176,6 +248,14 @@ export interface MessageBodyPayload {
     contacts?: ContactPayloadData[];
     interactive?: InteractiveData;
     reaction?: ReactionData;
+    address_message?: {
+        country: string;
+        values?: Record<string, string>;
+        saved_addresses?: Array<{
+            id: string;
+            value: Record<string, string>;
+        }>;
+    };
 }
 export interface MessageApiResponse {
     messaging_product: string;
@@ -193,4 +273,72 @@ export interface Message {
 }
 export interface Context {
     message_id: string;
+}
+export interface MediaUploadResponse {
+    id: string;
+}
+export interface MediaUrlResponse {
+    messaging_product: string;
+    url: string;
+    mime_type: string;
+    sha256: string;
+    file_size: string;
+    id: string;
+}
+export interface MediaDeleteResponse {
+    success: boolean;
+}
+export interface TypingIndicatorPayload {
+    messaging_product: string;
+    recipient_type: string;
+    to: string;
+    typing?: "typing";
+    status?: "read";
+    message_id?: string;
+}
+export interface AddressMessagePayload {
+    messaging_product: string;
+    recipient_type: string;
+    to: string;
+    type: "address_message";
+    address_message: {
+        country: string;
+        values?: {
+            name?: string;
+            phone_number?: string;
+            in_pin_code?: string;
+            floor_number?: string;
+            tower_number?: string;
+            building_name?: string;
+            address?: string;
+            landmark_area?: string;
+            city?: string;
+            state?: string;
+        };
+        saved_addresses?: Array<{
+            id: string;
+            value: {
+                name?: string;
+                phone_number?: string;
+                in_pin_code?: string;
+                floor_number?: string;
+                tower_number?: string;
+                building_name?: string;
+                address?: string;
+                landmark_area?: string;
+                city?: string;
+                state?: string;
+            };
+        }>;
+    };
+}
+export interface ProductData {
+    catalog_id: string;
+    product_retailer_id: string;
+}
+export interface ProductListSection {
+    title: string;
+    product_items: Array<{
+        product_retailer_id: string;
+    }>;
 }

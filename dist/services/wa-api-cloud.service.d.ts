@@ -1,3 +1,4 @@
+import type { MediaUrlResponse, MediaDeleteResponse, MediaUploadResponse } from "../types/message";
 /**
  * Service for making requests to the WhatsApp Cloud API
  */
@@ -33,6 +34,32 @@ export declare class WhatsAppApiService {
      * @returns Promise with the response
      */
     phoneRequest<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: unknown): Promise<T>;
+    /**
+     * Uploads media to WhatsApp servers
+     * @param filePath Path to the file
+     * @param mimeType MIME type of the file
+     * @param fileBuffer File content as Buffer
+     * @returns Promise with the media ID
+     */
+    uploadMedia(fileBuffer: Buffer, mimeType: string, filename: string): Promise<MediaUploadResponse>;
+    /**
+     * Gets the URL of an uploaded media file
+     * @param mediaId Media ID
+     * @returns Promise with the media URL info
+     */
+    getMediaUrl(mediaId: string): Promise<MediaUrlResponse>;
+    /**
+     * Deletes an uploaded media file
+     * @param mediaId Media ID
+     * @returns Promise with the deletion result
+     */
+    deleteMedia(mediaId: string): Promise<MediaDeleteResponse>;
+    /**
+     * Downloads media from WhatsApp servers
+     * @param mediaUrl The media URL obtained from getMediaUrl
+     * @returns Promise with the media as ArrayBuffer
+     */
+    downloadMedia(mediaUrl: string): Promise<ArrayBuffer>;
     /**
      * Handles WhatsApp API errors
      * @param errorResponse Error response

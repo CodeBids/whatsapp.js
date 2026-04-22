@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
 import { Message } from "./actions/Message";
 import { WhatsAppApiService } from "../services/wa-api-cloud.service";
-import type { ClientInfoResponse, ClientOptions } from "../types";
+import type { ClientInfoResponse, ClientOptions, BusinessProfileUpdate, MediaUploadResponse, MediaUrlResponse, MediaDeleteResponse } from "../types";
 import { WebhookHandler, EventType } from "./webhook/handlers/WebhookHandler";
 /**
  * This is the starting point for any WhatsApp Client and the main hub for interacting with the WhatsApp API Cloud
@@ -89,4 +89,48 @@ export declare class Client extends EventEmitter {
      */
     awaitMessage(filter?: (message: any) => boolean, time?: number, eventTypes?: EventType[]): Promise<any>;
     getBusinessProfile(): Promise<ClientInfoResponse>;
+    /**
+     * Updates the business profile
+     * @param profile Business profile fields to update
+     * @returns API response
+     */
+    updateBusinessProfile(profile: BusinessProfileUpdate): Promise<any>;
+    /**
+     * Sends a typing indicator to the user
+     * @param to Recipient's phone number
+     * @returns API response
+     */
+    sendTypingIndicator(to: string): Promise<any>;
+    /**
+     * Uploads media to WhatsApp servers
+     * @param fileBuffer File content as Buffer
+     * @param mimeType MIME type of the file (e.g., "image/jpeg", "video/mp4")
+     * @param filename Filename for the upload
+     * @returns Promise with the media ID
+     */
+    uploadMedia(fileBuffer: Buffer, mimeType: string, filename: string): Promise<MediaUploadResponse>;
+    /**
+     * Gets the URL of an uploaded media file
+     * @param mediaId Media ID
+     * @returns Promise with the media URL information
+     */
+    getMediaUrl(mediaId: string): Promise<MediaUrlResponse>;
+    /**
+     * Deletes an uploaded media file
+     * @param mediaId Media ID
+     * @returns Promise with the deletion result
+     */
+    deleteMedia(mediaId: string): Promise<MediaDeleteResponse>;
+    /**
+     * Downloads media from WhatsApp servers
+     * @param mediaUrl The media URL obtained from getMediaUrl
+     * @returns Promise with the media as ArrayBuffer
+     */
+    downloadMedia(mediaUrl: string): Promise<ArrayBuffer>;
+    /**
+     * Downloads media by its ID (convenience method)
+     * @param mediaId Media ID
+     * @returns Promise with the media as ArrayBuffer
+     */
+    downloadMediaById(mediaId: string): Promise<ArrayBuffer>;
 }

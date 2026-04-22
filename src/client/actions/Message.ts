@@ -7,6 +7,10 @@ import {
   type ContactPayloadData,
   type InteractiveData,
   type TemplateComponent,
+  type FlowData,
+  type AddressMessageData,
+  type ProductData,
+  type ProductListSection,
 } from "../../types/index";
 import { WhatsAppApiException } from "../../errors/Messages";
 import {
@@ -86,12 +90,17 @@ export class Message {
         payload.interactive ||
         payload.reaction ||
         (payload.components && payload.components.length > 0) ||
-        (payload.embeds && payload.embeds.length > 0)
+        (payload.embeds && payload.embeds.length > 0) ||
+        payload.locationRequest ||
+        payload.flow ||
+        payload.addressMessage ||
+        payload.product ||
+        payload.productList
     );
 
     if (!hasContent) {
       throw new WhatsAppApiException(
-        "At least one content type is required (text, template, files, interactive, reaction, components, or embeds)",
+        "At least one content type is required (text, template, files, interactive, reaction, components, embeds, locationRequest, flow, addressMessage, product, or productList)",
         0
       );
     }
@@ -206,6 +215,86 @@ export class Message {
         "Message ID is required in context for reply/quote messages",
         0
       );
+    }
+
+    // Validate location request if provided
+    if (payload.locationRequest) {
+      if (!payload.locationRequest.body) {
+        throw new WhatsAppApiException(
+          "Body text is required for location request messages",
+          0
+        );
+      }
+    }
+
+    // Validate flow if provided
+    if (payload.flow) {
+      if (!payload.flow.flow_id) {
+        throw new WhatsAppApiException(
+          "Flow ID is required for flow messages",
+          0
+        );
+      }
+      if (!payload.flow.flow_cta) {
+        throw new WhatsAppApiException(
+          "Flow CTA text is required for flow messages",
+          0
+        );
+      }
+      if (!payload.flow.body) {
+        throw new WhatsAppApiException(
+          "Body text is required for flow messages",
+          0
+        );
+      }
+    }
+
+    // Validate address message if provided
+    if (payload.addressMessage) {
+      if (!payload.addressMessage.country) {
+        throw new WhatsAppApiException(
+          "Country is required for address messages",
+          0
+        );
+      }
+    }
+
+    // Validate product if provided
+    if (payload.product) {
+      if (!payload.product.catalog_id) {
+        throw new WhatsAppApiException(
+          "Catalog ID is required for product messages",
+          0
+        );
+      }
+      if (!payload.product.product_retailer_id) {
+        throw new WhatsAppApiException(
+          "Product retailer ID is required for product messages",
+          0
+        );
+      }
+    }
+
+    // Validate product list if provided
+    if (payload.productList) {
+      if (!payload.productList.catalog_id) {
+        throw new WhatsAppApiException(
+          "Catalog ID is required for product list messages",
+          0
+        );
+      }
+      if (!payload.productList.body) {
+        throw new WhatsAppApiException(
+          "Body text is required for product list messages",
+          0
+        );
+      }
+      if (!payload.productList.sections || payload.productList.sections.length === 0) {
+        throw new WhatsAppApiException(
+          "At least one section is required for product list messages",
+          0
+        );
+      }
     }
   }
 
@@ -842,6 +931,92 @@ export class Message {
     } else if (payload.reaction) {
       messageBody.type = "reaction";
       messageBody.reaction = payload.reaction;
+    } else if (payload.locationRequest) {
+      messageBody.type = "interactive";
+      messageBody.interactive = {
+        type: "location_request_message",
+        body: {
+          text: payload.locationRequest.body,
+        },
+        action: {
+          name: "send_location",
+        },
+      };
+    } else if (payload.flow) {
+      messageBody.type = "interactive";
+      messageBody.interactive = {
+        type: "flow",
+        ...(payload.flow.header ? {
+          header: {
+            type: "text",
+            text: payload.flow.header,
+          },
+        } : {}),
+        body: {
+          text: payload.flow.body,
+        },
+        ...(payload.flow.footer ? {
+          footer: {
+            text: payload.flow.footer,
+          },
+        } : {}),
+        action: {
+          name: "flow",
+          parameters: {
+            flow_message_version: payload.flow.flow_message_version || "3",
+            flow_token: payload.flow.flow_token || "unused",
+            flow_id: payload.flow.flow_id,
+            flow_cta: payload.flow.flow_cta,
+            ...(payload.flow.flow_action ? { flow_action: payload.flow.flow_action } : {}),
+            ...(payload.flow.flow_action_payload ? { flow_action_payload: payload.flow.flow_action_payload } : {}),
+          } as any,
+        },
+      };
+    } else if (payload.addressMessage) {
+      messageBody.type = "address_message";
+      (messageBody as any).address_message = {
+        country: payload.addressMessage.country,
+        ...(payload.addressMessage.values ? { values: payload.addressMessage.values } : {}),
+        ...(payload.addressMessage.saved_addresses ? { saved_addresses: payload.addressMessage.saved_addresses } : {}),
+      };
+    } else if (payload.product) {
+      messageBody.type = "interactive";
+      messageBody.interactive = {
+        type: "product",
+        body: {
+          text: "",
+        },
+        action: {
+          catalog_id: payload.product.catalog_id,
+          product_retailer_id: payload.product.product_retailer_id,
+        },
+      };
+    } else if (payload.productList) {
+      messageBody.type = "interactive";
+      messageBody.interactive = {
+        type: "product_list",
+        ...(payload.productList.header ? {
+          header: {
+            type: "text",
+            text: payload.productList.header,
+          },
+        } : {}),
+        body: {
+          text: payload.productList.body,
+        },
+        ...(payload.productList.footer ? {
+          footer: {
+            text: payload.productList.footer,
+          },
+        } : {}),
+        action: {
+          catalog_id: payload.productList.catalog_id,
+          sections: payload.productList.sections.map(section => ({
+            title: section.title,
+            product_items: section.product_items,
+          })) as any,
+        },
+      };
     } else if (payload.content) {
       messageBody.type = "text";
       messageBody.text = {

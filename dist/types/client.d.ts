@@ -35,3 +35,12 @@ export interface ClientData {
 export interface Throughput {
     level: string;
 }
+export interface BusinessProfileUpdate {
+    about?: string;
+    address?: string;
+    description?: string;
+    email?: string;
+    profile_picture_url?: string;
+    websites?: string[];
+    vertical?: string;
+}
