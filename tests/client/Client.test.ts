@@ -85,11 +85,7 @@ class MockClient extends EventEmitter {
       }
       
       setTimeout(() => {
-        if (Math.random() > 0.5) {
-          resolve({ id: 'msg1', text: 'Test message' });
-        } else {
-          reject(new Error('No messages were collected within the time limit'));
-        }
+        resolve({ id: 'msg1', text: 'Test message' });
       }, 100);
     });
   }

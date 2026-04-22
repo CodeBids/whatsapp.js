@@ -1,31 +1,47 @@
 {
-    "name": "whatsapp.js",
-    "version": "0.6.15-Beta",
-    "description": "",
+    "name": "@thejulianjara/whatsapp.js",
+    "version": "1.0.0",
+    "description": "A typed WhatsApp Cloud API client for Node.js",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "exports": {
         ".": {
+            "types": "./dist/index.d.ts",
             "require": "./dist/index.js",
             "import": "./dist/index.js"
         }
     },
     "type": "commonjs",
+    "engines": {
+        "node": ">=18.0.0"
+    },
     "scripts": {
         "build": "tsc",
         "test": "jest",
         "test:watch": "jest --watch",
         "test:coverage": "jest --coverage",
         "lint": "eslint src --ext .ts",
-        "lint:fix": "eslint src --ext .ts --fix"
+        "lint:fix": "eslint src --ext .ts --fix",
+        "prepublishOnly": "pnpm run build && pnpm test"
     },
     "keywords": [
         "whatsapp",
+        "whatsapp-cloud-api",
+        "whatsapp-api",
         "api",
-        "client"
+        "client",
+        "typescript"
     ],
     "author": "TheJulianJara",
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/TheJulianJara/whatsapp.js.git"
+    },
+    "homepage": "https://github.com/TheJulianJara/whatsapp.js#readme",
+    "bugs": {
+        "url": "https://github.com/TheJulianJara/whatsapp.js/issues"
+    },
     "packageManager": "pnpm@10.6.2",
     "devDependencies": {
         "@eslint/js": "^9.23.0",
@@ -40,8 +56,7 @@
         "ts-jest": "^29.3.0",
         "ts-node": "^10.9.2",
         "typescript": "^5.8.2",
-        "typescript-eslint": "^8.28.0",
-        "vitest": "^3.1.1"
+        "typescript-eslint": "^8.28.0"
     },
     "files": [
         "dist"
