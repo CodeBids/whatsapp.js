@@ -173,7 +173,9 @@ export interface ReactionData {
 // Unified message payload that allows combining different content types
 export interface MessagePayload {
   to: string
+  recipient_type?: "individual" | "group"
   content?: string
+  preview_url?: boolean
   template?: TemplateData
   components?: Component[]
   files?: FileAttachment[]
@@ -195,6 +197,7 @@ export interface MessagePayload {
     footer?: string
     sections: ProductListSection[]
   }
+  biz_opaque_callback_data?: string
 }
 
 // Flow data
@@ -253,6 +256,7 @@ export interface MessageBodyPayload {
   type: MessageType
   context?: Context
   text?: {
+    preview_url?: boolean
     body: string
   }
   template?: {
@@ -298,6 +302,7 @@ export interface MessageBodyPayload {
       value: Record<string, string>
     }>
   }
+  biz_opaque_callback_data?: string
 }
 
 // API response

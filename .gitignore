@@ -129,4 +129,8 @@ out
 .yarn/install-state.gz
 .pnp.*
 
+# Documentation (generated)
+docs/
+docs-md/
+
 .zip

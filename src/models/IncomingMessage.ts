@@ -21,6 +21,8 @@ export class IncomingMessage {
   public interactive?: any
   public button?: any
   public reaction?: any
+  public sticker?: any
+  public order?: any
   public context?: any
 
   // Reference to the client
@@ -76,11 +78,19 @@ export class IncomingMessage {
       throw new WhatsAppApiException("Cannot mark a message as read without an ID", 0)
     }
 
-    return this.client.makeApiRequest(`messages`, "POST", {
-      messaging_product: "whatsapp",
-      status: "read",
-      message_id: this.id,
-    })
+    return this.client.markAsRead(this.id)
+  }
+
+  /**
+   * Shows a typing indicator to the sender
+   * @returns API response
+   */
+  async sendTypingIndicator(): Promise<any> {
+    if (!this.id) {
+      throw new WhatsAppApiException("Cannot send typing indicator without a message ID", 0)
+    }
+
+    return this.client.sendTypingIndicator(this.id)
   }
 
   /**
@@ -154,6 +164,20 @@ export class IncomingMessage {
                 ...(this.document.link ? { url: this.document.link } : {}),
                 caption: this.document.caption,
                 filename: this.document.filename,
+              },
+            ],
+          })
+        }
+        break
+      case "sticker":
+        if (this.sticker && (this.sticker.id || this.sticker.link)) {
+          return this.client.message.send({
+            to,
+            files: [
+              {
+                type: "sticker",
+                ...(this.sticker.id ? { id: this.sticker.id } : {}),
+                ...(this.sticker.link ? { url: this.sticker.link } : {}),
               },
             ],
           })

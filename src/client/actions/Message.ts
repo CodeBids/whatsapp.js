@@ -849,12 +849,16 @@ export class Message {
     // Initialize the message body with common properties
     const messageBody: Partial<MessageBodyPayload> = {
       messaging_product: "whatsapp",
-      recipient_type: "individual",
+      recipient_type: payload.recipient_type || "individual",
       to: payload.to,
     };
 
     if (payload.context) {
       messageBody.context = payload.context;
+    }
+
+    if (payload.biz_opaque_callback_data) {
+      (messageBody as any).biz_opaque_callback_data = payload.biz_opaque_callback_data;
     }
 
     /** Determine the primary message type
@@ -1020,6 +1024,7 @@ export class Message {
     } else if (payload.content) {
       messageBody.type = "text";
       messageBody.text = {
+        ...(payload.preview_url !== undefined ? { preview_url: payload.preview_url } : {}),
         body: payload.content,
       };
     } else if (payload.embeds && payload.embeds.length > 0) {

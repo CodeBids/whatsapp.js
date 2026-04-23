@@ -43,10 +43,6 @@ export class Client extends EventEmitter {
 
     this.message = new Message(this)
 
-    this.initializeClientData().catch((error) => {
-      console.error("Error initializing client data:", error)
-    })
-
     // Initialize webhook if options are provided
     if (webhook && webhook.verifyToken) {
       this._setupWebhook(webhook.verifyToken)
@@ -57,16 +53,19 @@ export class Client extends EventEmitter {
       }
     }
 
-    // When all promises are resolved, emit the 'ready' event
-    Promise.all([this.initializeClientData()]).then(() => {
-      // Get the client data and emit 'ready' event with client info
-      this.emit("ready", {
-        name: this.name,
-        quality: this.quality,
-        id: this.id,
-        displayPhoneNumber: this.displayPhoneNumber,
+    // Initialize client data and emit 'ready' event when done
+    this.initializeClientData()
+      .then(() => {
+        this.emit("ready", {
+          name: this.name,
+          quality: this.quality,
+          id: this.id,
+          displayPhoneNumber: this.displayPhoneNumber,
+        })
       })
-    })
+      .catch((error) => {
+        console.error("Error initializing client data:", error)
+      })
   }
 
   /**
@@ -176,8 +175,10 @@ export class Client extends EventEmitter {
 
   private async initializeClientData(): Promise<void> {
     try {
-      // Usar el endpoint correcto "whatsapp_business_profile" en lugar de un string vacío
-      const data = await this.makePhoneRequest<ClientData>("whatsapp_business_profile", "GET")
+      const data = await this.makePhoneRequest<ClientData>(
+        "?fields=verified_name,code_verification_status,display_phone_number,quality_rating,platform_type,throughput,id",
+        "GET"
+      )
       this.name = data.verified_name
       this.quality = data.quality_rating
       this.id = data.id
@@ -246,15 +247,30 @@ export class Client extends EventEmitter {
 
   /**
    * Sends a typing indicator to the user
-   * @param to Recipient's phone number
+   * @param messageId The ID of the last message received from the user
    * @returns API response
    */
-  public async sendTypingIndicator(to: string): Promise<any> {
+  public async sendTypingIndicator(messageId: string): Promise<any> {
     return await this.makeApiRequest("messages", "POST", {
       messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to,
-      typing: "typing",
+      status: "read",
+      message_id: messageId,
+      typing_indicator: {
+        type: "text",
+      },
+    })
+  }
+
+  /**
+   * Marks a message as read (shows blue check marks)
+   * @param messageId The ID of the message to mark as read
+   * @returns API response
+   */
+  public async markAsRead(messageId: string): Promise<any> {
+    return await this.makeApiRequest("messages", "POST", {
+      messaging_product: "whatsapp",
+      status: "read",
+      message_id: messageId,
     })
   }
 
