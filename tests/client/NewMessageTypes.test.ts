@@ -26,14 +26,20 @@ class NewMessageTypeValidator {
     if (!payload.flow) {
       throw new MockWhatsAppApiException('flow is required', 0);
     }
-    if (!payload.flow.flow_id) {
-      throw new MockWhatsAppApiException('Flow ID is required for flow messages', 0);
+    if (!payload.flow.flow_id && !payload.flow.flow_name) {
+      throw new MockWhatsAppApiException('Flow ID or Flow name is required for flow messages', 0);
+    }
+    if (payload.flow.flow_id && payload.flow.flow_name) {
+      throw new MockWhatsAppApiException('Cannot use both flow_id and flow_name. Use only one.', 0);
     }
     if (!payload.flow.flow_cta) {
       throw new MockWhatsAppApiException('Flow CTA text is required for flow messages', 0);
     }
     if (!payload.flow.body) {
       throw new MockWhatsAppApiException('Body text is required for flow messages', 0);
+    }
+    if (payload.flow.mode && !['draft', 'published'].includes(payload.flow.mode)) {
+      throw new MockWhatsAppApiException("Flow mode must be 'draft' or 'published'", 0);
     }
   }
 
@@ -111,10 +117,12 @@ class NewMessageTypeValidator {
           parameters: {
             flow_message_version: payload.flow.flow_message_version || '3',
             flow_token: payload.flow.flow_token || 'unused',
-            flow_id: payload.flow.flow_id,
+            ...(payload.flow.flow_id ? { flow_id: payload.flow.flow_id } : {}),
+            ...(payload.flow.flow_name ? { flow_name: payload.flow.flow_name } : {}),
             flow_cta: payload.flow.flow_cta,
             ...(payload.flow.flow_action ? { flow_action: payload.flow.flow_action } : {}),
             ...(payload.flow.flow_action_payload ? { flow_action_payload: payload.flow.flow_action_payload } : {}),
+            ...(payload.flow.mode ? { mode: payload.flow.mode } : {}),
           },
         },
       },
@@ -248,10 +256,28 @@ describe('New Message Types', () => {
         .toThrow('flow is required');
     });
 
-    it('should throw error when flow_id is missing', () => {
+    it('should validate a flow message with flow_name instead of flow_id', () => {
+      const payload = {
+        to: '5491155551234',
+        flow: {
+          body: 'Book your appointment',
+          flow_name: 'appointment_booking_v1',
+          flow_cta: 'Book Now',
+        },
+      };
+      expect(() => validator.validateFlow(payload)).not.toThrow();
+    });
+
+    it('should throw error when both flow_id and flow_name are missing', () => {
       const payload = { flow: { body: 'Test', flow_cta: 'Click' } };
       expect(() => validator.validateFlow(payload))
-        .toThrow('Flow ID is required for flow messages');
+        .toThrow('Flow ID or Flow name is required for flow messages');
+    });
+
+    it('should throw error when both flow_id and flow_name are provided', () => {
+      const payload = { flow: { body: 'Test', flow_id: 'FLOW_123', flow_name: 'my_flow', flow_cta: 'Click' } };
+      expect(() => validator.validateFlow(payload))
+        .toThrow('Cannot use both flow_id and flow_name. Use only one.');
     });
 
     it('should throw error when flow_cta is missing', () => {
@@ -266,6 +292,19 @@ describe('New Message Types', () => {
         .toThrow('Body text is required for flow messages');
     });
 
+    it('should throw error for invalid mode value', () => {
+      const payload = { flow: { body: 'Test', flow_id: 'FLOW_123', flow_cta: 'Click', mode: 'invalid' } };
+      expect(() => validator.validateFlow(payload))
+        .toThrow("Flow mode must be 'draft' or 'published'");
+    });
+
+    it('should accept valid mode values', () => {
+      const draftPayload = { flow: { body: 'Test', flow_id: 'FLOW_123', flow_cta: 'Click', mode: 'draft' } };
+      const publishedPayload = { flow: { body: 'Test', flow_id: 'FLOW_123', flow_cta: 'Click', mode: 'published' } };
+      expect(() => validator.validateFlow(draftPayload)).not.toThrow();
+      expect(() => validator.validateFlow(publishedPayload)).not.toThrow();
+    });
+
     it('should build correct flow body with minimal options', () => {
       const body = validator.buildFlowBody(validFlow);
 
@@ -277,6 +316,43 @@ describe('New Message Types', () => {
       expect(body.interactive.action.parameters.flow_cta).toBe('Book Now');
       expect(body.interactive.action.parameters.flow_message_version).toBe('3');
       expect(body.interactive.action.parameters.flow_token).toBe('unused');
+    });
+
+    it('should build flow body with flow_name instead of flow_id', () => {
+      const payload = {
+        to: '5491155551234',
+        flow: {
+          body: 'Book now',
+          flow_name: 'appointment_booking_v1',
+          flow_cta: 'Book!',
+        },
+      };
+
+      const body = validator.buildFlowBody(payload);
+
+      expect(body.interactive.action.parameters.flow_name).toBe('appointment_booking_v1');
+      expect(body.interactive.action.parameters.flow_id).toBeUndefined();
+    });
+
+    it('should build flow body with mode parameter', () => {
+      const payload = {
+        to: '5491155551234',
+        flow: {
+          body: 'Test draft flow',
+          flow_id: 'FLOW_DRAFT',
+          flow_cta: 'Open',
+          mode: 'draft',
+        },
+      };
+
+      const body = validator.buildFlowBody(payload);
+
+      expect(body.interactive.action.parameters.mode).toBe('draft');
+    });
+
+    it('should not include mode when not provided', () => {
+      const body = validator.buildFlowBody(validFlow);
+      expect(body.interactive.action.parameters.mode).toBeUndefined();
     });
 
     it('should build flow body with header and footer', () => {

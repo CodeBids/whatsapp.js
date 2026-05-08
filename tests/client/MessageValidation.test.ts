@@ -73,7 +73,7 @@ describe('Message Validation Logic', () => {
 
       // Validate button sub_type if it's a button
       if (component.type === 'button' && component.sub_type) {
-        if (!['quick_reply', 'url', 'CATALOG'].includes(component.sub_type)) {
+        if (!['quick_reply', 'url', 'CATALOG', 'flow'].includes(component.sub_type)) {
           throw new MockWhatsAppApiException(`Invalid button sub_type: ${component.sub_type}`, 0);
         }
       }
@@ -269,7 +269,8 @@ describe('Message Validation Logic', () => {
       const validComponents = [
         { type: 'header', parameters: [{ type: 'text', text: 'Hello' }] },
         { type: 'body', parameters: [{ type: 'text', text: 'Message body' }] },
-        { type: 'button', sub_type: 'quick_reply', parameters: [{ type: 'payload', payload: 'btn1' }] }
+        { type: 'button', sub_type: 'quick_reply', parameters: [{ type: 'payload', payload: 'btn1' }] },
+        { type: 'button', sub_type: 'flow', parameters: [{ type: 'action', action: { flow_token: 'token' } }] }
       ];
 
       validComponents.forEach(component => {
