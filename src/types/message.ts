@@ -205,7 +205,8 @@ export interface FlowData {
   header?: string
   body: string
   footer?: string
-  flow_id: string
+  flow_id?: string
+  flow_name?: string
   flow_cta: string
   flow_token?: string
   flow_message_version?: string
@@ -214,6 +215,7 @@ export interface FlowData {
     screen?: string
     data?: Record<string, any>
   }
+  mode?: "draft" | "published"
 }
 
 // Address message data
