@@ -229,9 +229,15 @@ export class Message {
 
     // Validate flow if provided
     if (payload.flow) {
-      if (!payload.flow.flow_id) {
+      if (!payload.flow.flow_id && !payload.flow.flow_name) {
         throw new WhatsAppApiException(
-          "Flow ID is required for flow messages",
+          "Flow ID or Flow name is required for flow messages",
+          0
+        );
+      }
+      if (payload.flow.flow_id && payload.flow.flow_name) {
+        throw new WhatsAppApiException(
+          "Cannot use both flow_id and flow_name. Use only one.",
           0
         );
       }
@@ -244,6 +250,12 @@ export class Message {
       if (!payload.flow.body) {
         throw new WhatsAppApiException(
           "Body text is required for flow messages",
+          0
+        );
+      }
+      if (payload.flow.mode && !["draft", "published"].includes(payload.flow.mode)) {
+        throw new WhatsAppApiException(
+          "Flow mode must be 'draft' or 'published'",
           0
         );
       }
@@ -314,7 +326,7 @@ export class Message {
 
       // Validate button sub_type if it's a button
       if (component.type === "button" && component.sub_type) {
-        if (!["quick_reply", "url", "CATALOG"].includes(component.sub_type)) {
+        if (!["quick_reply", "url", "CATALOG", "flow"].includes(component.sub_type)) {
           throw new WhatsAppApiException(
             `Invalid button sub_type: ${component.sub_type}`,
             0
@@ -969,10 +981,12 @@ export class Message {
           parameters: {
             flow_message_version: payload.flow.flow_message_version || "3",
             flow_token: payload.flow.flow_token || "unused",
-            flow_id: payload.flow.flow_id,
+            ...(payload.flow.flow_id ? { flow_id: payload.flow.flow_id } : {}),
+            ...(payload.flow.flow_name ? { flow_name: payload.flow.flow_name } : {}),
             flow_cta: payload.flow.flow_cta,
             ...(payload.flow.flow_action ? { flow_action: payload.flow.flow_action } : {}),
             ...(payload.flow.flow_action_payload ? { flow_action_payload: payload.flow.flow_action_payload } : {}),
+            ...(payload.flow.mode ? { mode: payload.flow.mode } : {}),
           } as any,
         },
       };
