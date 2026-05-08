@@ -49,7 +49,7 @@ export interface TemplateData {
 // Add new interfaces for template components and parameters
 export interface TemplateComponent {
   type: "header" | "body" | "button" | "footer"
-  sub_type?: "quick_reply" | "url" | "CATALOG"
+  sub_type?: "quick_reply" | "url" | "CATALOG" | "flow"
   index?: string | number
   parameters: TemplateParameter[]
 }
@@ -89,6 +89,11 @@ export interface TemplateParameter {
     catalog_id?: string
     product_retailer_id?: string
     link?: string
+    flow_token?: string
+    flow_action_data?: {
+      screen?: string
+      data?: Record<string, any>
+    }
   }
 }
 
