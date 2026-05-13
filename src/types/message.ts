@@ -90,7 +90,7 @@ export interface TemplateParameter {
     product_retailer_id?: string
     link?: string
     flow_token?: string
-    flow_action_payload?: {
+    flow_action_data?: {
       screen?: string
       data?: Record<string, any>
     }
