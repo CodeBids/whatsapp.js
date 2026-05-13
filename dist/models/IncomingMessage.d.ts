@@ -18,6 +18,8 @@ export declare class IncomingMessage {
     interactive?: any;
     button?: any;
     reaction?: any;
+    sticker?: any;
+    order?: any;
     context?: any;
     private client;
     constructor(data: any, client: Client);
@@ -38,6 +40,11 @@ export declare class IncomingMessage {
      * @returns API response
      */
     markAsRead(): Promise<any>;
+    /**
+     * Shows a typing indicator to the sender
+     * @returns API response
+     */
+    sendTypingIndicator(): Promise<any>;
     /**
      * Forwards the message to another recipient
      * @param to Recipient's phone number

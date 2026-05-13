@@ -6,8 +6,10 @@ import type { Client } from "../../Client";
  */
 export declare enum EventType {
     MESSAGE_RECEIVED = "message.received",
+    MESSAGE_SENT = "message.sent",
     MESSAGE_DELIVERED = "message.delivered",
     MESSAGE_READ = "message.read",
+    MESSAGE_FAILED = "message.failed",
     MESSAGE_REACTION = "message.reaction",
     STATUS_UPDATED = "status.updated",
     INTERACTION_CREATE = "interaction.create"

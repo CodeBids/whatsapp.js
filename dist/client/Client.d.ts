@@ -97,10 +97,16 @@ export declare class Client extends EventEmitter {
     updateBusinessProfile(profile: BusinessProfileUpdate): Promise<any>;
     /**
      * Sends a typing indicator to the user
-     * @param to Recipient's phone number
+     * @param messageId The ID of the last message received from the user
      * @returns API response
      */
-    sendTypingIndicator(to: string): Promise<any>;
+    sendTypingIndicator(messageId: string): Promise<any>;
+    /**
+     * Marks a message as read (shows blue check marks)
+     * @param messageId The ID of the message to mark as read
+     * @returns API response
+     */
+    markAsRead(messageId: string): Promise<any>;
     /**
      * Uploads media to WhatsApp servers
      * @param fileBuffer File content as Buffer

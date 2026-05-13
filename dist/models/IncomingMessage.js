@@ -49,11 +49,17 @@ class IncomingMessage {
         if (!this.id) {
             throw new Messages_1.WhatsAppApiException("Cannot mark a message as read without an ID", 0);
         }
-        return this.client.makeApiRequest(`messages`, "POST", {
-            messaging_product: "whatsapp",
-            status: "read",
-            message_id: this.id,
-        });
+        return this.client.markAsRead(this.id);
+    }
+    /**
+     * Shows a typing indicator to the sender
+     * @returns API response
+     */
+    async sendTypingIndicator() {
+        if (!this.id) {
+            throw new Messages_1.WhatsAppApiException("Cannot send typing indicator without a message ID", 0);
+        }
+        return this.client.sendTypingIndicator(this.id);
     }
     /**
      * Forwards the message to another recipient
@@ -126,6 +132,20 @@ class IncomingMessage {
                                 ...(this.document.link ? { url: this.document.link } : {}),
                                 caption: this.document.caption,
                                 filename: this.document.filename,
+                            },
+                        ],
+                    });
+                }
+                break;
+            case "sticker":
+                if (this.sticker && (this.sticker.id || this.sticker.link)) {
+                    return this.client.message.send({
+                        to,
+                        files: [
+                            {
+                                type: "sticker",
+                                ...(this.sticker.id ? { id: this.sticker.id } : {}),
+                                ...(this.sticker.link ? { url: this.sticker.link } : {}),
                             },
                         ],
                     });

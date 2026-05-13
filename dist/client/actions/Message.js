@@ -142,14 +142,20 @@ class Message {
         }
         // Validate flow if provided
         if (payload.flow) {
-            if (!payload.flow.flow_id) {
-                throw new Messages_1.WhatsAppApiException("Flow ID is required for flow messages", 0);
+            if (!payload.flow.flow_id && !payload.flow.flow_name) {
+                throw new Messages_1.WhatsAppApiException("Flow ID or Flow name is required for flow messages", 0);
+            }
+            if (payload.flow.flow_id && payload.flow.flow_name) {
+                throw new Messages_1.WhatsAppApiException("Cannot use both flow_id and flow_name. Use only one.", 0);
             }
             if (!payload.flow.flow_cta) {
                 throw new Messages_1.WhatsAppApiException("Flow CTA text is required for flow messages", 0);
             }
             if (!payload.flow.body) {
                 throw new Messages_1.WhatsAppApiException("Body text is required for flow messages", 0);
+            }
+            if (payload.flow.mode && !["draft", "published"].includes(payload.flow.mode)) {
+                throw new Messages_1.WhatsAppApiException("Flow mode must be 'draft' or 'published'", 0);
             }
         }
         // Validate address message if provided
@@ -192,7 +198,7 @@ class Message {
             }
             // Validate button sub_type if it's a button
             if (component.type === "button" && component.sub_type) {
-                if (!["quick_reply", "url", "CATALOG"].includes(component.sub_type)) {
+                if (!["quick_reply", "url", "CATALOG", "flow"].includes(component.sub_type)) {
                     throw new Messages_1.WhatsAppApiException(`Invalid button sub_type: ${component.sub_type}`, 0);
                 }
             }
@@ -524,11 +530,14 @@ class Message {
         // Initialize the message body with common properties
         const messageBody = {
             messaging_product: "whatsapp",
-            recipient_type: "individual",
+            recipient_type: payload.recipient_type || "individual",
             to: payload.to,
         };
         if (payload.context) {
             messageBody.context = payload.context;
+        }
+        if (payload.biz_opaque_callback_data) {
+            messageBody.biz_opaque_callback_data = payload.biz_opaque_callback_data;
         }
         /** Determine the primary message type
          * Priority order for message type determination:
@@ -638,10 +647,12 @@ class Message {
                     parameters: {
                         flow_message_version: payload.flow.flow_message_version || "3",
                         flow_token: payload.flow.flow_token || "unused",
-                        flow_id: payload.flow.flow_id,
+                        ...(payload.flow.flow_id ? { flow_id: payload.flow.flow_id } : {}),
+                        ...(payload.flow.flow_name ? { flow_name: payload.flow.flow_name } : {}),
                         flow_cta: payload.flow.flow_cta,
                         ...(payload.flow.flow_action ? { flow_action: payload.flow.flow_action } : {}),
                         ...(payload.flow.flow_action_payload ? { flow_action_payload: payload.flow.flow_action_payload } : {}),
+                        ...(payload.flow.mode ? { mode: payload.flow.mode } : {}),
                     },
                 },
             };
@@ -697,6 +708,7 @@ class Message {
         else if (payload.content) {
             messageBody.type = "text";
             messageBody.text = {
+                ...(payload.preview_url !== undefined ? { preview_url: payload.preview_url } : {}),
                 body: payload.content,
             };
         }

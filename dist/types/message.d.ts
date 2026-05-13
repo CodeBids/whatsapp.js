@@ -25,7 +25,7 @@ export interface TemplateData {
 }
 export interface TemplateComponent {
     type: "header" | "body" | "button" | "footer";
-    sub_type?: "quick_reply" | "url" | "CATALOG";
+    sub_type?: "quick_reply" | "url" | "CATALOG" | "flow";
     index?: string | number;
     parameters: TemplateParameter[];
 }
@@ -63,6 +63,11 @@ export interface TemplateParameter {
         catalog_id?: string;
         product_retailer_id?: string;
         link?: string;
+        flow_token?: string;
+        flow_action_payload?: {
+            screen?: string;
+            data?: Record<string, any>;
+        };
     };
 }
 export interface InteractiveData {
@@ -138,7 +143,9 @@ export interface ReactionData {
 }
 export interface MessagePayload {
     to: string;
+    recipient_type?: "individual" | "group";
     content?: string;
+    preview_url?: boolean;
     template?: TemplateData;
     components?: Component[];
     files?: FileAttachment[];
@@ -159,12 +166,14 @@ export interface MessagePayload {
         footer?: string;
         sections: ProductListSection[];
     };
+    biz_opaque_callback_data?: string;
 }
 export interface FlowData {
     header?: string;
     body: string;
     footer?: string;
-    flow_id: string;
+    flow_id?: string;
+    flow_name?: string;
     flow_cta: string;
     flow_token?: string;
     flow_message_version?: string;
@@ -173,6 +182,7 @@ export interface FlowData {
         screen?: string;
         data?: Record<string, any>;
     };
+    mode?: "draft" | "published";
 }
 export interface AddressMessageData {
     country: string;
@@ -211,6 +221,7 @@ export interface MessageBodyPayload {
     type: MessageType;
     context?: Context;
     text?: {
+        preview_url?: boolean;
         body: string;
     };
     template?: {
@@ -256,6 +267,7 @@ export interface MessageBodyPayload {
             value: Record<string, string>;
         }>;
     };
+    biz_opaque_callback_data?: string;
 }
 export interface MessageApiResponse {
     messaging_product: string;

@@ -8,8 +8,10 @@ const events_1 = require("events");
 var EventType;
 (function (EventType) {
     EventType["MESSAGE_RECEIVED"] = "message.received";
+    EventType["MESSAGE_SENT"] = "message.sent";
     EventType["MESSAGE_DELIVERED"] = "message.delivered";
     EventType["MESSAGE_READ"] = "message.read";
+    EventType["MESSAGE_FAILED"] = "message.failed";
     EventType["MESSAGE_REACTION"] = "message.reaction";
     EventType["STATUS_UPDATED"] = "status.updated";
     EventType["INTERACTION_CREATE"] = "interaction.create";
@@ -171,7 +173,14 @@ class WebhookHandler extends events_1.EventEmitter {
                 // Process delivery status updates
                 if (value.statuses && value.statuses.length > 0) {
                     for (const status of value.statuses) {
-                        if (status.status === "delivered") {
+                        if (status.status === "sent") {
+                            this.emit(EventType.MESSAGE_SENT, {
+                                id: status.id,
+                                recipient_id: status.recipient_id,
+                                timestamp: status.timestamp,
+                            });
+                        }
+                        else if (status.status === "delivered") {
                             this.emit(EventType.MESSAGE_DELIVERED, {
                                 id: status.id,
                                 recipient_id: status.recipient_id,
@@ -183,6 +192,14 @@ class WebhookHandler extends events_1.EventEmitter {
                                 id: status.id,
                                 recipient_id: status.recipient_id,
                                 timestamp: status.timestamp,
+                            });
+                        }
+                        else if (status.status === "failed") {
+                            this.emit(EventType.MESSAGE_FAILED, {
+                                id: status.id,
+                                recipient_id: status.recipient_id,
+                                timestamp: status.timestamp,
+                                errors: status.errors,
                             });
                         }
                         else {
@@ -228,6 +245,9 @@ class WebhookHandler extends events_1.EventEmitter {
             case "document":
                 content.document = message.document;
                 break;
+            case "sticker":
+                content.sticker = message.sticker;
+                break;
             case "location":
                 content.location = message.location;
                 break;
@@ -242,6 +262,12 @@ class WebhookHandler extends events_1.EventEmitter {
                 break;
             case "reaction":
                 content.reaction = message.reaction;
+                break;
+            case "sticker":
+                content.sticker = message.sticker;
+                break;
+            case "order":
+                content.order = message.order;
                 break;
         }
         return content;
