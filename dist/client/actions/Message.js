@@ -259,6 +259,15 @@ class Message {
                             throw new Messages_1.WhatsAppApiException(`Invalid URL format for video: ${param.video.link}`, 0);
                         }
                         break;
+                    case "location":
+                        if (!param.location) {
+                            throw new Messages_1.WhatsAppApiException("Location object is required for location parameter", 0);
+                        }
+                        if (param.location.latitude === undefined ||
+                            param.location.longitude === undefined) {
+                            throw new Messages_1.WhatsAppApiException("Latitude and longitude are required for location parameter", 0);
+                        }
+                        break;
                     case "payload":
                         if (!param.payload) {
                             throw new Messages_1.WhatsAppApiException("Payload value is required for payload parameter", 0);

@@ -30,7 +30,7 @@ export interface TemplateComponent {
     parameters: TemplateParameter[];
 }
 export interface TemplateParameter {
-    type: "text" | "currency" | "date_time" | "image" | "document" | "video" | "payload" | "action";
+    type: "text" | "currency" | "date_time" | "image" | "document" | "video" | "payload" | "action" | "location";
     text?: string;
     parameter_name?: string;
     currency?: {
@@ -56,6 +56,12 @@ export interface TemplateParameter {
     };
     video?: {
         link: string;
+    };
+    location?: {
+        latitude: number | string;
+        longitude: number | string;
+        name?: string;
+        address?: string;
     };
     payload?: string;
     action?: {

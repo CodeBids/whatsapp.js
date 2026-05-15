@@ -430,6 +430,23 @@ export class Message {
               );
             }
             break;
+          case "location":
+            if (!param.location) {
+              throw new WhatsAppApiException(
+                "Location object is required for location parameter",
+                0
+              );
+            }
+            if (
+              param.location.latitude === undefined ||
+              param.location.longitude === undefined
+            ) {
+              throw new WhatsAppApiException(
+                "Latitude and longitude are required for location parameter",
+                0
+              );
+            }
+            break;
           case "payload":
             if (!param.payload) {
               throw new WhatsAppApiException(
