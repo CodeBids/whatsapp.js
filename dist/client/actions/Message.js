@@ -768,10 +768,14 @@ class Message {
                 // Si no hay un archivo válido o no hay archivos, usar un header de texto
                 messageBody.interactive = {
                     type: interactiveType,
-                    header: {
-                        type: "text",
-                        text: payload.embeds[0].title || "",
-                    },
+                    ...(payload.embeds[0].title
+                        ? {
+                            header: {
+                                type: "text",
+                                text: payload.embeds[0].title,
+                            },
+                        }
+                        : {}),
                     body: {
                         text: payload.embeds[0].body || "",
                     },
