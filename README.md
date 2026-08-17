@@ -95,6 +95,30 @@ client.on("message.received", async (message) => {
 });
 ```
 
+### 🔒 Securing your webhook
+
+Pass your Meta app secret as `appSecret` to have every incoming webhook request validated against its `X-Hub-Signature-256` header. Requests with a missing or invalid signature are rejected with a `401` before your event listeners ever run.
+
+```ts
+const client = new Client({
+  phoneId: "YOUR_PHONE_ID",
+  accessToken: "YOUR_ACCESS_TOKEN",
+  webhook: {
+    verifyToken: "YOUR_VERIFY_TOKEN",
+    appSecret: "YOUR_APP_SECRET", // found in the Meta App Dashboard
+    port: 3000,
+  },
+});
+```
+
+If you're handling the HTTP request yourself (e.g. inside an Express route) instead of using the built-in server, you can validate the signature manually with the same logic:
+
+```ts
+import { WebhookHandler } from "@thejulianjara/whatsapp.js";
+
+const isValid = WebhookHandler.verifySignature(rawRequestBody, req.headers["x-hub-signature-256"], "YOUR_APP_SECRET");
+```
+
 ---
 
 ## 🧩 Use Cases
@@ -339,6 +363,59 @@ const { data: templates } = await client.templates.list({ status: "APPROVED" });
 const template = await client.templates.get(created.id);
 await client.templates.update(created.id, { category: "MARKETING" });
 await client.templates.delete({ name: "order_confirmation" });
+```
+
+---
+
+## 💡 Conversational Components
+
+Configure the welcome message shown on a user's first chat, slash-style commands, and ice breaker prompts, through `client.conversationalAutomation`.
+
+```ts
+await client.conversationalAutomation.update({
+  enableWelcomeMessage: true,
+  commands: [
+    { command_name: "tickets", command_description: "Book flight tickets" },
+    { command_name: "support", command_description: "Talk to a human" },
+  ],
+  prompts: ["Book a flight", "Track my order"],
+});
+
+const current = await client.conversationalAutomation.get();
+```
+
+---
+
+## 🔗 QR Codes & Short Links
+
+Create click-to-chat QR codes / short links that open a chat pre-filled with a message, through `client.qrCodes`.
+
+```ts
+const qr = await client.qrCodes.create({
+  prefilledMessage: "Hi! I'd like to know more 👋",
+  generateQrImage: "PNG",
+});
+
+console.log(qr.deep_link_url, qr.qr_image_url);
+
+const { data: codes } = await client.qrCodes.list();
+
+await client.qrCodes.update(qr.code, "New pre-filled message");
+await client.qrCodes.delete(qr.code);
+```
+
+---
+
+## 🚫 Blocking Users
+
+Block or unblock users so they can't message you (or receive messages from you), through `client.blockedUsers`.
+
+```ts
+await client.blockedUsers.block(["5491155551234"]);
+
+const { data: blocked } = await client.blockedUsers.list();
+
+await client.blockedUsers.unblock(["5491155551234"]);
 ```
 
 ---
