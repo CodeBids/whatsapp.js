@@ -1,6 +1,7 @@
 export * from "./client";
 export * from "./message";
 export * from "./language";
+export * from "./qrCodes";
 export * from "./structures/Location";
 export * from "./structures/Contact";
 export * from "./structures/Embed";

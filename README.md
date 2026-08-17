@@ -305,6 +305,26 @@ await client.updateBusinessProfile({
 
 ---
 
+## 🔗 QR Codes & Short Links
+
+Create click-to-chat QR codes / short links that open a chat pre-filled with a message, through `client.qrCodes`.
+
+```ts
+const qr = await client.qrCodes.create({
+  prefilledMessage: "Hi! I'd like to know more 👋",
+  generateQrImage: "PNG",
+});
+
+console.log(qr.deep_link_url, qr.qr_image_url);
+
+const { data: codes } = await client.qrCodes.list();
+
+await client.qrCodes.update(qr.code, "New pre-filled message");
+await client.qrCodes.delete(qr.code);
+```
+
+---
+
 ## ⌨️ Typing Indicator
 
 ```ts
