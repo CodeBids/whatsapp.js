@@ -12,7 +12,15 @@ export declare enum EventType {
     MESSAGE_FAILED = "message.failed",
     MESSAGE_REACTION = "message.reaction",
     STATUS_UPDATED = "status.updated",
-    INTERACTION_CREATE = "interaction.create"
+    INTERACTION_CREATE = "interaction.create",
+    /** A group was created, or a group's creation/deletion otherwise changed state (see `client.groups`) */
+    GROUP_LIFECYCLE_UPDATE = "group.lifecycle_update",
+    /** A participant joined, left, or was removed from a group */
+    GROUP_PARTICIPANTS_UPDATE = "group.participants_update",
+    /** A group's subject, description or picture changed */
+    GROUP_SETTINGS_UPDATE = "group.settings_update",
+    /** A group's status changed (e.g. suspended) */
+    GROUP_STATUS_UPDATE = "group.status_update"
 }
 /**
  * Interface for webhook event data

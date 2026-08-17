@@ -14,6 +14,14 @@ export enum EventType {
   MESSAGE_REACTION = "message.reaction",
   STATUS_UPDATED = "status.updated",
   INTERACTION_CREATE = "interaction.create",
+  /** A group was created, or a group's creation/deletion otherwise changed state (see `client.groups`) */
+  GROUP_LIFECYCLE_UPDATE = "group.lifecycle_update",
+  /** A participant joined, left, or was removed from a group */
+  GROUP_PARTICIPANTS_UPDATE = "group.participants_update",
+  /** A group's subject, description or picture changed */
+  GROUP_SETTINGS_UPDATE = "group.settings_update",
+  /** A group's status changed (e.g. suspended) */
+  GROUP_STATUS_UPDATE = "group.status_update",
 }
 
 /**
@@ -22,6 +30,14 @@ export enum EventType {
 export interface WebhookEvent {
   type: EventType
   data: any
+}
+
+/** Maps group-related webhook field names to the EventType emitted for them */
+const GROUP_EVENT_TYPES: Record<string, EventType> = {
+  group_lifecycle_update: EventType.GROUP_LIFECYCLE_UPDATE,
+  group_participants_update: EventType.GROUP_PARTICIPANTS_UPDATE,
+  group_settings_update: EventType.GROUP_SETTINGS_UPDATE,
+  group_status_update: EventType.GROUP_STATUS_UPDATE,
 }
 
 /**
@@ -142,6 +158,11 @@ export class WebhookHandler extends EventEmitter {
     // Process each entry in the webhook event
     for (const entry of data.entry || []) {
       for (const change of entry.changes || []) {
+        if (change.field in GROUP_EVENT_TYPES) {
+          this.emit(GROUP_EVENT_TYPES[change.field], change.value)
+          continue
+        }
+
         if (change.field !== "messages") {
           continue
         }

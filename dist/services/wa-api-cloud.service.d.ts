@@ -18,13 +18,41 @@ export declare class WhatsAppApiService {
      */
     getApiUrl(): string;
     /**
-     * Makes a request to the WhatsApp API
-     * @param url Request URL
+     * Gets the phone number ID this service was configured with
+     * @returns The phone number ID
+     */
+    getPhoneId(): string;
+    /**
+     * Gets the configured Graph API version
+     * @returns The API version (e.g. "v25.0")
+     */
+    getVersion(): string;
+    /**
+     * Makes a request against the Graph API using a fully-qualified URL, handling
+     * JSON parsing and error normalization consistently.
+     * @param url Fully-qualified request URL
+     * @param method HTTP method
+     * @param data Request data (optional)
+     * @returns Promise with the response
+     */
+    private executeRequest;
+    /**
+     * Makes a request to the WhatsApp API, scoped under the configured phone number ID
+     * @param endpoint Endpoint relative to the phone number (e.g. "messages")
      * @param method HTTP method
      * @param data Request data (optional)
      * @returns Promise with the response
      */
     request<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: unknown): Promise<T>;
+    /**
+     * Makes a request against an arbitrary Graph API path, not scoped under the phone number ID.
+     * Used for operating on a specific node ID directly (e.g. a group ID: "{GROUP_ID}/participants").
+     * @param path Path relative to the Graph API version (e.g. "{GROUP_ID}/invite_link")
+     * @param method HTTP method
+     * @param data Request data (optional)
+     * @returns Promise with the response
+     */
+    graphRequest<T>(path: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: unknown): Promise<T>;
     /**
      * Makes a request to a specific phone number
      * @param phoneId Phone number ID
@@ -60,6 +88,14 @@ export declare class WhatsAppApiService {
      * @returns Promise with the media as ArrayBuffer
      */
     downloadMedia(mediaUrl: string): Promise<ArrayBuffer>;
+    /**
+     * Updates a group's profile picture (and optionally subject/description in the same call).
+     * @param groupId Group ID
+     * @param fileBuffer JPEG image content (square, max 5MB per Meta's requirements)
+     * @param extraFields Additional form fields to send alongside the file (e.g. subject, description)
+     * @returns Promise with the API response
+     */
+    updateGroupProfilePicture<T>(groupId: string, fileBuffer: Buffer, extraFields?: Record<string, string>): Promise<T>;
     /**
      * Handles WhatsApp API errors
      * @param errorResponse Error response

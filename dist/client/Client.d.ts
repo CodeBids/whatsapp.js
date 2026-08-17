@@ -1,5 +1,6 @@
 import { EventEmitter } from "events";
 import { Message } from "./actions/Message";
+import { GroupManager } from "./actions/Groups";
 import { WhatsAppApiService } from "../services/wa-api-cloud.service";
 import type { ClientInfoResponse, ClientOptions, BusinessProfileUpdate, MediaUploadResponse, MediaUrlResponse, MediaDeleteResponse } from "../types";
 import { WebhookHandler, EventType } from "./webhook/handlers/WebhookHandler";
@@ -15,6 +16,7 @@ export declare class Client extends EventEmitter {
     id: string | null;
     displayPhoneNumber: string | null;
     message: Message;
+    groups: GroupManager;
     constructor(options: ClientOptions);
     /**
      * Gets the API service
@@ -66,6 +68,25 @@ export declare class Client extends EventEmitter {
      * @internal
      */
     makePhoneRequest<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T>;
+    /**
+     * Makes a request against an arbitrary Graph API path (not scoped under the phone number ID).
+     * Used internally for operating on a specific node ID directly (e.g. a group ID).
+     * @param path Path relative to the Graph API version
+     * @param method HTTP method
+     * @param data Request data
+     * @returns API response
+     * @internal
+     */
+    makeGraphRequest<T>(path: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T>;
+    /**
+     * Updates a group's profile picture (and optionally other fields in the same multipart request)
+     * @param groupId Group ID
+     * @param fileBuffer JPEG image content
+     * @param extraFields Additional form fields to send alongside the file
+     * @returns API response
+     * @internal
+     */
+    updateGroupProfilePicture<T>(groupId: string, fileBuffer: Buffer, extraFields?: Record<string, string>): Promise<T>;
     private initializeClientData;
     /**
      * Gets the webhook handler

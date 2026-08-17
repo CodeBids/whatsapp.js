@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Client = void 0;
 const events_1 = require("events");
 const Message_1 = require("./actions/Message");
+const Groups_1 = require("./actions/Groups");
 const IncomingMessage_1 = require("../models/IncomingMessage");
 const wa_api_cloud_service_1 = require("../services/wa-api-cloud.service");
 const WebhookHandler_1 = require("./webhook/handlers/WebhookHandler");
@@ -32,6 +33,7 @@ class Client extends events_1.EventEmitter {
         }
         this.apiService = new wa_api_cloud_service_1.WhatsAppApiService(accessToken, "v25.0", phoneId);
         this.message = new Message_1.Message(this);
+        this.groups = new Groups_1.GroupManager(this);
         // Initialize webhook if options are provided
         if (webhook && webhook.verifyToken) {
             this._setupWebhook(webhook.verifyToken);
@@ -151,6 +153,29 @@ class Client extends events_1.EventEmitter {
      */
     async makePhoneRequest(endpoint, method, data) {
         return this.apiService.phoneRequest(endpoint, method, data);
+    }
+    /**
+     * Makes a request against an arbitrary Graph API path (not scoped under the phone number ID).
+     * Used internally for operating on a specific node ID directly (e.g. a group ID).
+     * @param path Path relative to the Graph API version
+     * @param method HTTP method
+     * @param data Request data
+     * @returns API response
+     * @internal
+     */
+    async makeGraphRequest(path, method, data) {
+        return this.apiService.graphRequest(path, method, data);
+    }
+    /**
+     * Updates a group's profile picture (and optionally other fields in the same multipart request)
+     * @param groupId Group ID
+     * @param fileBuffer JPEG image content
+     * @param extraFields Additional form fields to send alongside the file
+     * @returns API response
+     * @internal
+     */
+    async updateGroupProfilePicture(groupId, fileBuffer, extraFields) {
+        return this.apiService.updateGroupProfilePicture(groupId, fileBuffer, extraFields);
     }
     async initializeClientData() {
         try {

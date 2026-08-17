@@ -1,5 +1,6 @@
 import { EventEmitter } from "events"
 import { Message } from "./actions/Message"
+import { GroupManager } from "./actions/Groups"
 import { IncomingMessage } from "../models/IncomingMessage"
 import { WhatsAppApiService } from "../services/wa-api-cloud.service"
 import type { ClientData, ClientInfoResponse, ClientOptions, BusinessProfileUpdate, MediaUploadResponse, MediaUrlResponse, MediaDeleteResponse } from "../types"
@@ -19,6 +20,7 @@ export class Client extends EventEmitter {
   public displayPhoneNumber: string | null = null
 
   public message: Message
+  public groups: GroupManager
 
   constructor(options: ClientOptions) {
     super()
@@ -42,6 +44,7 @@ export class Client extends EventEmitter {
     this.apiService = new WhatsAppApiService(accessToken, "v25.0", phoneId)
 
     this.message = new Message(this)
+    this.groups = new GroupManager(this)
 
     // Initialize webhook if options are provided
     if (webhook && webhook.verifyToken) {
@@ -171,6 +174,31 @@ export class Client extends EventEmitter {
    */
   async makePhoneRequest<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T> {
     return this.apiService.phoneRequest<T>(endpoint, method, data)
+  }
+
+  /**
+   * Makes a request against an arbitrary Graph API path (not scoped under the phone number ID).
+   * Used internally for operating on a specific node ID directly (e.g. a group ID).
+   * @param path Path relative to the Graph API version
+   * @param method HTTP method
+   * @param data Request data
+   * @returns API response
+   * @internal
+   */
+  async makeGraphRequest<T>(path: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T> {
+    return this.apiService.graphRequest<T>(path, method, data)
+  }
+
+  /**
+   * Updates a group's profile picture (and optionally other fields in the same multipart request)
+   * @param groupId Group ID
+   * @param fileBuffer JPEG image content
+   * @param extraFields Additional form fields to send alongside the file
+   * @returns API response
+   * @internal
+   */
+  async updateGroupProfilePicture<T>(groupId: string, fileBuffer: Buffer, extraFields?: Record<string, string>): Promise<T> {
+    return this.apiService.updateGroupProfilePicture<T>(groupId, fileBuffer, extraFields)
   }
 
   private async initializeClientData(): Promise<void> {

@@ -447,6 +447,14 @@ export class Message {
               );
             }
             break;
+          case "group_id":
+            if (!param.group_id) {
+              throw new WhatsAppApiException(
+                "group_id is required for group_id parameter",
+                0
+              );
+            }
+            break;
           case "payload":
             if (!param.payload) {
               throw new WhatsAppApiException(
