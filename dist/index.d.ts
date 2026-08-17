@@ -1,5 +1,6 @@
 export { Client } from "./client/Client";
 export { Message } from "./client/actions/Message";
+export { FlowManager } from "./client/actions/Flows";
 export { GroupManager } from "./client/actions/Groups";
 export { TemplateManager } from "./client/actions/Templates";
 export { CallingManager } from "./client/actions/Calling";

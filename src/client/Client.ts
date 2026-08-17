@@ -1,5 +1,6 @@
 import { EventEmitter } from "events"
 import { Message } from "./actions/Message"
+import { FlowManager } from "./actions/Flows"
 import { GroupManager } from "./actions/Groups"
 import { TemplateManager } from "./actions/Templates"
 import { CallingManager } from "./actions/Calling"
@@ -26,6 +27,7 @@ export class Client extends EventEmitter {
   public displayPhoneNumber: string | null = null
 
   public message: Message
+  public flows: FlowManager
   public groups: GroupManager
   public templates: TemplateManager
   /** Beta: see {@link CallingManager} */
@@ -64,6 +66,7 @@ export class Client extends EventEmitter {
     this.apiService = new WhatsAppApiService(accessToken, "v25.0", phoneId)
 
     this.message = new Message(this)
+    this.flows = new FlowManager(this)
     this.groups = new GroupManager(this)
     this.templates = new TemplateManager(this)
     this.calling = new CallingManager(this)
@@ -214,6 +217,18 @@ export class Client extends EventEmitter {
    */
   async makeGraphRequest<T>(path: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T> {
     return this.apiService.graphRequest<T>(path, method, data)
+  }
+
+  /**
+   * Uploads a Flow JSON file as an asset for a Flow
+   * @param flowId Flow ID
+   * @param fileBuffer Flow JSON file content
+   * @param filename Filename to report to the API
+   * @returns API response
+   * @internal
+   */
+  async uploadFlowAsset<T>(flowId: string, fileBuffer: Buffer, filename?: string): Promise<T> {
+    return this.apiService.uploadFlowJson<T>(flowId, fileBuffer, filename)
   }
 
   /**

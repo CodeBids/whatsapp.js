@@ -55,6 +55,14 @@ export declare class WhatsAppApiService {
      */
     graphRequest<T>(path: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: unknown): Promise<T>;
     /**
+     * Uploads a Flow JSON file as an asset for a Flow.
+     * @param flowId Flow ID
+     * @param fileBuffer Flow JSON file content
+     * @param filename Filename to report to the API (defaults to "flow.json")
+     * @returns Promise with the upload result
+     */
+    uploadFlowJson<T>(flowId: string, fileBuffer: Buffer, filename?: string): Promise<T>;
+    /**
      * Makes a request to a specific phone number
      * @param phoneId Phone number ID
      * @param endpoint API endpoint (e.g., "messages")
