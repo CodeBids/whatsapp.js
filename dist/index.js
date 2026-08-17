@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isErrorCode = exports.getErrorMessage = exports.WhatsAppApiException = exports.WhatsAppErrorCode = exports.BlockedUsersManager = exports.QrCodeManager = exports.ConversationalAutomationManager = exports.FlowManager = exports.Message = exports.Client = void 0;
+exports.isErrorCode = exports.getErrorMessage = exports.WhatsAppApiException = exports.WhatsAppErrorCode = exports.BlockedUsersManager = exports.QrCodeManager = exports.ConversationalAutomationManager = exports.CallingManager = exports.FlowManager = exports.Message = exports.Client = void 0;
 // Export the main classes
 var Client_1 = require("./client/Client");
 Object.defineProperty(exports, "Client", { enumerable: true, get: function () { return Client_1.Client; } });
@@ -22,6 +22,8 @@ var Message_1 = require("./client/actions/Message");
 Object.defineProperty(exports, "Message", { enumerable: true, get: function () { return Message_1.Message; } });
 var Flows_1 = require("./client/actions/Flows");
 Object.defineProperty(exports, "FlowManager", { enumerable: true, get: function () { return Flows_1.FlowManager; } });
+var Calling_1 = require("./client/actions/Calling");
+Object.defineProperty(exports, "CallingManager", { enumerable: true, get: function () { return Calling_1.CallingManager; } });
 var ConversationalAutomation_1 = require("./client/actions/ConversationalAutomation");
 Object.defineProperty(exports, "ConversationalAutomationManager", { enumerable: true, get: function () { return ConversationalAutomation_1.ConversationalAutomationManager; } });
 var QrCodes_1 = require("./client/actions/QrCodes");
