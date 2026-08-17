@@ -305,6 +305,25 @@ await client.updateBusinessProfile({
 
 ---
 
+## 💡 Conversational Components
+
+Configure the welcome message shown on a user's first chat, slash-style commands, and ice breaker prompts, through `client.conversationalAutomation`.
+
+```ts
+await client.conversationalAutomation.update({
+  enableWelcomeMessage: true,
+  commands: [
+    { command_name: "tickets", command_description: "Book flight tickets" },
+    { command_name: "support", command_description: "Talk to a human" },
+  ],
+  prompts: ["Book a flight", "Track my order"],
+});
+
+const current = await client.conversationalAutomation.get();
+```
+
+---
+
 ## ⌨️ Typing Indicator
 
 ```ts
