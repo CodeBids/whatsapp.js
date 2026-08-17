@@ -17,6 +17,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./client"), exports);
 __exportStar(require("./message"), exports);
 __exportStar(require("./language"), exports);
+__exportStar(require("./blockUsers"), exports);
 // Structures types
 __exportStar(require("./structures/Location"), exports);
 __exportStar(require("./structures/Contact"), exports);

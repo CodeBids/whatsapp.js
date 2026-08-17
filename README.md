@@ -329,6 +329,20 @@ await client.updateBusinessProfile({
 
 ---
 
+## 🚫 Blocking Users
+
+Block or unblock users so they can't message you (or receive messages from you), through `client.blockedUsers`.
+
+```ts
+await client.blockedUsers.block(["5491155551234"]);
+
+const { data: blocked } = await client.blockedUsers.list();
+
+await client.blockedUsers.unblock(["5491155551234"]);
+```
+
+---
+
 ## ⌨️ Typing Indicator
 
 ```ts
