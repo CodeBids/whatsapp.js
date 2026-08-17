@@ -12,7 +12,9 @@ export declare enum EventType {
     MESSAGE_FAILED = "message.failed",
     MESSAGE_REACTION = "message.reaction",
     STATUS_UPDATED = "status.updated",
-    INTERACTION_CREATE = "interaction.create"
+    INTERACTION_CREATE = "interaction.create",
+    /** Emitted for any subscribed webhook field this library doesn't parse into a more specific event (e.g. account_alerts, message_template_status_update, phone_number_quality_update). */
+    WEBHOOK_EVENT = "webhook.event"
 }
 /**
  * Interface for webhook event data
@@ -27,8 +29,18 @@ export interface WebhookEvent {
 export declare class WebhookHandler extends EventEmitter {
     private client;
     private verifyToken;
+    private appSecret?;
     private activeCollectors;
-    constructor(client: Client, verifyToken: string);
+    constructor(client: Client, verifyToken: string, appSecret?: string);
+    /**
+     * Verifies the `X-Hub-Signature-256` header Meta sends with every webhook POST request,
+     * proving the payload was sent by Meta and not tampered with in transit.
+     * @param rawBody The raw (unparsed) request body, exactly as received
+     * @param signatureHeader The value of the `X-Hub-Signature-256` request header
+     * @param appSecret Your app secret, found in the App Dashboard
+     * @returns true if the signature is present and matches the payload
+     */
+    static verifySignature(rawBody: Buffer | string, signatureHeader: string | null | undefined, appSecret: string): boolean;
     /**
      * Registers an active collector
      * @param collector The collector to register

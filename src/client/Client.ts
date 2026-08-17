@@ -1,6 +1,9 @@
 import { EventEmitter } from "events"
 import { Message } from "./actions/Message"
 import { PhoneNumberManager } from "./actions/PhoneNumbers"
+import { ConversationalAutomationManager } from "./actions/ConversationalAutomation"
+import { QrCodeManager } from "./actions/QrCodes"
+import { BlockedUsersManager } from "./actions/BlockedUsers"
 import { IncomingMessage } from "../models/IncomingMessage"
 import { WhatsAppApiService } from "../services/wa-api-cloud.service"
 import type { ClientData, ClientInfoResponse, ClientOptions, BusinessProfileUpdate, MediaUploadResponse, MediaUrlResponse, MediaDeleteResponse } from "../types"
@@ -22,6 +25,9 @@ export class Client extends EventEmitter {
 
   public message: Message
   public phoneNumbers: PhoneNumberManager
+  public conversationalAutomation: ConversationalAutomationManager
+  public qrCodes: QrCodeManager
+  public blockedUsers: BlockedUsersManager
 
   constructor(options: ClientOptions) {
     super()
@@ -54,10 +60,13 @@ export class Client extends EventEmitter {
 
     this.message = new Message(this)
     this.phoneNumbers = new PhoneNumberManager(this)
+    this.conversationalAutomation = new ConversationalAutomationManager(this)
+    this.qrCodes = new QrCodeManager(this)
+    this.blockedUsers = new BlockedUsersManager(this)
 
     // Initialize webhook if options are provided
     if (webhook && webhook.verifyToken) {
-      this._setupWebhook(webhook.verifyToken)
+      this._setupWebhook(webhook.verifyToken, webhook.appSecret)
 
       // Start webhook server automatically if autoStart is true or not specified
       if (webhook.autoStart !== false && webhook.port) {
@@ -92,10 +101,11 @@ export class Client extends EventEmitter {
   /**
    * Sets up a webhook handler for receiving events
    * @param verifyToken Token used to verify webhook requests
+   * @param appSecret Optional app secret used to validate the `X-Hub-Signature-256` header on incoming requests
    * @private
    */
-  _setupWebhook(verifyToken: string): void {
-    this._webhook = new WebhookHandler(this, verifyToken)
+  _setupWebhook(verifyToken: string, appSecret?: string): void {
+    this._webhook = new WebhookHandler(this, verifyToken, appSecret)
 
     // Forward all webhook events to the client
     Object.values(EventType).forEach((eventType) => {
