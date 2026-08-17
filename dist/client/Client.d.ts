@@ -1,5 +1,6 @@
 import { EventEmitter } from "events";
 import { Message } from "./actions/Message";
+import { TemplateManager } from "./actions/Templates";
 import { WhatsAppApiService } from "../services/wa-api-cloud.service";
 import type { ClientInfoResponse, ClientOptions, BusinessProfileUpdate, MediaUploadResponse, MediaUrlResponse, MediaDeleteResponse } from "../types";
 import { WebhookHandler, EventType } from "./webhook/handlers/WebhookHandler";
@@ -10,11 +11,13 @@ export declare class Client extends EventEmitter {
     private apiService;
     private _webhook;
     private _webhookServer;
+    private wabaId;
     name: string | null;
     quality: string | null;
     id: string | null;
     displayPhoneNumber: string | null;
     message: Message;
+    templates: TemplateManager;
     constructor(options: ClientOptions);
     /**
      * Gets the API service
@@ -66,6 +69,26 @@ export declare class Client extends EventEmitter {
      * @internal
      */
     makePhoneRequest<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T>;
+    /**
+     * Makes a request against an arbitrary Graph API path (not scoped under the phone number ID).
+     * Used internally for WABA-level resources such as phone numbers, message templates and Flows.
+     * @param path Path relative to the Graph API version
+     * @param method HTTP method
+     * @param data Request data
+     * @returns API response
+     * @internal
+     */
+    makeGraphRequest<T>(path: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T>;
+    /**
+     * Gets the phone number ID this client was configured with
+     * @returns The phone number ID
+     */
+    getPhoneId(): string;
+    /**
+     * Gets the WhatsApp Business Account ID this client was configured with, if any
+     * @returns The WABA ID, or null if it wasn't provided
+     */
+    getWabaId(): string | null;
     private initializeClientData;
     /**
      * Gets the webhook handler

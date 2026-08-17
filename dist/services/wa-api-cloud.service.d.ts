@@ -18,13 +18,42 @@ export declare class WhatsAppApiService {
      */
     getApiUrl(): string;
     /**
-     * Makes a request to the WhatsApp API
-     * @param url Request URL
+     * Gets the phone number ID this service was configured with
+     * @returns The phone number ID
+     */
+    getPhoneId(): string;
+    /**
+     * Gets the configured Graph API version
+     * @returns The API version (e.g. "v25.0")
+     */
+    getVersion(): string;
+    /**
+     * Makes a request against the Graph API using a fully-qualified URL, handling
+     * JSON parsing and error normalization consistently.
+     * @param url Fully-qualified request URL
+     * @param method HTTP method
+     * @param data Request data (optional)
+     * @returns Promise with the response
+     */
+    private executeRequest;
+    /**
+     * Makes a request to the WhatsApp API, scoped under the configured phone number ID
+     * @param endpoint Endpoint relative to the phone number (e.g. "messages")
      * @param method HTTP method
      * @param data Request data (optional)
      * @returns Promise with the response
      */
     request<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: unknown): Promise<T>;
+    /**
+     * Makes a request against an arbitrary Graph API path, not scoped under the phone number ID.
+     * Used for WABA-level resources (message templates, flows, phone number listing) and for
+     * operating on a specific node ID directly (e.g. "{FLOW_ID}/publish").
+     * @param path Path relative to the Graph API version (e.g. "{WABA_ID}/message_templates")
+     * @param method HTTP method
+     * @param data Request data (optional)
+     * @returns Promise with the response
+     */
+    graphRequest<T>(path: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: unknown): Promise<T>;
     /**
      * Makes a request to a specific phone number
      * @param phoneId Phone number ID
