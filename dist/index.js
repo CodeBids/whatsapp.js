@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isErrorCode = exports.getErrorMessage = exports.WhatsAppApiException = exports.WhatsAppErrorCode = exports.QrCodeManager = exports.Message = exports.Client = void 0;
+exports.isErrorCode = exports.getErrorMessage = exports.WhatsAppApiException = exports.WhatsAppErrorCode = exports.BlockedUsersManager = exports.QrCodeManager = exports.Message = exports.Client = void 0;
 // Export the main classes
 var Client_1 = require("./client/Client");
 Object.defineProperty(exports, "Client", { enumerable: true, get: function () { return Client_1.Client; } });
@@ -22,6 +22,8 @@ var Message_1 = require("./client/actions/Message");
 Object.defineProperty(exports, "Message", { enumerable: true, get: function () { return Message_1.Message; } });
 var QrCodes_1 = require("./client/actions/QrCodes");
 Object.defineProperty(exports, "QrCodeManager", { enumerable: true, get: function () { return QrCodes_1.QrCodeManager; } });
+var BlockedUsers_1 = require("./client/actions/BlockedUsers");
+Object.defineProperty(exports, "BlockedUsersManager", { enumerable: true, get: function () { return BlockedUsers_1.BlockedUsersManager; } });
 // Export types
 __exportStar(require("./types"), exports);
 // Export WS utilites
