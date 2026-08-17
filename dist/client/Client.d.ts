@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import { Message } from "./actions/Message";
 import { TemplateManager } from "./actions/Templates";
+import { CallingManager } from "./actions/Calling";
 import { ConversationalAutomationManager } from "./actions/ConversationalAutomation";
 import { QrCodeManager } from "./actions/QrCodes";
 import { BlockedUsersManager } from "./actions/BlockedUsers";
@@ -21,6 +22,8 @@ export declare class Client extends EventEmitter {
     displayPhoneNumber: string | null;
     message: Message;
     templates: TemplateManager;
+    /** Beta: see {@link CallingManager} */
+    calling: CallingManager;
     conversationalAutomation: ConversationalAutomationManager;
     qrCodes: QrCodeManager;
     blockedUsers: BlockedUsersManager;
