@@ -140,6 +140,7 @@ class WebhookHandler extends events_1.EventEmitter {
                                 timestamp: message.timestamp,
                                 type: message.interactive.type,
                                 interactive: message.interactive,
+                                context: message.context,
                             };
                             eventType = EventType.INTERACTION_CREATE;
                         }

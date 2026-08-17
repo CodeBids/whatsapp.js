@@ -1,6 +1,7 @@
 export * from "./client";
 export * from "./message";
 export * from "./language";
+export * from "./phoneNumbers";
 
 // Structures types
 

@@ -1,5 +1,6 @@
 import { EventEmitter } from "events"
 import { Message } from "./actions/Message"
+import { PhoneNumberManager } from "./actions/PhoneNumbers"
 import { IncomingMessage } from "../models/IncomingMessage"
 import { WhatsAppApiService } from "../services/wa-api-cloud.service"
 import type { ClientData, ClientInfoResponse, ClientOptions, BusinessProfileUpdate, MediaUploadResponse, MediaUrlResponse, MediaDeleteResponse } from "../types"
@@ -12,6 +13,7 @@ export class Client extends EventEmitter {
   private apiService: WhatsAppApiService
   private _webhook: WebhookHandler | null = null
   private _webhookServer: any = null
+  private wabaId: string | null = null
 
   public name: string | null = null
   public quality: string | null = null
@@ -19,11 +21,12 @@ export class Client extends EventEmitter {
   public displayPhoneNumber: string | null = null
 
   public message: Message
+  public phoneNumbers: PhoneNumberManager
 
   constructor(options: ClientOptions) {
     super()
 
-    const { phoneId, accessToken, webhook } = options
+    const { phoneId, accessToken, webhook, wabaId } = options
 
     if (!phoneId || !accessToken) {
       throw new Error("Phone ID and Access Token are required")
@@ -39,9 +42,18 @@ export class Client extends EventEmitter {
       throw new Error("Access Token must be alphanumeric")
     }
 
+    if (wabaId) {
+      if (!/^\d+$/.test(wabaId)) {
+        console.error("Invalid WABA ID format:", wabaId)
+        throw new Error("WABA ID must be a numeric string")
+      }
+      this.wabaId = wabaId
+    }
+
     this.apiService = new WhatsAppApiService(accessToken, "v25.0", phoneId)
 
     this.message = new Message(this)
+    this.phoneNumbers = new PhoneNumberManager(this)
 
     // Initialize webhook if options are provided
     if (webhook && webhook.verifyToken) {
@@ -171,6 +183,35 @@ export class Client extends EventEmitter {
    */
   async makePhoneRequest<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T> {
     return this.apiService.phoneRequest<T>(endpoint, method, data)
+  }
+
+  /**
+   * Makes a request against an arbitrary Graph API path (not scoped under the phone number ID).
+   * Used internally for WABA-level resources such as phone numbers, message templates and Flows.
+   * @param path Path relative to the Graph API version
+   * @param method HTTP method
+   * @param data Request data
+   * @returns API response
+   * @internal
+   */
+  async makeGraphRequest<T>(path: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T> {
+    return this.apiService.graphRequest<T>(path, method, data)
+  }
+
+  /**
+   * Gets the phone number ID this client was configured with
+   * @returns The phone number ID
+   */
+  getPhoneId(): string {
+    return this.apiService.getPhoneId()
+  }
+
+  /**
+   * Gets the WhatsApp Business Account ID this client was configured with, if any
+   * @returns The WABA ID, or null if it wasn't provided
+   */
+  getWabaId(): string | null {
+    return this.wabaId
   }
 
   private async initializeClientData(): Promise<void> {
