@@ -1,6 +1,9 @@
 import { EventEmitter } from "events";
 import { Message } from "./actions/Message";
 import { GroupManager } from "./actions/Groups";
+import { ConversationalAutomationManager } from "./actions/ConversationalAutomation";
+import { QrCodeManager } from "./actions/QrCodes";
+import { BlockedUsersManager } from "./actions/BlockedUsers";
 import { WhatsAppApiService } from "../services/wa-api-cloud.service";
 import type { ClientInfoResponse, ClientOptions, BusinessProfileUpdate, MediaUploadResponse, MediaUrlResponse, MediaDeleteResponse } from "../types";
 import { WebhookHandler, EventType } from "./webhook/handlers/WebhookHandler";
@@ -17,6 +20,9 @@ export declare class Client extends EventEmitter {
     displayPhoneNumber: string | null;
     message: Message;
     groups: GroupManager;
+    conversationalAutomation: ConversationalAutomationManager;
+    qrCodes: QrCodeManager;
+    blockedUsers: BlockedUsersManager;
     constructor(options: ClientOptions);
     /**
      * Gets the API service
@@ -27,9 +33,10 @@ export declare class Client extends EventEmitter {
     /**
      * Sets up a webhook handler for receiving events
      * @param verifyToken Token used to verify webhook requests
+     * @param appSecret Optional app secret used to validate the `X-Hub-Signature-256` header on incoming requests
      * @private
      */
-    _setupWebhook(verifyToken: string): void;
+    _setupWebhook(verifyToken: string, appSecret?: string): void;
     /**
      * Starts a webhook server to listen for events
      * @param port Port to listen on

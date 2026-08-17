@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WebhookHandler = exports.EventType = void 0;
 const events_1 = require("events");
+const crypto_1 = require("crypto");
 /**
  * Types of events that can be emitted by the webhook handler
  */
@@ -23,6 +24,8 @@ var EventType;
     EventType["GROUP_SETTINGS_UPDATE"] = "group.settings_update";
     /** A group's status changed (e.g. suspended) */
     EventType["GROUP_STATUS_UPDATE"] = "group.status_update";
+    /** Emitted for any subscribed webhook field this library doesn't parse into a more specific event (e.g. account_alerts, message_template_status_update, phone_number_quality_update). */
+    EventType["WEBHOOK_EVENT"] = "webhook.event";
 })(EventType || (exports.EventType = EventType = {}));
 /** Maps group-related webhook field names to the EventType emitted for them */
 const GROUP_EVENT_TYPES = {
@@ -35,11 +38,35 @@ const GROUP_EVENT_TYPES = {
  * Handler for WhatsApp webhook events
  */
 class WebhookHandler extends events_1.EventEmitter {
-    constructor(client, verifyToken) {
+    constructor(client, verifyToken, appSecret) {
         super();
         this.activeCollectors = new Set();
         this.client = client;
         this.verifyToken = verifyToken;
+        this.appSecret = appSecret;
+    }
+    /**
+     * Verifies the `X-Hub-Signature-256` header Meta sends with every webhook POST request,
+     * proving the payload was sent by Meta and not tampered with in transit.
+     * @param rawBody The raw (unparsed) request body, exactly as received
+     * @param signatureHeader The value of the `X-Hub-Signature-256` request header
+     * @param appSecret Your app secret, found in the App Dashboard
+     * @returns true if the signature is present and matches the payload
+     */
+    static verifySignature(rawBody, signatureHeader, appSecret) {
+        if (!signatureHeader || !signatureHeader.startsWith("sha256=")) {
+            return false;
+        }
+        const expectedSignature = (0, crypto_1.createHmac)("sha256", appSecret)
+            .update(rawBody)
+            .digest("hex");
+        const providedSignature = signatureHeader.slice("sha256=".length);
+        const expectedBuffer = Buffer.from(expectedSignature, "hex");
+        const providedBuffer = Buffer.from(providedSignature, "hex");
+        if (expectedBuffer.length !== providedBuffer.length) {
+            return false;
+        }
+        return (0, crypto_1.timingSafeEqual)(expectedBuffer, providedBuffer);
     }
     /**
      * Registers an active collector
@@ -103,15 +130,27 @@ class WebhookHandler extends events_1.EventEmitter {
      * @param res HTTP response
      */
     async handleWebhookEvent(req, res) {
-        let body = "";
-        // Collect request body
+        const chunks = [];
+        // Collect the raw request body (kept as a Buffer so signature validation hashes the exact bytes Meta sent)
         req.on("data", (chunk) => {
-            body += chunk.toString();
+            chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
         });
         // Process the event when the request is complete
         req.on("end", () => {
+            const rawBody = Buffer.concat(chunks);
+            // Validate the payload signature when an app secret was configured
+            if (this.appSecret) {
+                const signature = req.headers["x-hub-signature-256"];
+                const signatureHeader = Array.isArray(signature) ? signature[0] : signature;
+                if (!WebhookHandler.verifySignature(rawBody, signatureHeader, this.appSecret)) {
+                    console.error("Webhook signature validation failed. Rejecting request.");
+                    res.writeHead(401, { "Content-Type": "text/plain" });
+                    res.end("Invalid signature");
+                    return;
+                }
+            }
             try {
-                const data = JSON.parse(body);
+                const data = JSON.parse(rawBody.toString("utf-8"));
                 // Acknowledge receipt of the event
                 res.writeHead(200, { "Content-Type": "text/plain" });
                 res.end("EVENT_RECEIVED");
@@ -142,6 +181,10 @@ class WebhookHandler extends events_1.EventEmitter {
                     continue;
                 }
                 if (change.field !== "messages") {
+                    // Fields this library doesn't parse into a dedicated event (account_alerts,
+                    // message_template_status_update, phone_number_quality_update, etc.) are still
+                    // surfaced, unparsed, so consumers can react to them if they subscribed to the field.
+                    this.emit(EventType.WEBHOOK_EVENT, { field: change.field, value: change.value });
                     continue;
                 }
                 const value = change.value;

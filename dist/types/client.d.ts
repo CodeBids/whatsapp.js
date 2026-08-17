@@ -5,6 +5,13 @@ export interface ClientOptions {
         verifyToken: string;
         port?: number;
         autoStart?: boolean;
+        /**
+         * App secret (found in the Meta App Dashboard). When provided, every incoming webhook
+         * request is validated against its `X-Hub-Signature-256` header before being processed,
+         * and requests with a missing or invalid signature are rejected with a 401 response.
+         * Strongly recommended for any webhook endpoint reachable from the public internet.
+         */
+        appSecret?: string;
     };
 }
 export interface ClientInfoResponse {
