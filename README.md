@@ -305,6 +305,38 @@ await client.updateBusinessProfile({
 
 ---
 
+## 🌊 Flow Management
+
+Create, update, publish and deprecate [WhatsApp Flows](https://developers.facebook.com/docs/whatsapp/flows) through `client.flows`. This manages the Flows themselves (their JSON, status, categories); to actually send one to a user, use `client.message.send({ flow: { ... } })`. Creating and listing Flows requires `wabaId` on the `Client`.
+
+```ts
+const client = new Client({
+  phoneId: "YOUR_PHONE_ID",
+  accessToken: "YOUR_ACCESS_TOKEN",
+  wabaId: "YOUR_WABA_ID",
+});
+
+// Create a draft Flow
+const flow = await client.flows.create({
+  name: "appointment_booking",
+  categories: ["APPOINTMENT_BOOKING"],
+});
+
+// Upload its JSON definition
+await client.flows.updateJson(flow.id, JSON.stringify(flowJson));
+
+// Publish it once validation passes
+await client.flows.publish(flow.id);
+
+// Get a 30-day shareable preview link
+const { preview } = await client.flows.getPreviewUrl(flow.id);
+
+// Retire it later
+await client.flows.deprecate(flow.id);
+```
+
+---
+
 ## ⌨️ Typing Indicator
 
 ```ts

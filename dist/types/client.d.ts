@@ -1,6 +1,11 @@
 export interface ClientOptions {
     phoneId: string;
     accessToken: string;
+    /**
+     * WhatsApp Business Account ID. Required only for WABA-scoped features: listing every
+     * phone number on the account, and managing message templates and Flows.
+     */
+    wabaId?: string;
     webhook?: {
         verifyToken: string;
         port?: number;
