@@ -273,6 +273,7 @@ Built-in HTTP server for real-time events.
 * `message.reaction`
 * `status.updated`
 * `interaction.create`
+* `call.event` _(beta, requires subscribing to the "calls" webhook field — see [Calling](#-calling-beta))_
 
 ### Example
 
@@ -353,6 +354,31 @@ await client.phoneNumbers.register("123456"); // 6-digit two-step verification P
 // Deregister, or rotate the two-step verification PIN
 await client.phoneNumbers.deregister();
 await client.phoneNumbers.setTwoStepVerificationPin("654321");
+```
+
+---
+
+## 📞 Calling (beta)
+
+`client.calling` wraps the [Business Calling API](https://developers.facebook.com/docs/whatsapp/cloud-api/calling), a newer part of the Cloud API — treat it as beta, since Meta's spec here is still evolving.
+
+```ts
+// Call a user
+await client.calling.connect("5491155551234");
+
+// React to an incoming call (subscribe to the "calls" webhook field first)
+client.on("call.event", async (call) => {
+  if (call.event === "connect") {
+    await client.calling.accept(call.id, { sdp_type: "answer", sdp: mySdpAnswer });
+    // or: await client.calling.reject(call.id);
+  }
+});
+
+await client.calling.terminate("call_id");
+
+// Calling settings
+const settings = await client.calling.getSettings();
+await client.calling.updateSettings({ status: "ENABLED" });
 ```
 
 ---
