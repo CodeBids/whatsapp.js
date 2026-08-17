@@ -13,6 +13,14 @@ export declare enum EventType {
     MESSAGE_REACTION = "message.reaction",
     STATUS_UPDATED = "status.updated",
     INTERACTION_CREATE = "interaction.create",
+    /** A group was created, or a group's creation/deletion otherwise changed state (see `client.groups`) */
+    GROUP_LIFECYCLE_UPDATE = "group.lifecycle_update",
+    /** A participant joined, left, or was removed from a group */
+    GROUP_PARTICIPANTS_UPDATE = "group.participants_update",
+    /** A group's subject, description or picture changed */
+    GROUP_SETTINGS_UPDATE = "group.settings_update",
+    /** A group's status changed (e.g. suspended) */
+    GROUP_STATUS_UPDATE = "group.status_update",
     /** Beta: emitted for entries on the `calls` webhook field (see the Calling API, `client.calling`) */
     CALL_EVENT = "call.event",
     /** Emitted for any subscribed webhook field this library doesn't parse into a more specific event (e.g. account_alerts, message_template_status_update, phone_number_quality_update). */

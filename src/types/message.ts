@@ -56,8 +56,10 @@ export interface TemplateComponent {
 
 // Update the TemplateParameter interface to include all parameter types
 export interface TemplateParameter {
-  type: "text" | "currency" | "date_time" | "image" | "document" | "video" | "payload" | "action" | "location"
+  type: "text" | "currency" | "date_time" | "image" | "document" | "video" | "payload" | "action" | "location" | "group_id"
   text?: string
+  /** WhatsApp group ID, used by the "group_id" parameter type to send a group invite link template */
+  group_id?: string
   parameter_name?: string
   currency?: {
     fallback_value: string

@@ -47,7 +47,7 @@ export declare class WhatsAppApiService {
     /**
      * Makes a request against an arbitrary Graph API path, not scoped under the phone number ID.
      * Used for WABA-level resources (message templates, flows, phone number listing) and for
-     * operating on a specific node ID directly (e.g. "{FLOW_ID}/publish").
+     * operating on a specific node ID directly (e.g. "{FLOW_ID}/publish" or "{GROUP_ID}/invite_link").
      * @param path Path relative to the Graph API version (e.g. "{WABA_ID}/message_templates")
      * @param method HTTP method
      * @param data Request data (optional)
@@ -97,6 +97,14 @@ export declare class WhatsAppApiService {
      * @returns Promise with the media as ArrayBuffer
      */
     downloadMedia(mediaUrl: string): Promise<ArrayBuffer>;
+    /**
+     * Updates a group's profile picture (and optionally subject/description in the same call).
+     * @param groupId Group ID
+     * @param fileBuffer JPEG image content (square, max 5MB per Meta's requirements)
+     * @param extraFields Additional form fields to send alongside the file (e.g. subject, description)
+     * @returns Promise with the API response
+     */
+    updateGroupProfilePicture<T>(groupId: string, fileBuffer: Buffer, extraFields?: Record<string, string>): Promise<T>;
     /**
      * Handles WhatsApp API errors
      * @param errorResponse Error response

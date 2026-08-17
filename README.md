@@ -200,6 +200,8 @@ await client.message.send({
 });
 ```
 
+Need to create, review or retire templates instead of just sending them? See [Template Management](#-template-management) below.
+
 ---
 
 ### Reactions
@@ -273,6 +275,7 @@ Built-in HTTP server for real-time events.
 * `message.reaction`
 * `status.updated`
 * `interaction.create`
+* `group.lifecycle_update`, `group.participants_update`, `group.settings_update`, `group.status_update` _(see [Groups](#-groups))_
 * `call.event` _(beta, requires subscribing to the "calls" webhook field — see [Calling](#-calling-beta))_
 
 ### Example
@@ -358,6 +361,70 @@ const { preview } = await client.flows.getPreviewUrl(flow.id);
 
 // Retire it later
 await client.flows.deprecate(flow.id);
+```
+
+---
+
+## 👥 Groups
+
+Create and manage WhatsApp groups through `client.groups`. Requires your business phone number to be an Official Business Account (OBA) on the Cloud API. Groups are invite-only — there's no "add participant" endpoint; people join via an invite link or by having their join request approved (subscribe to the `calls`-sibling group webhook fields to get notified).
+
+```ts
+// Create a group (the invite link arrives via the group.lifecycle_update event)
+const group = await client.groups.create({ subject: "Support Team", joinApprovalMode: "approval_required" });
+
+client.on("group.lifecycle_update", (event) => console.log(event.invite_link));
+
+// Share the invite link
+const { invite_link } = await client.groups.getInviteLink(group.id);
+
+// Approve pending join requests
+const { data: requests } = await client.groups.getJoinRequests(group.id);
+await client.groups.approveJoinRequests(group.id, requests.map((r) => r.join_request_id));
+
+// Message the group like any other recipient
+await client.message.send({ to: group.id, recipient_type: "group", content: "Welcome! 👋" });
+
+// Manage it
+await client.groups.update(group.id, { subject: "Support Team 🎧" });
+await client.groups.removeParticipants(group.id, ["5491155551234"]);
+await client.groups.delete(group.id);
+```
+
+---
+
+## 📝 Template Management
+
+Create, review, edit and retire message templates through `client.templates`. This is the Business Management API counterpart to sending templates with `client.message.send({ template: ... })` — it requires `wabaId` (your WhatsApp Business Account ID) when creating the `Client`.
+
+```ts
+const client = new Client({
+  phoneId: "YOUR_PHONE_ID",
+  accessToken: "YOUR_ACCESS_TOKEN",
+  wabaId: "YOUR_WABA_ID",
+});
+
+// Create a template and submit it for review
+const created = await client.templates.create({
+  name: "order_confirmation",
+  language: "en_US",
+  category: "UTILITY",
+  components: [
+    {
+      type: "BODY",
+      text: "Your order {{1}} has shipped 📦",
+      example: { body_text: [["#1234"]] },
+    },
+  ],
+});
+
+// List templates, optionally filtered
+const { data: templates } = await client.templates.list({ status: "APPROVED" });
+
+// Get, edit and delete
+const template = await client.templates.get(created.id);
+await client.templates.update(created.id, { category: "MARKETING" });
+await client.templates.delete({ name: "order_confirmation" });
 ```
 
 ---

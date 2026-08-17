@@ -268,6 +268,11 @@ class Message {
                             throw new Messages_1.WhatsAppApiException("Latitude and longitude are required for location parameter", 0);
                         }
                         break;
+                    case "group_id":
+                        if (!param.group_id) {
+                            throw new Messages_1.WhatsAppApiException("group_id is required for group_id parameter", 0);
+                        }
+                        break;
                     case "payload":
                         if (!param.payload) {
                             throw new Messages_1.WhatsAppApiException("Payload value is required for payload parameter", 0);

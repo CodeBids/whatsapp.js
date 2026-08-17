@@ -18,6 +18,8 @@ __exportStar(require("./client"), exports);
 __exportStar(require("./message"), exports);
 __exportStar(require("./language"), exports);
 __exportStar(require("./flows"), exports);
+__exportStar(require("./groups"), exports);
+__exportStar(require("./templates"), exports);
 __exportStar(require("./calling"), exports);
 __exportStar(require("./conversationalAutomation"), exports);
 __exportStar(require("./qrCodes"), exports);

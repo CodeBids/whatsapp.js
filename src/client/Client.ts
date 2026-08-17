@@ -1,6 +1,8 @@
 import { EventEmitter } from "events"
 import { Message } from "./actions/Message"
 import { FlowManager } from "./actions/Flows"
+import { GroupManager } from "./actions/Groups"
+import { TemplateManager } from "./actions/Templates"
 import { CallingManager } from "./actions/Calling"
 import { ConversationalAutomationManager } from "./actions/ConversationalAutomation"
 import { QrCodeManager } from "./actions/QrCodes"
@@ -26,6 +28,8 @@ export class Client extends EventEmitter {
 
   public message: Message
   public flows: FlowManager
+  public groups: GroupManager
+  public templates: TemplateManager
   /** Beta: see {@link CallingManager} */
   public calling: CallingManager
   public conversationalAutomation: ConversationalAutomationManager
@@ -63,6 +67,8 @@ export class Client extends EventEmitter {
 
     this.message = new Message(this)
     this.flows = new FlowManager(this)
+    this.groups = new GroupManager(this)
+    this.templates = new TemplateManager(this)
     this.calling = new CallingManager(this)
     this.conversationalAutomation = new ConversationalAutomationManager(this)
     this.qrCodes = new QrCodeManager(this)
@@ -201,7 +207,8 @@ export class Client extends EventEmitter {
 
   /**
    * Makes a request against an arbitrary Graph API path (not scoped under the phone number ID).
-   * Used internally for WABA-level resources such as phone numbers, message templates and Flows.
+   * Used internally for WABA-level resources such as phone numbers, message templates and Flows,
+   * and for operating on a specific node ID directly (e.g. a group ID).
    * @param path Path relative to the Graph API version
    * @param method HTTP method
    * @param data Request data
@@ -222,6 +229,18 @@ export class Client extends EventEmitter {
    */
   async uploadFlowAsset<T>(flowId: string, fileBuffer: Buffer, filename?: string): Promise<T> {
     return this.apiService.uploadFlowJson<T>(flowId, fileBuffer, filename)
+  }
+
+  /**
+   * Updates a group's profile picture (and optionally other fields in the same multipart request)
+   * @param groupId Group ID
+   * @param fileBuffer JPEG image content
+   * @param extraFields Additional form fields to send alongside the file
+   * @returns API response
+   * @internal
+   */
+  async updateGroupProfilePicture<T>(groupId: string, fileBuffer: Buffer, extraFields?: Record<string, string>): Promise<T> {
+    return this.apiService.updateGroupProfilePicture<T>(groupId, fileBuffer, extraFields)
   }
 
   /**

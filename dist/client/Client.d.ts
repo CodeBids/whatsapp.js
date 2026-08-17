@@ -1,6 +1,8 @@
 import { EventEmitter } from "events";
 import { Message } from "./actions/Message";
 import { FlowManager } from "./actions/Flows";
+import { GroupManager } from "./actions/Groups";
+import { TemplateManager } from "./actions/Templates";
 import { CallingManager } from "./actions/Calling";
 import { ConversationalAutomationManager } from "./actions/ConversationalAutomation";
 import { QrCodeManager } from "./actions/QrCodes";
@@ -22,6 +24,8 @@ export declare class Client extends EventEmitter {
     displayPhoneNumber: string | null;
     message: Message;
     flows: FlowManager;
+    groups: GroupManager;
+    templates: TemplateManager;
     /** Beta: see {@link CallingManager} */
     calling: CallingManager;
     conversationalAutomation: ConversationalAutomationManager;
@@ -81,7 +85,8 @@ export declare class Client extends EventEmitter {
     makePhoneRequest<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T>;
     /**
      * Makes a request against an arbitrary Graph API path (not scoped under the phone number ID).
-     * Used internally for WABA-level resources such as phone numbers, message templates and Flows.
+     * Used internally for WABA-level resources such as phone numbers, message templates and Flows,
+     * and for operating on a specific node ID directly (e.g. a group ID).
      * @param path Path relative to the Graph API version
      * @param method HTTP method
      * @param data Request data
@@ -98,6 +103,15 @@ export declare class Client extends EventEmitter {
      * @internal
      */
     uploadFlowAsset<T>(flowId: string, fileBuffer: Buffer, filename?: string): Promise<T>;
+    /**
+     * Updates a group's profile picture (and optionally other fields in the same multipart request)
+     * @param groupId Group ID
+     * @param fileBuffer JPEG image content
+     * @param extraFields Additional form fields to send alongside the file
+     * @returns API response
+     * @internal
+     */
+    updateGroupProfilePicture<T>(groupId: string, fileBuffer: Buffer, extraFields?: Record<string, string>): Promise<T>;
     /**
      * Gets the phone number ID this client was configured with
      * @returns The phone number ID
