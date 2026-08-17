@@ -1,5 +1,7 @@
 import { EventEmitter } from "events"
 import { Message } from "./actions/Message"
+import { ConversationalAutomationManager } from "./actions/ConversationalAutomation"
+import { QrCodeManager } from "./actions/QrCodes"
 import { BlockedUsersManager } from "./actions/BlockedUsers"
 import { IncomingMessage } from "../models/IncomingMessage"
 import { WhatsAppApiService } from "../services/wa-api-cloud.service"
@@ -20,6 +22,8 @@ export class Client extends EventEmitter {
   public displayPhoneNumber: string | null = null
 
   public message: Message
+  public conversationalAutomation: ConversationalAutomationManager
+  public qrCodes: QrCodeManager
   public blockedUsers: BlockedUsersManager
 
   constructor(options: ClientOptions) {
@@ -44,6 +48,8 @@ export class Client extends EventEmitter {
     this.apiService = new WhatsAppApiService(accessToken, "v25.0", phoneId)
 
     this.message = new Message(this)
+    this.conversationalAutomation = new ConversationalAutomationManager(this)
+    this.qrCodes = new QrCodeManager(this)
     this.blockedUsers = new BlockedUsersManager(this)
 
     // Initialize webhook if options are provided

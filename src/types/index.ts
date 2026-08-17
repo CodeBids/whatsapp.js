@@ -1,6 +1,8 @@
 export * from "./client";
 export * from "./message";
 export * from "./language";
+export * from "./conversationalAutomation";
+export * from "./qrCodes";
 export * from "./blockUsers";
 
 // Structures types

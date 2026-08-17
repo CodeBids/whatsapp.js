@@ -329,6 +329,45 @@ await client.updateBusinessProfile({
 
 ---
 
+## 💡 Conversational Components
+
+Configure the welcome message shown on a user's first chat, slash-style commands, and ice breaker prompts, through `client.conversationalAutomation`.
+
+```ts
+await client.conversationalAutomation.update({
+  enableWelcomeMessage: true,
+  commands: [
+    { command_name: "tickets", command_description: "Book flight tickets" },
+    { command_name: "support", command_description: "Talk to a human" },
+  ],
+  prompts: ["Book a flight", "Track my order"],
+});
+
+const current = await client.conversationalAutomation.get();
+```
+
+---
+
+## 🔗 QR Codes & Short Links
+
+Create click-to-chat QR codes / short links that open a chat pre-filled with a message, through `client.qrCodes`.
+
+```ts
+const qr = await client.qrCodes.create({
+  prefilledMessage: "Hi! I'd like to know more 👋",
+  generateQrImage: "PNG",
+});
+
+console.log(qr.deep_link_url, qr.qr_image_url);
+
+const { data: codes } = await client.qrCodes.list();
+
+await client.qrCodes.update(qr.code, "New pre-filled message");
+await client.qrCodes.delete(qr.code);
+```
+
+---
+
 ## 🚫 Blocking Users
 
 Block or unblock users so they can't message you (or receive messages from you), through `client.blockedUsers`.

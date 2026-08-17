@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Client = void 0;
 const events_1 = require("events");
 const Message_1 = require("./actions/Message");
+const ConversationalAutomation_1 = require("./actions/ConversationalAutomation");
+const QrCodes_1 = require("./actions/QrCodes");
 const BlockedUsers_1 = require("./actions/BlockedUsers");
 const IncomingMessage_1 = require("../models/IncomingMessage");
 const wa_api_cloud_service_1 = require("../services/wa-api-cloud.service");
@@ -33,6 +35,8 @@ class Client extends events_1.EventEmitter {
         }
         this.apiService = new wa_api_cloud_service_1.WhatsAppApiService(accessToken, "v25.0", phoneId);
         this.message = new Message_1.Message(this);
+        this.conversationalAutomation = new ConversationalAutomation_1.ConversationalAutomationManager(this);
+        this.qrCodes = new QrCodes_1.QrCodeManager(this);
         this.blockedUsers = new BlockedUsers_1.BlockedUsersManager(this);
         // Initialize webhook if options are provided
         if (webhook && webhook.verifyToken) {

@@ -1,6 +1,8 @@
 // Export the main classes
 export { Client } from "./client/Client"
 export { Message } from "./client/actions/Message"
+export { ConversationalAutomationManager } from "./client/actions/ConversationalAutomation"
+export { QrCodeManager } from "./client/actions/QrCodes"
 export { BlockedUsersManager } from "./client/actions/BlockedUsers"
 
 // Export types

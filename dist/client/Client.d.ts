@@ -1,5 +1,7 @@
 import { EventEmitter } from "events";
 import { Message } from "./actions/Message";
+import { ConversationalAutomationManager } from "./actions/ConversationalAutomation";
+import { QrCodeManager } from "./actions/QrCodes";
 import { BlockedUsersManager } from "./actions/BlockedUsers";
 import { WhatsAppApiService } from "../services/wa-api-cloud.service";
 import type { ClientInfoResponse, ClientOptions, BusinessProfileUpdate, MediaUploadResponse, MediaUrlResponse, MediaDeleteResponse } from "../types";
@@ -16,6 +18,8 @@ export declare class Client extends EventEmitter {
     id: string | null;
     displayPhoneNumber: string | null;
     message: Message;
+    conversationalAutomation: ConversationalAutomationManager;
+    qrCodes: QrCodeManager;
     blockedUsers: BlockedUsersManager;
     constructor(options: ClientOptions);
     /**
