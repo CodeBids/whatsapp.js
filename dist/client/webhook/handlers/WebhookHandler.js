@@ -15,6 +15,8 @@ var EventType;
     EventType["MESSAGE_REACTION"] = "message.reaction";
     EventType["STATUS_UPDATED"] = "status.updated";
     EventType["INTERACTION_CREATE"] = "interaction.create";
+    /** Beta: emitted for entries on the `calls` webhook field (see the Calling API, `client.calling`) */
+    EventType["CALL_EVENT"] = "call.event";
 })(EventType || (exports.EventType = EventType = {}));
 /**
  * Handler for WhatsApp webhook events
@@ -122,6 +124,12 @@ class WebhookHandler extends events_1.EventEmitter {
         // Process each entry in the webhook event
         for (const entry of data.entry || []) {
             for (const change of entry.changes || []) {
+                if (change.field === "calls") {
+                    for (const call of change.value?.calls || []) {
+                        this.emit(EventType.CALL_EVENT, call);
+                    }
+                    continue;
+                }
                 if (change.field !== "messages") {
                     continue;
                 }
@@ -140,6 +148,7 @@ class WebhookHandler extends events_1.EventEmitter {
                                 timestamp: message.timestamp,
                                 type: message.interactive.type,
                                 interactive: message.interactive,
+                                context: message.context,
                             };
                             eventType = EventType.INTERACTION_CREATE;
                         }

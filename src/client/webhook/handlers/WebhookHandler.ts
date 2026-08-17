@@ -14,6 +14,8 @@ export enum EventType {
   MESSAGE_REACTION = "message.reaction",
   STATUS_UPDATED = "status.updated",
   INTERACTION_CREATE = "interaction.create",
+  /** Beta: emitted for entries on the `calls` webhook field (see the Calling API, `client.calling`) */
+  CALL_EVENT = "call.event",
 }
 
 /**
@@ -142,6 +144,13 @@ export class WebhookHandler extends EventEmitter {
     // Process each entry in the webhook event
     for (const entry of data.entry || []) {
       for (const change of entry.changes || []) {
+        if (change.field === "calls") {
+          for (const call of change.value?.calls || []) {
+            this.emit(EventType.CALL_EVENT, call)
+          }
+          continue
+        }
+
         if (change.field !== "messages") {
           continue
         }

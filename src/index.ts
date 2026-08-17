@@ -1,6 +1,7 @@
 // Export the main classes
 export { Client } from "./client/Client"
 export { Message } from "./client/actions/Message"
+export { CallingManager } from "./client/actions/Calling"
 
 // Export types
 export * from "./types"

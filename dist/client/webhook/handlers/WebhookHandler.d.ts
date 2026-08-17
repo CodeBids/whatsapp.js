@@ -12,7 +12,9 @@ export declare enum EventType {
     MESSAGE_FAILED = "message.failed",
     MESSAGE_REACTION = "message.reaction",
     STATUS_UPDATED = "status.updated",
-    INTERACTION_CREATE = "interaction.create"
+    INTERACTION_CREATE = "interaction.create",
+    /** Beta: emitted for entries on the `calls` webhook field (see the Calling API, `client.calling`) */
+    CALL_EVENT = "call.event"
 }
 /**
  * Interface for webhook event data

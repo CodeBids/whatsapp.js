@@ -1,5 +1,6 @@
 import { EventEmitter } from "events";
 import { Message } from "./actions/Message";
+import { CallingManager } from "./actions/Calling";
 import { WhatsAppApiService } from "../services/wa-api-cloud.service";
 import type { ClientInfoResponse, ClientOptions, BusinessProfileUpdate, MediaUploadResponse, MediaUrlResponse, MediaDeleteResponse } from "../types";
 import { WebhookHandler, EventType } from "./webhook/handlers/WebhookHandler";
@@ -15,6 +16,8 @@ export declare class Client extends EventEmitter {
     id: string | null;
     displayPhoneNumber: string | null;
     message: Message;
+    /** Beta: see {@link CallingManager} */
+    calling: CallingManager;
     constructor(options: ClientOptions);
     /**
      * Gets the API service

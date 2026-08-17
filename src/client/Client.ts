@@ -1,5 +1,6 @@
 import { EventEmitter } from "events"
 import { Message } from "./actions/Message"
+import { CallingManager } from "./actions/Calling"
 import { IncomingMessage } from "../models/IncomingMessage"
 import { WhatsAppApiService } from "../services/wa-api-cloud.service"
 import type { ClientData, ClientInfoResponse, ClientOptions, BusinessProfileUpdate, MediaUploadResponse, MediaUrlResponse, MediaDeleteResponse } from "../types"
@@ -19,6 +20,8 @@ export class Client extends EventEmitter {
   public displayPhoneNumber: string | null = null
 
   public message: Message
+  /** Beta: see {@link CallingManager} */
+  public calling: CallingManager
 
   constructor(options: ClientOptions) {
     super()
@@ -42,6 +45,7 @@ export class Client extends EventEmitter {
     this.apiService = new WhatsAppApiService(accessToken, "v25.0", phoneId)
 
     this.message = new Message(this)
+    this.calling = new CallingManager(this)
 
     // Initialize webhook if options are provided
     if (webhook && webhook.verifyToken) {

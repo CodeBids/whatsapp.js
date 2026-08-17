@@ -1,5 +1,6 @@
 export { Client } from "./client/Client";
 export { Message } from "./client/actions/Message";
+export { CallingManager } from "./client/actions/Calling";
 export * from "./types";
 export * from './client/webhook/handlers/WebhookHandler';
 export { WhatsAppErrorCode, type WhatsAppApiError, type WhatsAppApiErrorResponse } from "./errors/ErrorCodes";
