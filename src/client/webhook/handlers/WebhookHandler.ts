@@ -1,4 +1,5 @@
 import { EventEmitter } from "events"
+import { createHmac, timingSafeEqual } from "crypto"
 import type { IncomingMessage, ServerResponse } from "http"
 import type { Client } from "../../Client"
 
@@ -14,6 +15,8 @@ export enum EventType {
   MESSAGE_REACTION = "message.reaction",
   STATUS_UPDATED = "status.updated",
   INTERACTION_CREATE = "interaction.create",
+  /** Emitted for any subscribed webhook field this library doesn't parse into a more specific event (e.g. account_alerts, message_template_status_update, phone_number_quality_update). */
+  WEBHOOK_EVENT = "webhook.event",
 }
 
 /**
@@ -30,12 +33,43 @@ export interface WebhookEvent {
 export class WebhookHandler extends EventEmitter {
   private client: Client
   private verifyToken: string
+  private appSecret?: string
   private activeCollectors: Set<any> = new Set()
 
-  constructor(client: Client, verifyToken: string) {
+  constructor(client: Client, verifyToken: string, appSecret?: string) {
     super()
     this.client = client
     this.verifyToken = verifyToken
+    this.appSecret = appSecret
+  }
+
+  /**
+   * Verifies the `X-Hub-Signature-256` header Meta sends with every webhook POST request,
+   * proving the payload was sent by Meta and not tampered with in transit.
+   * @param rawBody The raw (unparsed) request body, exactly as received
+   * @param signatureHeader The value of the `X-Hub-Signature-256` request header
+   * @param appSecret Your app secret, found in the App Dashboard
+   * @returns true if the signature is present and matches the payload
+   */
+  static verifySignature(rawBody: Buffer | string, signatureHeader: string | null | undefined, appSecret: string): boolean {
+    if (!signatureHeader || !signatureHeader.startsWith("sha256=")) {
+      return false
+    }
+
+    const expectedSignature = createHmac("sha256", appSecret)
+      .update(rawBody)
+      .digest("hex")
+
+    const providedSignature = signatureHeader.slice("sha256=".length)
+
+    const expectedBuffer = Buffer.from(expectedSignature, "hex")
+    const providedBuffer = Buffer.from(providedSignature, "hex")
+
+    if (expectedBuffer.length !== providedBuffer.length) {
+      return false
+    }
+
+    return timingSafeEqual(expectedBuffer, providedBuffer)
   }
 
   /**
@@ -103,17 +137,32 @@ export class WebhookHandler extends EventEmitter {
    * @param res HTTP response
    */
   private async handleWebhookEvent(req: IncomingMessage, res: ServerResponse): Promise<void> {
-    let body = ""
+    const chunks: Buffer[] = []
 
-    // Collect request body
+    // Collect the raw request body (kept as a Buffer so signature validation hashes the exact bytes Meta sent)
     req.on("data", (chunk) => {
-      body += chunk.toString()
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
     })
 
     // Process the event when the request is complete
     req.on("end", () => {
+      const rawBody = Buffer.concat(chunks)
+
+      // Validate the payload signature when an app secret was configured
+      if (this.appSecret) {
+        const signature = req.headers["x-hub-signature-256"]
+        const signatureHeader = Array.isArray(signature) ? signature[0] : signature
+
+        if (!WebhookHandler.verifySignature(rawBody, signatureHeader, this.appSecret)) {
+          console.error("Webhook signature validation failed. Rejecting request.")
+          res.writeHead(401, { "Content-Type": "text/plain" })
+          res.end("Invalid signature")
+          return
+        }
+      }
+
       try {
-        const data = JSON.parse(body)
+        const data = JSON.parse(rawBody.toString("utf-8"))
 
         // Acknowledge receipt of the event
         res.writeHead(200, { "Content-Type": "text/plain" })
@@ -143,6 +192,10 @@ export class WebhookHandler extends EventEmitter {
     for (const entry of data.entry || []) {
       for (const change of entry.changes || []) {
         if (change.field !== "messages") {
+          // Fields this library doesn't parse into a dedicated event (account_alerts,
+          // message_template_status_update, phone_number_quality_update, etc.) are still
+          // surfaced, unparsed, so consumers can react to them if they subscribed to the field.
+          this.emit(EventType.WEBHOOK_EVENT, { field: change.field, value: change.value })
           continue
         }
 

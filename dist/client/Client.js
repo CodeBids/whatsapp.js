@@ -34,7 +34,7 @@ class Client extends events_1.EventEmitter {
         this.message = new Message_1.Message(this);
         // Initialize webhook if options are provided
         if (webhook && webhook.verifyToken) {
-            this._setupWebhook(webhook.verifyToken);
+            this._setupWebhook(webhook.verifyToken, webhook.appSecret);
             // Start webhook server automatically if autoStart is true or not specified
             if (webhook.autoStart !== false && webhook.port) {
                 this._startWebhookServer(webhook.port);
@@ -65,10 +65,11 @@ class Client extends events_1.EventEmitter {
     /**
      * Sets up a webhook handler for receiving events
      * @param verifyToken Token used to verify webhook requests
+     * @param appSecret Optional app secret used to validate the `X-Hub-Signature-256` header on incoming requests
      * @private
      */
-    _setupWebhook(verifyToken) {
-        this._webhook = new WebhookHandler_1.WebhookHandler(this, verifyToken);
+    _setupWebhook(verifyToken, appSecret) {
+        this._webhook = new WebhookHandler_1.WebhookHandler(this, verifyToken, appSecret);
         // Forward all webhook events to the client
         Object.values(WebhookHandler_1.EventType).forEach((eventType) => {
             this._webhook.on(eventType, (data) => {
