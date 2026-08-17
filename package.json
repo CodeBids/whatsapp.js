@@ -22,9 +22,9 @@
         "test:coverage": "jest --coverage",
         "lint": "eslint src",
         "lint:fix": "eslint src --fix",
-        "docs": "typedoc",
-        "docs:md": "typedoc --options typedoc-markdown.json",
-        "docs:all": "pnpm run docs && pnpm run docs:md",
+        "docs": "typedoc --options typedoc-markdown.json && node scripts/jekyll-postprocess.js",
+        "docs:html": "typedoc",
+        "docs:all": "pnpm run docs && pnpm run docs:html",
         "prepublishOnly": "pnpm run build && pnpm test"
     },
     "keywords": [

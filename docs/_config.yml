@@ -1,0 +1,44 @@
+title: "@thejulianjara/whatsapp.js"
+description: "API documentation for the WhatsApp Cloud API client for Node.js"
+url: "https://thejulianjara.github.io"
+baseurl: "/whatsapp.js"
+
+remote_theme: just-the-docs/just-the-docs@v0.10.0
+
+color_scheme: dark
+
+aux_links:
+  "GitHub":
+    - "https://github.com/TheJulianJara/whatsapp.js"
+  "npm":
+    - "https://www.npmjs.com/package/@thejulianjara/whatsapp.js"
+
+aux_links_new_tab: true
+
+heading_anchors: true
+
+nav_sort: case_insensitive
+
+search_enabled: true
+search:
+  heading_level: 3
+
+back_to_top: true
+back_to_top_text: "Back to top"
+
+footer_content: 'MIT License &copy; <a href="https://github.com/TheJulianJara">TheJulianJara</a>'
+
+exclude:
+  - node_modules/
+  - src/
+  - tests/
+  - dist/
+  - docs-html/
+  - scripts/
+  - "*.ts"
+  - "*.js"
+  - "*.json"
+  - "*.yaml"
+  - "*.lock"
+  - Gemfile.lock
+  - LICENSE

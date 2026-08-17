@@ -130,7 +130,7 @@ out
 .pnp.*
 
 # Documentation (generated)
-docs/
+docs-html/
 docs-md/
 
 .zip

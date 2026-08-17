@@ -1,7 +1,7 @@
 {
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": ["./src/index.ts"],
-  "out": "./docs",
+  "out": "./docs-html",
   "name": "@thejulianjara/whatsapp.js",
   "readme": "./README.md",
   "tsconfig": "./tsconfig.json",
