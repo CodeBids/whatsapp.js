@@ -200,6 +200,8 @@ await client.message.send({
 });
 ```
 
+Need to create, review or retire templates instead of just sending them? See [Template Management](#-template-management) below.
+
 ---
 
 ### Reactions
@@ -354,6 +356,42 @@ await client.phoneNumbers.register("123456"); // 6-digit two-step verification P
 // Deregister, or rotate the two-step verification PIN
 await client.phoneNumbers.deregister();
 await client.phoneNumbers.setTwoStepVerificationPin("654321");
+```
+
+---
+
+## 📝 Template Management
+
+Create, review, edit and retire message templates through `client.templates`. This is the Business Management API counterpart to sending templates with `client.message.send({ template: ... })` — it requires `wabaId` (your WhatsApp Business Account ID) when creating the `Client`.
+
+```ts
+const client = new Client({
+  phoneId: "YOUR_PHONE_ID",
+  accessToken: "YOUR_ACCESS_TOKEN",
+  wabaId: "YOUR_WABA_ID",
+});
+
+// Create a template and submit it for review
+const created = await client.templates.create({
+  name: "order_confirmation",
+  language: "en_US",
+  category: "UTILITY",
+  components: [
+    {
+      type: "BODY",
+      text: "Your order {{1}} has shipped 📦",
+      example: { body_text: [["#1234"]] },
+    },
+  ],
+});
+
+// List templates, optionally filtered
+const { data: templates } = await client.templates.list({ status: "APPROVED" });
+
+// Get, edit and delete
+const template = await client.templates.get(created.id);
+await client.templates.update(created.id, { category: "MARKETING" });
+await client.templates.delete({ name: "order_confirmation" });
 ```
 
 ---

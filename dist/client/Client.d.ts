@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import { Message } from "./actions/Message";
 import { PhoneNumberManager } from "./actions/PhoneNumbers";
+import { TemplateManager } from "./actions/Templates";
 import { CallingManager } from "./actions/Calling";
 import { ConversationalAutomationManager } from "./actions/ConversationalAutomation";
 import { QrCodeManager } from "./actions/QrCodes";
@@ -22,6 +23,7 @@ export declare class Client extends EventEmitter {
     displayPhoneNumber: string | null;
     message: Message;
     phoneNumbers: PhoneNumberManager;
+    templates: TemplateManager;
     /** Beta: see {@link CallingManager} */
     calling: CallingManager;
     conversationalAutomation: ConversationalAutomationManager;

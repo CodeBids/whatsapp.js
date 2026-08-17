@@ -4,6 +4,7 @@ exports.Client = void 0;
 const events_1 = require("events");
 const Message_1 = require("./actions/Message");
 const PhoneNumbers_1 = require("./actions/PhoneNumbers");
+const Templates_1 = require("./actions/Templates");
 const Calling_1 = require("./actions/Calling");
 const ConversationalAutomation_1 = require("./actions/ConversationalAutomation");
 const QrCodes_1 = require("./actions/QrCodes");
@@ -46,6 +47,7 @@ class Client extends events_1.EventEmitter {
         this.apiService = new wa_api_cloud_service_1.WhatsAppApiService(accessToken, "v25.0", phoneId);
         this.message = new Message_1.Message(this);
         this.phoneNumbers = new PhoneNumbers_1.PhoneNumberManager(this);
+        this.templates = new Templates_1.TemplateManager(this);
         this.calling = new Calling_1.CallingManager(this);
         this.conversationalAutomation = new ConversationalAutomation_1.ConversationalAutomationManager(this);
         this.qrCodes = new QrCodes_1.QrCodeManager(this);

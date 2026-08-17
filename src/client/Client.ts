@@ -1,6 +1,7 @@
 import { EventEmitter } from "events"
 import { Message } from "./actions/Message"
 import { PhoneNumberManager } from "./actions/PhoneNumbers"
+import { TemplateManager } from "./actions/Templates"
 import { CallingManager } from "./actions/Calling"
 import { ConversationalAutomationManager } from "./actions/ConversationalAutomation"
 import { QrCodeManager } from "./actions/QrCodes"
@@ -26,6 +27,7 @@ export class Client extends EventEmitter {
 
   public message: Message
   public phoneNumbers: PhoneNumberManager
+  public templates: TemplateManager
   /** Beta: see {@link CallingManager} */
   public calling: CallingManager
   public conversationalAutomation: ConversationalAutomationManager
@@ -63,6 +65,7 @@ export class Client extends EventEmitter {
 
     this.message = new Message(this)
     this.phoneNumbers = new PhoneNumberManager(this)
+    this.templates = new TemplateManager(this)
     this.calling = new CallingManager(this)
     this.conversationalAutomation = new ConversationalAutomationManager(this)
     this.qrCodes = new QrCodeManager(this)
