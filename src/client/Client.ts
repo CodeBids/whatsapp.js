@@ -1,6 +1,8 @@
 import { EventEmitter } from "events"
 import { Message } from "./actions/Message"
 import { GroupManager } from "./actions/Groups"
+import { TemplateManager } from "./actions/Templates"
+import { CallingManager } from "./actions/Calling"
 import { ConversationalAutomationManager } from "./actions/ConversationalAutomation"
 import { QrCodeManager } from "./actions/QrCodes"
 import { BlockedUsersManager } from "./actions/BlockedUsers"
@@ -16,6 +18,7 @@ export class Client extends EventEmitter {
   private apiService: WhatsAppApiService
   private _webhook: WebhookHandler | null = null
   private _webhookServer: any = null
+  private wabaId: string | null = null
 
   public name: string | null = null
   public quality: string | null = null
@@ -24,6 +27,9 @@ export class Client extends EventEmitter {
 
   public message: Message
   public groups: GroupManager
+  public templates: TemplateManager
+  /** Beta: see {@link CallingManager} */
+  public calling: CallingManager
   public conversationalAutomation: ConversationalAutomationManager
   public qrCodes: QrCodeManager
   public blockedUsers: BlockedUsersManager
@@ -31,7 +37,7 @@ export class Client extends EventEmitter {
   constructor(options: ClientOptions) {
     super()
 
-    const { phoneId, accessToken, webhook } = options
+    const { phoneId, accessToken, webhook, wabaId } = options
 
     if (!phoneId || !accessToken) {
       throw new Error("Phone ID and Access Token are required")
@@ -47,10 +53,20 @@ export class Client extends EventEmitter {
       throw new Error("Access Token must be alphanumeric")
     }
 
+    if (wabaId) {
+      if (!/^\d+$/.test(wabaId)) {
+        console.error("Invalid WABA ID format:", wabaId)
+        throw new Error("WABA ID must be a numeric string")
+      }
+      this.wabaId = wabaId
+    }
+
     this.apiService = new WhatsAppApiService(accessToken, "v25.0", phoneId)
 
     this.message = new Message(this)
     this.groups = new GroupManager(this)
+    this.templates = new TemplateManager(this)
+    this.calling = new CallingManager(this)
     this.conversationalAutomation = new ConversationalAutomationManager(this)
     this.qrCodes = new QrCodeManager(this)
     this.blockedUsers = new BlockedUsersManager(this)
@@ -188,7 +204,8 @@ export class Client extends EventEmitter {
 
   /**
    * Makes a request against an arbitrary Graph API path (not scoped under the phone number ID).
-   * Used internally for operating on a specific node ID directly (e.g. a group ID).
+   * Used internally for WABA-level resources such as phone numbers, message templates and Flows,
+   * and for operating on a specific node ID directly (e.g. a group ID).
    * @param path Path relative to the Graph API version
    * @param method HTTP method
    * @param data Request data
@@ -209,6 +226,22 @@ export class Client extends EventEmitter {
    */
   async updateGroupProfilePicture<T>(groupId: string, fileBuffer: Buffer, extraFields?: Record<string, string>): Promise<T> {
     return this.apiService.updateGroupProfilePicture<T>(groupId, fileBuffer, extraFields)
+  }
+
+  /**
+   * Gets the phone number ID this client was configured with
+   * @returns The phone number ID
+   */
+  getPhoneId(): string {
+    return this.apiService.getPhoneId()
+  }
+
+  /**
+   * Gets the WhatsApp Business Account ID this client was configured with, if any
+   * @returns The WABA ID, or null if it wasn't provided
+   */
+  getWabaId(): string | null {
+    return this.wabaId
   }
 
   private async initializeClientData(): Promise<void> {

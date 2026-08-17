@@ -96,8 +96,9 @@ export class WhatsAppApiService {
 
   /**
    * Makes a request against an arbitrary Graph API path, not scoped under the phone number ID.
-   * Used for operating on a specific node ID directly (e.g. a group ID: "{GROUP_ID}/participants").
-   * @param path Path relative to the Graph API version (e.g. "{GROUP_ID}/invite_link")
+   * Used for WABA-level resources (message templates, flows, phone number listing) and for
+   * operating on a specific node ID directly (e.g. "{FLOW_ID}/publish" or "{GROUP_ID}/invite_link").
+   * @param path Path relative to the Graph API version (e.g. "{WABA_ID}/message_templates")
    * @param method HTTP method
    * @param data Request data (optional)
    * @returns Promise with the response

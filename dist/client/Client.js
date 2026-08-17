@@ -4,6 +4,8 @@ exports.Client = void 0;
 const events_1 = require("events");
 const Message_1 = require("./actions/Message");
 const Groups_1 = require("./actions/Groups");
+const Templates_1 = require("./actions/Templates");
+const Calling_1 = require("./actions/Calling");
 const ConversationalAutomation_1 = require("./actions/ConversationalAutomation");
 const QrCodes_1 = require("./actions/QrCodes");
 const BlockedUsers_1 = require("./actions/BlockedUsers");
@@ -18,11 +20,12 @@ class Client extends events_1.EventEmitter {
         super();
         this._webhook = null;
         this._webhookServer = null;
+        this.wabaId = null;
         this.name = null;
         this.quality = null;
         this.id = null;
         this.displayPhoneNumber = null;
-        const { phoneId, accessToken, webhook } = options;
+        const { phoneId, accessToken, webhook, wabaId } = options;
         if (!phoneId || !accessToken) {
             throw new Error("Phone ID and Access Token are required");
         }
@@ -34,9 +37,18 @@ class Client extends events_1.EventEmitter {
             console.error("Invalid Access Token format");
             throw new Error("Access Token must be alphanumeric");
         }
+        if (wabaId) {
+            if (!/^\d+$/.test(wabaId)) {
+                console.error("Invalid WABA ID format:", wabaId);
+                throw new Error("WABA ID must be a numeric string");
+            }
+            this.wabaId = wabaId;
+        }
         this.apiService = new wa_api_cloud_service_1.WhatsAppApiService(accessToken, "v25.0", phoneId);
         this.message = new Message_1.Message(this);
         this.groups = new Groups_1.GroupManager(this);
+        this.templates = new Templates_1.TemplateManager(this);
+        this.calling = new Calling_1.CallingManager(this);
         this.conversationalAutomation = new ConversationalAutomation_1.ConversationalAutomationManager(this);
         this.qrCodes = new QrCodes_1.QrCodeManager(this);
         this.blockedUsers = new BlockedUsers_1.BlockedUsersManager(this);
@@ -163,7 +175,8 @@ class Client extends events_1.EventEmitter {
     }
     /**
      * Makes a request against an arbitrary Graph API path (not scoped under the phone number ID).
-     * Used internally for operating on a specific node ID directly (e.g. a group ID).
+     * Used internally for WABA-level resources such as phone numbers, message templates and Flows,
+     * and for operating on a specific node ID directly (e.g. a group ID).
      * @param path Path relative to the Graph API version
      * @param method HTTP method
      * @param data Request data
@@ -183,6 +196,20 @@ class Client extends events_1.EventEmitter {
      */
     async updateGroupProfilePicture(groupId, fileBuffer, extraFields) {
         return this.apiService.updateGroupProfilePicture(groupId, fileBuffer, extraFields);
+    }
+    /**
+     * Gets the phone number ID this client was configured with
+     * @returns The phone number ID
+     */
+    getPhoneId() {
+        return this.apiService.getPhoneId();
+    }
+    /**
+     * Gets the WhatsApp Business Account ID this client was configured with, if any
+     * @returns The WABA ID, or null if it wasn't provided
+     */
+    getWabaId() {
+        return this.wabaId;
     }
     async initializeClientData() {
         try {

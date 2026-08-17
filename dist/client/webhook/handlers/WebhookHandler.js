@@ -24,6 +24,8 @@ var EventType;
     EventType["GROUP_SETTINGS_UPDATE"] = "group.settings_update";
     /** A group's status changed (e.g. suspended) */
     EventType["GROUP_STATUS_UPDATE"] = "group.status_update";
+    /** Beta: emitted for entries on the `calls` webhook field (see the Calling API, `client.calling`) */
+    EventType["CALL_EVENT"] = "call.event";
     /** Emitted for any subscribed webhook field this library doesn't parse into a more specific event (e.g. account_alerts, message_template_status_update, phone_number_quality_update). */
     EventType["WEBHOOK_EVENT"] = "webhook.event";
 })(EventType || (exports.EventType = EventType = {}));
@@ -178,6 +180,12 @@ class WebhookHandler extends events_1.EventEmitter {
             for (const change of entry.changes || []) {
                 if (change.field in GROUP_EVENT_TYPES) {
                     this.emit(GROUP_EVENT_TYPES[change.field], change.value);
+                    continue;
+                }
+                if (change.field === "calls") {
+                    for (const call of change.value?.calls || []) {
+                        this.emit(EventType.CALL_EVENT, call);
+                    }
                     continue;
                 }
                 if (change.field !== "messages") {

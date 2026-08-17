@@ -200,6 +200,8 @@ await client.message.send({
 });
 ```
 
+Need to create, review or retire templates instead of just sending them? See [Template Management](#-template-management) below.
+
 ---
 
 ### Reactions
@@ -274,6 +276,7 @@ Built-in HTTP server for real-time events.
 * `status.updated`
 * `interaction.create`
 * `group.lifecycle_update`, `group.participants_update`, `group.settings_update`, `group.status_update` _(see [Groups](#-groups))_
+* `call.event` _(beta, requires subscribing to the "calls" webhook field — see [Calling](#-calling-beta))_
 
 ### Example
 
@@ -354,6 +357,67 @@ await client.message.send({ to: group.id, recipient_type: "group", content: "Wel
 await client.groups.update(group.id, { subject: "Support Team 🎧" });
 await client.groups.removeParticipants(group.id, ["5491155551234"]);
 await client.groups.delete(group.id);
+```
+
+---
+
+## 📝 Template Management
+
+Create, review, edit and retire message templates through `client.templates`. This is the Business Management API counterpart to sending templates with `client.message.send({ template: ... })` — it requires `wabaId` (your WhatsApp Business Account ID) when creating the `Client`.
+
+```ts
+const client = new Client({
+  phoneId: "YOUR_PHONE_ID",
+  accessToken: "YOUR_ACCESS_TOKEN",
+  wabaId: "YOUR_WABA_ID",
+});
+
+// Create a template and submit it for review
+const created = await client.templates.create({
+  name: "order_confirmation",
+  language: "en_US",
+  category: "UTILITY",
+  components: [
+    {
+      type: "BODY",
+      text: "Your order {{1}} has shipped 📦",
+      example: { body_text: [["#1234"]] },
+    },
+  ],
+});
+
+// List templates, optionally filtered
+const { data: templates } = await client.templates.list({ status: "APPROVED" });
+
+// Get, edit and delete
+const template = await client.templates.get(created.id);
+await client.templates.update(created.id, { category: "MARKETING" });
+await client.templates.delete({ name: "order_confirmation" });
+```
+
+---
+
+## 📞 Calling (beta)
+
+`client.calling` wraps the [Business Calling API](https://developers.facebook.com/docs/whatsapp/cloud-api/calling), a newer part of the Cloud API — treat it as beta, since Meta's spec here is still evolving.
+
+```ts
+// Call a user
+await client.calling.connect("5491155551234");
+
+// React to an incoming call (subscribe to the "calls" webhook field first)
+client.on("call.event", async (call) => {
+  if (call.event === "connect") {
+    await client.calling.accept(call.id, { sdp_type: "answer", sdp: mySdpAnswer });
+    // or: await client.calling.reject(call.id);
+  }
+});
+
+await client.calling.terminate("call_id");
+
+// Calling settings
+const settings = await client.calling.getSettings();
+await client.calling.updateSettings({ status: "ENABLED" });
 ```
 
 ---

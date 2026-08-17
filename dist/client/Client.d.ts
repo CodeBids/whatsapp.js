@@ -1,6 +1,8 @@
 import { EventEmitter } from "events";
 import { Message } from "./actions/Message";
 import { GroupManager } from "./actions/Groups";
+import { TemplateManager } from "./actions/Templates";
+import { CallingManager } from "./actions/Calling";
 import { ConversationalAutomationManager } from "./actions/ConversationalAutomation";
 import { QrCodeManager } from "./actions/QrCodes";
 import { BlockedUsersManager } from "./actions/BlockedUsers";
@@ -14,12 +16,16 @@ export declare class Client extends EventEmitter {
     private apiService;
     private _webhook;
     private _webhookServer;
+    private wabaId;
     name: string | null;
     quality: string | null;
     id: string | null;
     displayPhoneNumber: string | null;
     message: Message;
     groups: GroupManager;
+    templates: TemplateManager;
+    /** Beta: see {@link CallingManager} */
+    calling: CallingManager;
     conversationalAutomation: ConversationalAutomationManager;
     qrCodes: QrCodeManager;
     blockedUsers: BlockedUsersManager;
@@ -77,7 +83,8 @@ export declare class Client extends EventEmitter {
     makePhoneRequest<T>(endpoint: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T>;
     /**
      * Makes a request against an arbitrary Graph API path (not scoped under the phone number ID).
-     * Used internally for operating on a specific node ID directly (e.g. a group ID).
+     * Used internally for WABA-level resources such as phone numbers, message templates and Flows,
+     * and for operating on a specific node ID directly (e.g. a group ID).
      * @param path Path relative to the Graph API version
      * @param method HTTP method
      * @param data Request data
@@ -94,6 +101,16 @@ export declare class Client extends EventEmitter {
      * @internal
      */
     updateGroupProfilePicture<T>(groupId: string, fileBuffer: Buffer, extraFields?: Record<string, string>): Promise<T>;
+    /**
+     * Gets the phone number ID this client was configured with
+     * @returns The phone number ID
+     */
+    getPhoneId(): string;
+    /**
+     * Gets the WhatsApp Business Account ID this client was configured with, if any
+     * @returns The WABA ID, or null if it wasn't provided
+     */
+    getWabaId(): string | null;
     private initializeClientData;
     /**
      * Gets the webhook handler

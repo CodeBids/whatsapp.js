@@ -21,6 +21,8 @@ export declare enum EventType {
     GROUP_SETTINGS_UPDATE = "group.settings_update",
     /** A group's status changed (e.g. suspended) */
     GROUP_STATUS_UPDATE = "group.status_update",
+    /** Beta: emitted for entries on the `calls` webhook field (see the Calling API, `client.calling`) */
+    CALL_EVENT = "call.event",
     /** Emitted for any subscribed webhook field this library doesn't parse into a more specific event (e.g. account_alerts, message_template_status_update, phone_number_quality_update). */
     WEBHOOK_EVENT = "webhook.event"
 }
