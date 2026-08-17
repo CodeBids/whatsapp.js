@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import { Message } from "./actions/Message";
 import { PhoneNumberManager } from "./actions/PhoneNumbers";
+import { FlowManager } from "./actions/Flows";
 import { GroupManager } from "./actions/Groups";
 import { TemplateManager } from "./actions/Templates";
 import { CallingManager } from "./actions/Calling";
@@ -24,6 +25,7 @@ export declare class Client extends EventEmitter {
     displayPhoneNumber: string | null;
     message: Message;
     phoneNumbers: PhoneNumberManager;
+    flows: FlowManager;
     groups: GroupManager;
     templates: TemplateManager;
     /** Beta: see {@link CallingManager} */
@@ -94,6 +96,15 @@ export declare class Client extends EventEmitter {
      * @internal
      */
     makeGraphRequest<T>(path: string, method: "GET" | "POST" | "PUT" | "DELETE", data?: any): Promise<T>;
+    /**
+     * Uploads a Flow JSON file as an asset for a Flow
+     * @param flowId Flow ID
+     * @param fileBuffer Flow JSON file content
+     * @param filename Filename to report to the API
+     * @returns API response
+     * @internal
+     */
+    uploadFlowAsset<T>(flowId: string, fileBuffer: Buffer, filename?: string): Promise<T>;
     /**
      * Updates a group's profile picture (and optionally other fields in the same multipart request)
      * @param groupId Group ID

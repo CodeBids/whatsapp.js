@@ -95,6 +95,39 @@ class WhatsAppApiService {
         return this.executeRequest(`https://graph.facebook.com/${this.version}/${path}`, method, data);
     }
     /**
+     * Uploads a Flow JSON file as an asset for a Flow.
+     * @param flowId Flow ID
+     * @param fileBuffer Flow JSON file content
+     * @param filename Filename to report to the API (defaults to "flow.json")
+     * @returns Promise with the upload result
+     */
+    async uploadFlowJson(flowId, fileBuffer, filename = "flow.json") {
+        try {
+            const formData = new FormData();
+            formData.append("name", filename);
+            formData.append("asset_type", "FLOW_JSON");
+            formData.append("file", new Blob([fileBuffer], { type: "application/json" }), filename);
+            const response = await fetch(`https://graph.facebook.com/${this.version}/${flowId}/assets`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${this.accessToken}`,
+                },
+                body: formData,
+            });
+            const responseData = await response.json();
+            if (!response.ok) {
+                this.handleApiError(responseData);
+            }
+            return responseData;
+        }
+        catch (error) {
+            if (error instanceof Messages_1.WhatsAppApiException) {
+                throw error;
+            }
+            throw new Messages_1.WhatsAppApiException(error instanceof Error ? error.message : "Unknown error uploading Flow JSON", 0);
+        }
+    }
+    /**
      * Makes a request to a specific phone number
      * @param phoneId Phone number ID
      * @param endpoint API endpoint (e.g., "messages")
