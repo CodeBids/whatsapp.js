@@ -4,6 +4,7 @@ exports.Client = void 0;
 const events_1 = require("events");
 const Message_1 = require("./actions/Message");
 const PhoneNumbers_1 = require("./actions/PhoneNumbers");
+const Groups_1 = require("./actions/Groups");
 const Templates_1 = require("./actions/Templates");
 const Calling_1 = require("./actions/Calling");
 const ConversationalAutomation_1 = require("./actions/ConversationalAutomation");
@@ -47,6 +48,7 @@ class Client extends events_1.EventEmitter {
         this.apiService = new wa_api_cloud_service_1.WhatsAppApiService(accessToken, "v25.0", phoneId);
         this.message = new Message_1.Message(this);
         this.phoneNumbers = new PhoneNumbers_1.PhoneNumberManager(this);
+        this.groups = new Groups_1.GroupManager(this);
         this.templates = new Templates_1.TemplateManager(this);
         this.calling = new Calling_1.CallingManager(this);
         this.conversationalAutomation = new ConversationalAutomation_1.ConversationalAutomationManager(this);
@@ -175,7 +177,8 @@ class Client extends events_1.EventEmitter {
     }
     /**
      * Makes a request against an arbitrary Graph API path (not scoped under the phone number ID).
-     * Used internally for WABA-level resources such as phone numbers, message templates and Flows.
+     * Used internally for WABA-level resources such as phone numbers, message templates and Flows,
+     * and for operating on a specific node ID directly (e.g. a group ID).
      * @param path Path relative to the Graph API version
      * @param method HTTP method
      * @param data Request data
@@ -184,6 +187,17 @@ class Client extends events_1.EventEmitter {
      */
     async makeGraphRequest(path, method, data) {
         return this.apiService.graphRequest(path, method, data);
+    }
+    /**
+     * Updates a group's profile picture (and optionally other fields in the same multipart request)
+     * @param groupId Group ID
+     * @param fileBuffer JPEG image content
+     * @param extraFields Additional form fields to send alongside the file
+     * @returns API response
+     * @internal
+     */
+    async updateGroupProfilePicture(groupId, fileBuffer, extraFields) {
+        return this.apiService.updateGroupProfilePicture(groupId, fileBuffer, extraFields);
     }
     /**
      * Gets the phone number ID this client was configured with

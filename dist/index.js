@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isErrorCode = exports.getErrorMessage = exports.WhatsAppApiException = exports.WhatsAppErrorCode = exports.BlockedUsersManager = exports.QrCodeManager = exports.ConversationalAutomationManager = exports.CallingManager = exports.TemplateManager = exports.PhoneNumberManager = exports.Message = exports.Client = void 0;
+exports.isErrorCode = exports.getErrorMessage = exports.WhatsAppApiException = exports.WhatsAppErrorCode = exports.BlockedUsersManager = exports.QrCodeManager = exports.ConversationalAutomationManager = exports.CallingManager = exports.TemplateManager = exports.GroupManager = exports.PhoneNumberManager = exports.Message = exports.Client = void 0;
 // Export the main classes
 var Client_1 = require("./client/Client");
 Object.defineProperty(exports, "Client", { enumerable: true, get: function () { return Client_1.Client; } });
@@ -22,6 +22,8 @@ var Message_1 = require("./client/actions/Message");
 Object.defineProperty(exports, "Message", { enumerable: true, get: function () { return Message_1.Message; } });
 var PhoneNumbers_1 = require("./client/actions/PhoneNumbers");
 Object.defineProperty(exports, "PhoneNumberManager", { enumerable: true, get: function () { return PhoneNumbers_1.PhoneNumberManager; } });
+var Groups_1 = require("./client/actions/Groups");
+Object.defineProperty(exports, "GroupManager", { enumerable: true, get: function () { return Groups_1.GroupManager; } });
 var Templates_1 = require("./client/actions/Templates");
 Object.defineProperty(exports, "TemplateManager", { enumerable: true, get: function () { return Templates_1.TemplateManager; } });
 var Calling_1 = require("./client/actions/Calling");
