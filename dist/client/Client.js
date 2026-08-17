@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Client = void 0;
 const events_1 = require("events");
 const Message_1 = require("./actions/Message");
+const PhoneNumbers_1 = require("./actions/PhoneNumbers");
 const Flows_1 = require("./actions/Flows");
 const Groups_1 = require("./actions/Groups");
 const Templates_1 = require("./actions/Templates");
@@ -47,6 +48,7 @@ class Client extends events_1.EventEmitter {
         }
         this.apiService = new wa_api_cloud_service_1.WhatsAppApiService(accessToken, "v25.0", phoneId);
         this.message = new Message_1.Message(this);
+        this.phoneNumbers = new PhoneNumbers_1.PhoneNumberManager(this);
         this.flows = new Flows_1.FlowManager(this);
         this.groups = new Groups_1.GroupManager(this);
         this.templates = new Templates_1.TemplateManager(this);

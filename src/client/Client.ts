@@ -1,5 +1,6 @@
 import { EventEmitter } from "events"
 import { Message } from "./actions/Message"
+import { PhoneNumberManager } from "./actions/PhoneNumbers"
 import { FlowManager } from "./actions/Flows"
 import { GroupManager } from "./actions/Groups"
 import { TemplateManager } from "./actions/Templates"
@@ -27,6 +28,7 @@ export class Client extends EventEmitter {
   public displayPhoneNumber: string | null = null
 
   public message: Message
+  public phoneNumbers: PhoneNumberManager
   public flows: FlowManager
   public groups: GroupManager
   public templates: TemplateManager
@@ -66,6 +68,7 @@ export class Client extends EventEmitter {
     this.apiService = new WhatsAppApiService(accessToken, "v25.0", phoneId)
 
     this.message = new Message(this)
+    this.phoneNumbers = new PhoneNumberManager(this)
     this.flows = new FlowManager(this)
     this.groups = new GroupManager(this)
     this.templates = new TemplateManager(this)

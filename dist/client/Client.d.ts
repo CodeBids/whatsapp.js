@@ -1,5 +1,6 @@
 import { EventEmitter } from "events";
 import { Message } from "./actions/Message";
+import { PhoneNumberManager } from "./actions/PhoneNumbers";
 import { FlowManager } from "./actions/Flows";
 import { GroupManager } from "./actions/Groups";
 import { TemplateManager } from "./actions/Templates";
@@ -23,6 +24,7 @@ export declare class Client extends EventEmitter {
     id: string | null;
     displayPhoneNumber: string | null;
     message: Message;
+    phoneNumbers: PhoneNumberManager;
     flows: FlowManager;
     groups: GroupManager;
     templates: TemplateManager;

@@ -1,6 +1,7 @@
 // Export the main classes
 export { Client } from "./client/Client"
 export { Message } from "./client/actions/Message"
+export { PhoneNumberManager } from "./client/actions/PhoneNumbers"
 export { FlowManager } from "./client/actions/Flows"
 export { GroupManager } from "./client/actions/Groups"
 export { TemplateManager } from "./client/actions/Templates"

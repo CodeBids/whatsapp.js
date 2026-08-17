@@ -17,6 +17,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./client"), exports);
 __exportStar(require("./message"), exports);
 __exportStar(require("./language"), exports);
+__exportStar(require("./phoneNumbers"), exports);
 __exportStar(require("./flows"), exports);
 __exportStar(require("./groups"), exports);
 __exportStar(require("./templates"), exports);

@@ -333,6 +333,34 @@ await client.updateBusinessProfile({
 
 ---
 
+## ☎️ Phone Number Management
+
+Register/deregister numbers, request and verify SMS/voice codes, and manage two-step verification, through `client.phoneNumbers`. Listing every number on the account requires passing `wabaId` (your WhatsApp Business Account ID) when creating the `Client`.
+
+```ts
+const client = new Client({
+  phoneId: "YOUR_PHONE_ID",
+  accessToken: "YOUR_ACCESS_TOKEN",
+  wabaId: "YOUR_WABA_ID", // only needed for client.phoneNumbers.list()
+});
+
+// List every phone number on the account
+const { data: numbers } = await client.phoneNumbers.list();
+
+// Verify a newly added number
+await client.phoneNumbers.requestVerificationCode({ codeMethod: "SMS", language: "en" });
+await client.phoneNumbers.verifyCode("123456");
+
+// Register it for use with the Cloud API
+await client.phoneNumbers.register("123456"); // 6-digit two-step verification PIN
+
+// Deregister, or rotate the two-step verification PIN
+await client.phoneNumbers.deregister();
+await client.phoneNumbers.setTwoStepVerificationPin("654321");
+```
+
+---
+
 ## 🌊 Flow Management
 
 Create, update, publish and deprecate [WhatsApp Flows](https://developers.facebook.com/docs/whatsapp/flows) through `client.flows`. This manages the Flows themselves (their JSON, status, categories); to actually send one to a user, use `client.message.send({ flow: { ... } })`. Creating and listing Flows requires `wabaId` on the `Client`.

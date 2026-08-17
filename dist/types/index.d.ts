@@ -1,6 +1,7 @@
 export * from "./client";
 export * from "./message";
 export * from "./language";
+export * from "./phoneNumbers";
 export * from "./flows";
 export * from "./groups";
 export * from "./templates";
