@@ -275,6 +275,7 @@ Built-in HTTP server for real-time events.
 * `message.reaction`
 * `status.updated`
 * `interaction.create`
+* `group.lifecycle_update`, `group.participants_update`, `group.settings_update`, `group.status_update` _(see [Groups](#-groups))_
 * `call.event` _(beta, requires subscribing to the "calls" webhook field — see [Calling](#-calling-beta))_
 
 ### Example
@@ -328,6 +329,34 @@ const profile = await client.getBusinessProfile();
 await client.updateBusinessProfile({
   about: "Built with whatsapp.js 🚀",
 });
+```
+
+---
+
+## 👥 Groups
+
+Create and manage WhatsApp groups through `client.groups`. Requires your business phone number to be an Official Business Account (OBA) on the Cloud API. Groups are invite-only — there's no "add participant" endpoint; people join via an invite link or by having their join request approved (subscribe to the `calls`-sibling group webhook fields to get notified).
+
+```ts
+// Create a group (the invite link arrives via the group.lifecycle_update event)
+const group = await client.groups.create({ subject: "Support Team", joinApprovalMode: "approval_required" });
+
+client.on("group.lifecycle_update", (event) => console.log(event.invite_link));
+
+// Share the invite link
+const { invite_link } = await client.groups.getInviteLink(group.id);
+
+// Approve pending join requests
+const { data: requests } = await client.groups.getJoinRequests(group.id);
+await client.groups.approveJoinRequests(group.id, requests.map((r) => r.join_request_id));
+
+// Message the group like any other recipient
+await client.message.send({ to: group.id, recipient_type: "group", content: "Welcome! 👋" });
+
+// Manage it
+await client.groups.update(group.id, { subject: "Support Team 🎧" });
+await client.groups.removeParticipants(group.id, ["5491155551234"]);
+await client.groups.delete(group.id);
 ```
 
 ---

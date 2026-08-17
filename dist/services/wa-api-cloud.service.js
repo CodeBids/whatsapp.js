@@ -85,7 +85,7 @@ class WhatsAppApiService {
     /**
      * Makes a request against an arbitrary Graph API path, not scoped under the phone number ID.
      * Used for WABA-level resources (message templates, flows, phone number listing) and for
-     * operating on a specific node ID directly (e.g. "{FLOW_ID}/publish").
+     * operating on a specific node ID directly (e.g. "{FLOW_ID}/publish" or "{GROUP_ID}/invite_link").
      * @param path Path relative to the Graph API version (e.g. "{WABA_ID}/message_templates")
      * @param method HTTP method
      * @param data Request data (optional)
@@ -220,6 +220,41 @@ class WhatsAppApiService {
                 throw error;
             }
             throw new Messages_1.WhatsAppApiException(error instanceof Error ? error.message : "Unknown error downloading media", 0);
+        }
+    }
+    /**
+     * Updates a group's profile picture (and optionally subject/description in the same call).
+     * @param groupId Group ID
+     * @param fileBuffer JPEG image content (square, max 5MB per Meta's requirements)
+     * @param extraFields Additional form fields to send alongside the file (e.g. subject, description)
+     * @returns Promise with the API response
+     */
+    async updateGroupProfilePicture(groupId, fileBuffer, extraFields = {}) {
+        try {
+            const formData = new FormData();
+            formData.append("messaging_product", "whatsapp");
+            for (const [key, value] of Object.entries(extraFields)) {
+                formData.append(key, value);
+            }
+            formData.append("profile_picture_file", new Blob([fileBuffer], { type: "image/jpeg" }), "profile_picture.jpg");
+            const response = await fetch(`https://graph.facebook.com/${this.version}/${groupId}`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${this.accessToken}`,
+                },
+                body: formData,
+            });
+            const responseData = await response.json();
+            if (!response.ok) {
+                this.handleApiError(responseData);
+            }
+            return responseData;
+        }
+        catch (error) {
+            if (error instanceof Messages_1.WhatsAppApiException) {
+                throw error;
+            }
+            throw new Messages_1.WhatsAppApiException(error instanceof Error ? error.message : "Unknown error updating group profile picture", 0);
         }
     }
     /**

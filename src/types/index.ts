@@ -1,6 +1,7 @@
 export * from "./client";
 export * from "./message";
 export * from "./language";
+export * from "./groups";
 export * from "./templates";
 export * from "./calling";
 export * from "./conversationalAutomation";
