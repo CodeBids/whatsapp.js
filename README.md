@@ -95,6 +95,30 @@ client.on("message.received", async (message) => {
 });
 ```
 
+### 🔒 Securing your webhook
+
+Pass your Meta app secret as `appSecret` to have every incoming webhook request validated against its `X-Hub-Signature-256` header. Requests with a missing or invalid signature are rejected with a `401` before your event listeners ever run.
+
+```ts
+const client = new Client({
+  phoneId: "YOUR_PHONE_ID",
+  accessToken: "YOUR_ACCESS_TOKEN",
+  webhook: {
+    verifyToken: "YOUR_VERIFY_TOKEN",
+    appSecret: "YOUR_APP_SECRET", // found in the Meta App Dashboard
+    port: 3000,
+  },
+});
+```
+
+If you're handling the HTTP request yourself (e.g. inside an Express route) instead of using the built-in server, you can validate the signature manually with the same logic:
+
+```ts
+import { WebhookHandler } from "@thejulianjara/whatsapp.js";
+
+const isValid = WebhookHandler.verifySignature(rawRequestBody, req.headers["x-hub-signature-256"], "YOUR_APP_SECRET");
+```
+
 ---
 
 ## 🧩 Use Cases

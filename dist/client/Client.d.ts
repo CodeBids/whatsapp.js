@@ -25,9 +25,10 @@ export declare class Client extends EventEmitter {
     /**
      * Sets up a webhook handler for receiving events
      * @param verifyToken Token used to verify webhook requests
+     * @param appSecret Optional app secret used to validate the `X-Hub-Signature-256` header on incoming requests
      * @private
      */
-    _setupWebhook(verifyToken: string): void;
+    _setupWebhook(verifyToken: string, appSecret?: string): void;
     /**
      * Starts a webhook server to listen for events
      * @param port Port to listen on
